@@ -1,11 +1,10 @@
-
 "use client";
 
 import React, { useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypePrismPlus from 'rehype-prism-plus';
-import Prism from 'prismjs';
+import Prism from 'prismjs'; // Re-import Prism
 // Import languages you need, or use autoloader
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
@@ -34,7 +33,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   useEffect(() => {
     // Delay Prism highlighting slightly to ensure DOM is ready, especially for client-side rendered content
     const timer = setTimeout(() => {
-      Prism.highlightAll();
+      Prism.highlightAll(); // Restore Prism.highlightAll() call
     }, 0);
     return () => clearTimeout(timer);
   }, [content]);
@@ -85,7 +84,9 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           
           // rehype-prism-plus adds 'line-numbers' and 'language-xxx' to props.className
           // We should pass these through directly.
-          const preClassName = cn((props as any).className, 'my-6'); // Add custom margin if needed
+          // The classes added by rehype-prism-plus are what Prism.js uses to style.
+          // The useEffect with Prism.highlightAll() will re-apply highlighting if needed or if classes are dynamic.
+          const preClassName = cn((props as any).className, 'my-6'); 
           
           return (
             <div className="relative group">
