@@ -73,43 +73,50 @@ export async function getNavigation(): Promise<NavItem[]> {
 
 export async function getDocumentContent(slug: string[]): Promise<{ content: string; title: string; description?: string } | null> {
   const joinedSlug = slug.join('/');
-  let filePath = path.join(contentDir, joinedSlug);
-  
+  const baseFilePath = path.join(contentDir, joinedSlug); // e.g., .../docs/api or .../docs/api/reference
+
   try {
-    const stats = await fs.stat(filePath).catch(() => null);
+    const stats = await fs.stat(baseFilePath).catch(() => null);
+
     if (stats && stats.isDirectory()) {
-      let indexContent: string | null = null;
-      let data: matter.GrayMatterFile<string>['data'] = {};
-      let contentForReturn: string = '';
-      
-      const indexMdPath = path.join(filePath, 'index.md');
-      const underscoreIndexMdPath = path.join(filePath, '_index.md');
+      // Path is a directory, look for index.md or _index.md
+      let directoryIndexPath: string | undefined;
+      const indexMdPath = path.join(baseFilePath, 'index.md');
+      const underscoreIndexMdPath = path.join(baseFilePath, '_index.md');
 
       if ((await fs.stat(indexMdPath).catch(() => null))?.isFile()) {
-        indexContent = await fs.readFile(indexMdPath, 'utf-8');
-        ({ data, content: contentForReturn } = matter(indexContent));
+        directoryIndexPath = indexMdPath;
       } else if ((await fs.stat(underscoreIndexMdPath).catch(() => null))?.isFile()) {
-        indexContent = await fs.readFile(underscoreIndexMdPath, 'utf-8');
-        ({ data, content: contentForReturn } = matter(indexContent));
+        directoryIndexPath = underscoreIndexMdPath;
       }
 
-      if (indexContent !== null) {
+      if (directoryIndexPath) {
+        const fileContent = await fs.readFile(directoryIndexPath, 'utf-8');
+        const { data, content } = matter(fileContent);
         const title = data.title || slug[slug.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        return { content: contentForReturn, title, description: data.description };
+        return { content, title, description: data.description };
+      } else {
+        // Directory exists but contains no index.md or _index.md
+        return null;
       }
     } else {
-      filePath = path.join(contentDir, joinedSlug) + '.md';
-      const fileContent = await fs.readFile(filePath, 'utf-8');
+      // Path is not a directory (or doesn't exist as one). Try as a .md file.
+      const mdFilePath = baseFilePath + '.md'; // e.g., .../docs/api/reference.md
+      
+      // Check if this .md file actually exists before reading
+      if (!((await fs.stat(mdFilePath).catch(() => null))?.isFile())) {
+        return null;
+      }
+      const fileContent = await fs.readFile(mdFilePath, 'utf-8');
       const { data, content } = matter(fileContent);
       const title = data.title || slug[slug.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       return { content, title, description: data.description };
     }
   } catch (error) {
-    // This error means neither directory/index.md nor file.md was found
-    // console.error(`Error reading document for slug: ${slug.join('/')}`, error); // Too noisy for notFound cases
+    // This catch is for unexpected errors during fs operations if not handled by .catch(()=>null)
+    // console.error(`Unexpected error in getDocumentContent for slug "${slug.join('/')}":`, error);
     return null;
   }
-  return null; 
 }
 
 
@@ -162,15 +169,14 @@ export async function getFirstDocPath(): Promise<string> {
      // Traverse to the first actual page if the top-level item is a folder
     while (firstItem.items && firstItem.items.length > 0) {
       const nextItem = firstItem.items.find(subItem => subItem.order === 1 || !subItem.order) || firstItem.items[0];
-      if (!nextItem) break; // Should not happen with valid items array
-      // Check if the folder's href itself is a valid page (points to an index.md)
-      // If folderHref points to an actual index page, use it. Otherwise, traverse.
+      if (!nextItem) break; 
+      
       const potentialIndexSlug = firstItem.href.replace('/docs/', '').split('/');
       const indexDoc = await getDocumentContent(potentialIndexSlug);
-      if(indexDoc) {
-        break; // Use the folder's href as it points to a page
+      if(indexDoc) { // If the current folder's href points to a valid page, use it.
+        break; 
       }
-      firstItem = nextItem;
+      firstItem = nextItem; // Otherwise, drill down.
     }
     if (firstItem.href) {
       return firstItem.href;
@@ -179,3 +185,4 @@ export async function getFirstDocPath(): Promise<string> {
   
   return '/docs/introduction'; 
 }
+
