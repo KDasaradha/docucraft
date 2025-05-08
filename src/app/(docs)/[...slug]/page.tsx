@@ -1,7 +1,7 @@
 
 // src/app/(docs)/[...slug]/page.tsx
 import { notFound } from 'next/navigation';
-import { getDocumentContent } from '@/lib/docs';
+import { getDocumentContent, getAllMarkdownPaths } from '@/lib/docs';
 import type { Metadata } from 'next';
 import DocClientView from './doc-client-view';
 
@@ -24,15 +24,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  // Dynamically import to ensure it's treated as server-side
-  const { getAllMarkdownPaths: getPaths } = await import('@/lib/docs');
-  const paths = await getPaths();
+  const paths = await getAllMarkdownPaths();
   return paths.map((slugArray) => ({
     slug: slugArray,
   }));
 }
 
-export const dynamic = 'force_dynamic'; // Force dynamic rendering
+export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 export default async function Page({ params }: Props) {
   const doc = await getDocumentContent(params.slug);
@@ -43,3 +41,4 @@ export default async function Page({ params }: Props) {
 
   return <DocClientView initialDoc={doc} params={params} />;
 }
+
