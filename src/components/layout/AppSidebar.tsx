@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -11,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSkeleton, // Added import
   useSidebar, 
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/shared/Logo";
@@ -178,3 +180,4 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
       </Sidebar>
   );
 }
+
