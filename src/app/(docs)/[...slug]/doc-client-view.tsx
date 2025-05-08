@@ -24,7 +24,7 @@ type DocClientViewProps = {
 export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false); 
-  const [isEditing, setIsEditing] = useState(isEditing);
+  const [isEditing, setIsEditing] = useState(false); // Changed initial state
   const [editableContent, setEditableContent] = useState(initialDoc.content);
   const [isSaving, startSaveTransition] = useTransition();
   const { toast } = useToast();
