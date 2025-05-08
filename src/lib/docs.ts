@@ -31,15 +31,12 @@ async function getNavItemsRecursive(currentPath: string, basePath: string = ''):
       const underscoreIndexMdPath = path.join(fullPath, '_index.md');
       
       let indexFileContentString: string | null = null;
-      let hasIndexPage = false;
 
       try {
         if ((await fs.stat(indexMdPath).catch(() => null))?.isFile()) {
           indexFileContentString = await fs.readFile(indexMdPath, 'utf-8');
-          hasIndexPage = true;
         } else if ((await fs.stat(underscoreIndexMdPath).catch(() => null))?.isFile()) {
           indexFileContentString = await fs.readFile(underscoreIndexMdPath, 'utf-8');
-          hasIndexPage = true;
         }
         
         if (indexFileContentString) {
@@ -49,10 +46,6 @@ async function getNavItemsRecursive(currentPath: string, basePath: string = ''):
         }
       } catch (e) { /* ignore */ }
       
-      // If the folder itself has an index page, its href is set.
-      // Otherwise, its href might not be directly navigable if it doesn't have children either,
-      // but navigation structure might still want to list it.
-      // For folders, the href points to the folder itself. The [...slug] page handles rendering index.md or _index.md.
       items.push({
         title: folderTitle,
         href: folderHref,
@@ -61,7 +54,6 @@ async function getNavItemsRecursive(currentPath: string, basePath: string = ''):
       });
 
     } else if (entry.isFile() && entry.name.endsWith('.md')) {
-      // Skip index.md and _index.md as they are handled by their parent directory item.
       if (entry.name === 'index.md' || entry.name === '_index.md') {
         continue;
       }
@@ -92,10 +84,21 @@ export interface DocResult {
 }
 
 export async function getDocumentContent(slug: string[]): Promise<DocResult | null> {
-  const joinedSlug = slug.join('/');
-  // Normalize to handle potential empty initial slug component for root /docs page
-  const normalizedSlugArray = slug.length === 1 && slug[0] === '' ? [] : slug;
-  const currentSlugPath = normalizedSlugArray.join('/');
+  const originalSlugForLog = slug.join('/'); // For logging the original input
+  let processedSlugArray = [...slug];
+
+  const contentBaseName = path.basename(contentDir); // e.g., "docs"
+
+  // If contentDir is '.../docs' and the slug starts with 'docs' (e.g., ['docs', 'introduction']),
+  // then we should process ['introduction'] relative to contentDir.
+  if (processedSlugArray.length > 0 && processedSlugArray[0] === contentBaseName) {
+    // console.warn(`[DocuCraft] Adjusting slug: original was '${originalSlugForLog}', using '${processedSlugArray.slice(1).join('/')}' relative to ${contentDir}`);
+    processedSlugArray = processedSlugArray.slice(1);
+  }
+  
+  // Handle case where processedSlugArray might become empty (e.g., original slug was just ['docs'])
+  // This corresponds to the root of the contentDir (e.g. /docs page itself if index.md exists there)
+  const currentSlugPath = processedSlugArray.join('/'); 
 
   const baseFilePathWithoutExt = path.join(contentDir, currentSlugPath);
 
@@ -103,8 +106,6 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
   let isDirectoryAttempt = false;
   
   try {
-    // Check if the slug points to a directory (e.g., /docs/api)
-    // In this case, we look for index.md or _index.md within that directory.
     const stats = await fs.stat(baseFilePathWithoutExt).catch(() => null);
     if (stats && stats.isDirectory()) {
       isDirectoryAttempt = true;
@@ -118,8 +119,6 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
       }
     }
 
-    // If not a directory with an index file, or if slug doesn't point to a directory,
-    // try appending .md (e.g., /docs/introduction.md)
     if (!actualFilePath) {
       const mdFilePath = baseFilePathWithoutExt + '.md';
       if ((await fs.stat(mdFilePath).catch(() => null))?.isFile()) {
@@ -127,8 +126,9 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
       }
     }
     
-    // Handle root /docs/ case specifically if slug is empty array
-    if (normalizedSlugArray.length === 0 && !actualFilePath) {
+    // Handle root /docs/ case specifically if processedSlugArray is empty and no direct .md file was found
+    // This happens if slug was ['docs'] and became [], or was [] initially.
+    if (processedSlugArray.length === 0 && !actualFilePath) {
         const rootIndexMdPath = path.join(contentDir, 'index.md');
         const rootUnderscoreIndexMdPath = path.join(contentDir, '_index.md');
         if ((await fs.stat(rootIndexMdPath).catch(() => null))?.isFile()) {
@@ -143,16 +143,18 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
       const fileContentString = await fs.readFile(actualFilePath, 'utf-8');
       const { data, content: bodyContent } = matter(fileContentString);
       
+      // Use processedSlugArray (which is now correctly relative to contentDir) for title generation
+      const normalizedSlugArrayForTitle = processedSlugArray.length === 1 && processedSlugArray[0] === '' ? [] : processedSlugArray;
+
       let title = data.title;
       if (!title) {
-        if (normalizedSlugArray.length > 0 && normalizedSlugArray[normalizedSlugArray.length -1] !== '') {
-           title = normalizedSlugArray[normalizedSlugArray.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        if (normalizedSlugArrayForTitle.length > 0 && normalizedSlugArrayForTitle[normalizedSlugArrayForTitle.length -1] !== '') {
+           title = normalizedSlugArrayForTitle[normalizedSlugArrayForTitle.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         } else if (path.basename(actualFilePath, '.md') !== 'index' && path.basename(actualFilePath, '.md') !== '_index') {
             title = path.basename(actualFilePath, '.md').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         } else {
-            // Fallback for index files in subdirectories if title is missing in frontmatter
             const parentDirName = path.basename(path.dirname(actualFilePath));
-            if (parentDirName !== 'docs') {
+            if (parentDirName !== contentBaseName) { // Compare with actual base dir name
                  title = parentDirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             } else {
                 title = "Documentation"; // Default for root index if no title
@@ -168,10 +170,11 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
       };
     }
     
-    console.error(`[DocuCraft] Document not found. Slug: '${slug.join('/')}', Normalized: '${currentSlugPath}', Base path tried: '${baseFilePathWithoutExt}', IsDirAttempt: ${isDirectoryAttempt}`);
+    console.error(`[DocuCraft] Document not found. Original Slug: '${originalSlugForLog}', Processed Slug Path: '${currentSlugPath}', Base path tried: '${baseFilePathWithoutExt}', IsDirAttempt: ${isDirectoryAttempt}`);
     return null;
-  } catch (error) {
-    console.error(`[DocuCraft] Error in getDocumentContent for slug "${slug.join('/')}":`, error);
+  } catch (error)
+{
+    console.error(`[DocuCraft] Error in getDocumentContent for original slug "${originalSlugForLog}":`, error);
     return null;
   }
 }
@@ -182,9 +185,9 @@ export async function getAllMarkdownPaths(): Promise<string[][]> {
   async function findMarkdownFiles(dir: string, currentSlugs: string[] = []) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
     
-    // Check for index.md or _index.md at the current directory level first
-    // This is for generateStaticParams to correctly generate a path for the folder itself if it's a page
-    if (currentSlugs.length > 0) { // Only for subdirectories, not the root 'docs' dir initially
+    const isRootDocsDir = dir === contentDir;
+
+    if (!isRootDocsDir) { // For subdirectories
         const indexMdPath = path.join(dir, 'index.md');
         const underscoreIndexMdPath = path.join(dir, '_index.md');
         if ((await fs.stat(indexMdPath).catch(()=>null))?.isFile() || (await fs.stat(underscoreIndexMdPath).catch(()=>null))?.isFile()) {
@@ -201,10 +204,8 @@ export async function getAllMarkdownPaths(): Promise<string[][]> {
     for (const entry of entries) {
       const entryPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        // The check for directory index files is now done at the start of this function call for the 'dir'
         await findMarkdownFiles(entryPath, [...currentSlugs, entry.name]);
       } else if (entry.isFile() && entry.name.endsWith('.md')) {
-        // Regular markdown files (not index files)
         if (entry.name !== 'index.md' && entry.name !== '_index.md') {
             paths.push([...currentSlugs, entry.name.replace(/\.md$/, '')]);
         }
@@ -219,9 +220,16 @@ export async function getAllDocumentationContent(): Promise<string> {
   const allPaths = await getAllMarkdownPaths();
   let combinedContent = "";
   for (const slugArray of allPaths) {
-    const doc = await getDocumentContent(slugArray);
+    const doc = await getDocumentContent(slugArray); // getDocumentContent will now handle potentially prefixed slugs correctly
     if (doc) {
-      const pagePath = slugArray.length > 0 ? slugArray.join('/') : '(root)';
+      // Determine the "clean" path for display based on how getDocumentContent processed it
+      let displayPathSegments = [...slugArray];
+      const contentBaseName = path.basename(contentDir);
+      if (slugArray.length > 0 && slugArray[0] === contentBaseName) {
+        displayPathSegments = slugArray.slice(1);
+      }
+      const pagePath = displayPathSegments.length > 0 ? displayPathSegments.join('/') : '(root)';
+
       combinedContent += `\n\n## Page: /docs/${pagePath} (Title: ${doc.title})\n\n${doc.content}`;
     }
   }
@@ -229,28 +237,23 @@ export async function getAllDocumentationContent(): Promise<string> {
 }
 
 export async function getFirstDocPath(): Promise<string> {
-  const navItems = await getNavigation(); // These are sorted by order
+  const navItems = await getNavigation(); 
 
   if (navItems.length === 0) {
     console.warn("[DocuCraft] No navigation items found. Defaulting to /docs/introduction.");
-    return '/docs/introduction'; // Default fallback
+    return '/docs/introduction'; 
   }
 
   let currentItem = navItems[0];
-
-  // If the first item is a folder, we need to see if it has an index page or if we should use its first child.
+  
   while (currentItem.items && currentItem.items.length > 0) {
-    // Check if the folder itself (currentItem) is a page by trying to get its content.
-    // The slug for a folder like '/docs/api/' would be ['api']
-    const folderSlug = currentItem.href.replace(/^\/docs\/?/, '').split('/').filter(s => s.length > 0);
-    const folderDoc = await getDocumentContent(folderSlug);
+    const folderSlugOriginal = currentItem.href.replace(/^\/docs\/?/, '').split('/').filter(s => s.length > 0);
+    // getDocumentContent will handle if folderSlugOriginal is like ['docs', 'api'] or ['api']
+    const folderDoc = await getDocumentContent(folderSlugOriginal);
 
     if (folderDoc) {
-      // This folder has its own content page (index.md or _index.md), so it's a valid target.
       break;
     }
-    // If the folder is not a page itself, and it has children, move to its first child.
-    // This ensures we always point to an actual page.
     currentItem = currentItem.items[0];
   }
   
@@ -261,3 +264,4 @@ export async function getFirstDocPath(): Promise<string> {
 
   return currentItem.href;
 }
+
