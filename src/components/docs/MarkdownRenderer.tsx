@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -7,17 +6,27 @@ import remarkGfm from 'remark-gfm';
 import rehypePrismPlus from 'rehype-prism-plus';
 
 // Ensure Prism core is loaded before language components
-import 'prismjs/components/prism-core'; 
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-core';
+// Dependencies:
+// javascript -> clike
+// typescript -> javascript
+// jsx -> markup, javascript
+// tsx -> jsx, typescript
+import 'prismjs/components/prism-markup';    // Needed for XML, HTML, SVG, MathML, and by JSX
 import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-clike';     // Base for many C-like languages
+import 'prismjs/components/prism-javascript';// Depends on clike
+import 'prismjs/components/prism-typescript';// Depends on javascript
+import 'prismjs/components/prism-jsx';       // Depends on markup and javascript
+import 'prismjs/components/prism-tsx';       // Depends on jsx and typescript
+
+// Other languages
+import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff';
+
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -77,6 +86,8 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
+          // props.className will contain classes like "language-typescript", "line-numbers" etc.
+          // from rehypePrismPlus.
           const preClassName = cn('my-6', (props as any).className); 
           
           return (
@@ -115,4 +126,3 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     </ReactMarkdown>
   );
 }
-
