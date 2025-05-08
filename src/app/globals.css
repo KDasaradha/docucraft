@@ -1,11 +1,14 @@
+@import 'prismjs/themes/prism-okaidia.css';
+@import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Import a Prism.js theme. Okaidia is a good dark theme that can work on light backgrounds too with minor tweaks if needed. */
-@import 'prismjs/themes/prism-okaidia.css';
+/* MOVED TO TOP: @import 'prismjs/themes/prism-okaidia.css'; */
 /* Import line numbers plugin CSS */
-@import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
+/* MOVED TO TOP: @import 'prismjs/plugins/line-numbers/prism-line-numbers.css'; */
 
 
 body {
