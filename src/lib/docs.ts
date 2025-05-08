@@ -27,19 +27,19 @@ async function getNavItemsRecursive(currentPath: string, basePath: string = ''):
       const indexMdPath = path.join(fullPath, 'index.md');
       const underscoreIndexMdPath = path.join(fullPath, '_index.md');
       
-      let indexContent: string | null = null;
+      let indexFileContentString: string | null = null;
 
       try {
         if ((await fs.stat(indexMdPath).catch(() => null))?.isFile()) {
-          indexContent = await fs.readFile(indexMdPath, 'utf-8');
+          indexFileContentString = await fs.readFile(indexMdPath, 'utf-8');
           folderHref = `/docs/${relativePath}`; 
         } else if ((await fs.stat(underscoreIndexMdPath).catch(() => null))?.isFile()) {
-          indexContent = await fs.readFile(underscoreIndexMdPath, 'utf-8');
+          indexFileContentString = await fs.readFile(underscoreIndexMdPath, 'utf-8');
           folderHref = `/docs/${relativePath}`; 
         }
         
-        if (indexContent) {
-            const { data } = matter(indexContent);
+        if (indexFileContentString) {
+            const { data } = matter(indexFileContentString);
             if (data.title) folderTitle = data.title;
             if (data.order !== undefined) folderOrder = Number(data.order);
         }
@@ -52,8 +52,8 @@ async function getNavItemsRecursive(currentPath: string, basePath: string = ''):
         items: await getNavItemsRecursive(fullPath, relativePath),
       });
     } else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'index.md' && entry.name !== '_index.md') {
-      const fileContent = await fs.readFile(fullPath, 'utf-8');
-      const { data } = matter(fileContent);
+      const fileContentString = await fs.readFile(fullPath, 'utf-8');
+      const { data } = matter(fileContentString);
       const title = data.title || entry.name.replace(/\.md$/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const order = data.order !== undefined ? Number(data.order) : Infinity;
       items.push({
@@ -71,50 +71,52 @@ export async function getNavigation(): Promise<NavItem[]> {
   return getNavItemsRecursive(contentDir);
 }
 
-export async function getDocumentContent(slug: string[]): Promise<{ content: string; title: string; description?: string } | null> {
-  const joinedSlug = slug.join('/');
-  const baseFilePath = path.join(contentDir, joinedSlug); // e.g., .../docs/api or .../docs/api/reference
+export interface DocResult {
+  content: string; // Markdown body
+  title: string;
+  description?: string;
+  filePath: string; // Absolute path to the .md file
+}
 
+export async function getDocumentContent(slug: string[]): Promise<DocResult | null> {
+  const joinedSlug = slug.join('/');
+  const baseFilePath = path.join(contentDir, joinedSlug); 
+
+  let actualFilePath: string | undefined;
+  
   try {
     const stats = await fs.stat(baseFilePath).catch(() => null);
 
     if (stats && stats.isDirectory()) {
-      // Path is a directory, look for index.md or _index.md
-      let directoryIndexPath: string | undefined;
       const indexMdPath = path.join(baseFilePath, 'index.md');
       const underscoreIndexMdPath = path.join(baseFilePath, '_index.md');
 
       if ((await fs.stat(indexMdPath).catch(() => null))?.isFile()) {
-        directoryIndexPath = indexMdPath;
+        actualFilePath = indexMdPath;
       } else if ((await fs.stat(underscoreIndexMdPath).catch(() => null))?.isFile()) {
-        directoryIndexPath = underscoreIndexMdPath;
-      }
-
-      if (directoryIndexPath) {
-        const fileContent = await fs.readFile(directoryIndexPath, 'utf-8');
-        const { data, content } = matter(fileContent);
-        const title = data.title || slug[slug.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        return { content, title, description: data.description };
-      } else {
-        // Directory exists but contains no index.md or _index.md
-        return null;
+        actualFilePath = underscoreIndexMdPath;
       }
     } else {
-      // Path is not a directory (or doesn't exist as one). Try as a .md file.
-      const mdFilePath = baseFilePath + '.md'; // e.g., .../docs/api/reference.md
-      
-      // Check if this .md file actually exists before reading
-      if (!((await fs.stat(mdFilePath).catch(() => null))?.isFile())) {
-        return null;
+      const mdFilePath = baseFilePath + '.md';
+      if ((await fs.stat(mdFilePath).catch(() => null))?.isFile()) {
+        actualFilePath = mdFilePath;
       }
-      const fileContent = await fs.readFile(mdFilePath, 'utf-8');
-      const { data, content } = matter(fileContent);
-      const title = data.title || slug[slug.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      return { content, title, description: data.description };
     }
+
+    if (actualFilePath) {
+      const fileContentString = await fs.readFile(actualFilePath, 'utf-8');
+      const { data, content: bodyContent } = matter(fileContentString);
+      const title = data.title || slug[slug.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return {
+        content: bodyContent,
+        title,
+        description: data.description,
+        filePath: actualFilePath,
+      };
+    }
+    return null;
   } catch (error) {
-    // This catch is for unexpected errors during fs operations if not handled by .catch(()=>null)
-    // console.error(`Unexpected error in getDocumentContent for slug "${slug.join('/')}":`, error);
+    // console.error(`Error in getDocumentContent for slug "${slug.join('/')}":`, error);
     return null;
   }
 }
@@ -166,17 +168,21 @@ export async function getFirstDocPath(): Promise<string> {
 
   if (navItems.length > 0) {
     let firstItem = navItems[0];
-     // Traverse to the first actual page if the top-level item is a folder
     while (firstItem.items && firstItem.items.length > 0) {
-      const nextItem = firstItem.items.find(subItem => subItem.order === 1 || !subItem.order) || firstItem.items[0];
-      if (!nextItem) break; 
-      
+      const nextItemInHierarchy = firstItem.items.find(subItem => subItem.order === 1 || !subItem.order) || firstItem.items[0];
+      if (!nextItemInHierarchy) break; 
+
       const potentialIndexSlug = firstItem.href.replace('/docs/', '').split('/');
-      const indexDoc = await getDocumentContent(potentialIndexSlug);
-      if(indexDoc) { // If the current folder's href points to a valid page, use it.
-        break; 
+      if (potentialIndexSlug.join('') === "") { // Handle base /docs/ which might be an _index.md
+         const rootIndexDoc = await getDocumentContent([]); // Check for /docs/_index.md or /docs/index.md
+         if (rootIndexDoc) break; 
+      } else {
+        const indexDoc = await getDocumentContent(potentialIndexSlug);
+        if(indexDoc) { 
+          break; 
+        }
       }
-      firstItem = nextItem; // Otherwise, drill down.
+      firstItem = nextItemInHierarchy;
     }
     if (firstItem.href) {
       return firstItem.href;
@@ -185,4 +191,3 @@ export async function getFirstDocPath(): Promise<string> {
   
   return '/docs/introduction'; 
 }
-
