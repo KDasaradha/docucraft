@@ -88,18 +88,10 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
   const originalSlugForLog = slug.join('/');
   let processedSlugArray = [...slug];
   
-  // Determine the base directory for content lookup.
-  // If the slug is for a special file like 'custom_404', it might be in src/content/ directly.
-  // Otherwise, it's in src/content/docs/.
-  // For now, this function is primarily for 'docs' content.
-  // The not-found.tsx handles 'custom_404.md' specifically if it's in 'src/content/docs'.
+  const currentContentDir = contentDir; 
   
-  const currentContentDir = contentDir; // Default to docs directory
-
-  // If the slug starts with 'docs' (e.g. from an old URL structure or direct call), remove it.
-  const contentBaseName = path.basename(currentContentDir); // e.g., "docs"
+  const contentBaseName = path.basename(currentContentDir); 
   if (processedSlugArray.length > 0 && processedSlugArray[0] === contentBaseName) {
-    // console.warn(`[DocuCraft] Adjusting slug: original was '${originalSlugForLog}', using '${processedSlugArray.slice(1).join('/')}' relative to ${currentContentDir}`);
     processedSlugArray = processedSlugArray.slice(1);
   }
   
@@ -130,7 +122,7 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
       }
     }
     
-    if (processedSlugArray.length === 0 && !actualFilePath) { // Handles /docs or an empty slug array
+    if (processedSlugArray.length === 0 && !actualFilePath) { 
         const rootIndexMdPath = path.join(currentContentDir, 'index.md');
         const rootUnderscoreIndexMdPath = path.join(currentContentDir, '_index.md');
         if ((await fs.stat(rootIndexMdPath).catch(() => null))?.isFile()) {
@@ -152,27 +144,19 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
            title = processedSlugArray[processedSlugArray.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         } else if (fileName !== 'index' && fileName !== '_index') {
             title = fileName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        } else { // For index.md or _index.md
+        } else { 
             const parentDirName = path.basename(path.dirname(actualFilePath));
-             // Ensure parentDirName is not the base 'docs' directory itself unless it's the root /docs index.
             if (parentDirName !== contentBaseName || path.dirname(actualFilePath) === currentContentDir) {
                  title = parentDirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                  if (title.toLowerCase() === contentBaseName && path.dirname(actualFilePath) === currentContentDir) {
-                    // If it's the root index.md (e.g. /docs/index.md) and has no title, use a default.
-                    title = "Documentation Home"; 
+                    title = data.site_name || "Documentation Home"; 
                  }
             } else {
-                // Fallback if something is unexpected
-                title = "Documentation"; 
+                title = data.site_name || "Documentation"; 
             }
         }
       }
       
-      // Correct filePath for index files at the root of /docs to be the full path to the index.md
-      // For `src/content/docs/index.md`, filePath should be `/path/to/project/src/content/docs/index.md`
-      // currentContentDir is `/path/to/project/src/content/docs`
-      // actualFilePath is already the absolute path.
-
       return {
         content: bodyContent,
         title,
@@ -250,52 +234,99 @@ export async function getFirstDocPath(): Promise<string> {
 
   if (navItems.length === 0) {
     console.warn("[DocuCraft] No navigation items found. Defaulting to /docs/introduction.");
+    // Attempt to locate a root index.md or _index.md as a fallback first
+    const rootIndexMdPath = path.join(contentDir, 'index.md');
+    const rootUnderscoreIndexMdPath = path.join(contentDir, '_index.md');
+    if ((await fs.stat(rootIndexMdPath).catch(() => null))?.isFile() || (await fs.stat(rootUnderscoreIndexMdPath).catch(() => null))?.isFile()) {
+      return '/docs';
+    }
     return '/docs/introduction'; 
   }
 
-  let currentItem = navItems[0];
-  
-  // Try to find the first actual page, not just a folder
-  async function findFirstPage(item: NavItem): Promise<NavItem | null> {
-    // Check if current item itself is a page (by checking if its href points to a resolvable document)
-    const itemSlug = item.href.replace(/^\/docs\/?/, '').split('/').filter(s => s.length > 0);
-    const itemDoc = await getDocumentContent(itemSlug);
-    if (itemDoc) {
-      return item; // This item is a page itself
-    }
-
-    // If it's a folder with items, recurse
-    if (item.items && item.items.length > 0) {
-      for (const subItem of item.items) {
-        const page = await findFirstPage(subItem);
-        if (page) return page;
+  async function findFirstPageRecursive(items: NavItem[]): Promise<NavItem | null> {
+    for (const item of items) {
+      // Check if the item itself is a page (e.g., it doesn't primarily serve as a folder with items)
+      // Or if it's a folder with an index page, its href should be valid
+      const itemSlug = item.href.replace(/^\/docs\/?/, '').split('/').filter(s => s.length > 0);
+      const doc = await getDocumentContent(itemSlug);
+      if (doc) { // If the href resolves to an actual document, it's a candidate
+        return item;
+      }
+      // If it has sub-items, recurse into them
+      if (item.items && item.items.length > 0) {
+        const firstSubPage = await findFirstPageRecursive(item.items);
+        if (firstSubPage) {
+          return firstSubPage;
+        }
       }
     }
-    return null; // No page found in this branch
+    return null;
   }
 
-  const firstPageItem = await findFirstPage(currentItem);
+  const firstPageItem = await findFirstPageRecursive(navItems);
 
   if (firstPageItem && firstPageItem.href) {
     return firstPageItem.href;
   }
   
-  // Fallback if the above logic doesn't find a clear page (e.g. only empty folders)
-  // This part tries to resolve the original logic as a backup
-  while (currentItem.items && currentItem.items.length > 0) {
-    const folderSlugOriginal = currentItem.href.replace(/^\/docs\/?/, '').split('/').filter(s => s.length > 0);
-    const folderDoc = await getDocumentContent(folderSlugOriginal);
+  console.warn(`[DocuCraft] Could not determine a valid first page from navigation structure. Defaulting. NavItems: ${JSON.stringify(navItems)}`);
+  const rootIndexMdPath = path.join(contentDir, 'index.md');
+  const rootUnderscoreIndexMdPath = path.join(contentDir, '_index.md');
+  if ((await fs.stat(rootIndexMdPath).catch(() => null))?.isFile() || (await fs.stat(rootUnderscoreIndexMdPath).catch(() => null))?.isFile()) {
+    return '/docs';
+  }
+  return '/docs/introduction'; // Final fallback
+}
 
-    if (folderDoc) { // This means the folder itself has an index.md page
-      break;
+
+// Helper to flatten navigation items for prev/next links
+function getAllPagesInOrder(navItems: NavItem[]): { href: string; title: string }[] {
+    const pages: { href: string; title: string }[] = [];
+    function recurse(items: NavItem[]) {
+        for (const item of items) {
+            // Add the item itself, as getNavigation ensures items have valid hrefs
+            // (either to a direct .md file or an _index.md for a folder)
+            pages.push({ href: item.href, title: item.title });
+            if (item.items && item.items.length > 0) {
+                recurse(item.items); // Recurse into sub-items
+            }
+        }
     }
-    currentItem = currentItem.items[0]; // Go to the first item in the folder
+    recurse(navItems);
+    return pages;
+}
+
+export async function getPrevNextDocs(currentSlugArray: string[]): Promise<{
+  prev: { href: string; title: string } | null;
+  next: { href: string; title: string } | null;
+}> {
+  const navItems = await getNavigation();
+  const allPages = getAllPagesInOrder(navItems);
+
+  let currentHref = "/docs"; // Default for empty slug array (e.g. /docs root page)
+  if (currentSlugArray.length > 0) {
+    const slugPath = currentSlugArray.join('/');
+    if (slugPath && slugPath !== '.') { // Ensure slugPath is not empty or just a dot
+        currentHref = `/docs/${slugPath}`;
+    }
   }
-  
-  if (!currentItem.href) {
-     console.warn(`[DocuCraft] First navigation item resolved to an item without an href after fallback. Defaulting. Item: ${JSON.stringify(currentItem)}`);
-     return '/docs/introduction';
+  // Normalize hrefs that might end with /index if slug was for an index.md file explicitly
+  currentHref = currentHref.replace(/\/index$/, '');
+  if (currentHref === '/docs/') currentHref = '/docs';
+
+
+  const currentIndex = allPages.findIndex(page => {
+    const pageHrefNormalized = page.href.replace(/\/index$/, '');
+    return pageHrefNormalized === currentHref || page.href === currentHref;
+  });
+
+  if (currentIndex === -1) {
+    console.warn(`[getPrevNextDocs] Current href "${currentHref}" (from slug: "${currentSlugArray.join('/')}") not found in flattened navigation. All page hrefs:`, allPages.map(p => p.href));
+    return { prev: null, next: null };
   }
 
-  return currentItem.href;
+  const prev = currentIndex > 0 ? allPages[currentIndex - 1] : null;
+  const next = currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+
+  return { prev, next };
 }

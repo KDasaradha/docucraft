@@ -10,20 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { saveDocumentContent } from '@/app/actions/docsActions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Edit3, XCircle, Save, Eye, PencilLine } from 'lucide-react';
+import { Loader2, Edit3, XCircle, Save, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
 type DocClientViewProps = {
   initialDoc: DocResult;
   params: { slug: string[] };
-  editUrl: string; // Added editUrl prop
+  prevDoc?: { href: string; title: string } | null;
+  nextDoc?: { href: string; title: string } | null;
 };
 
-export default function DocClientView({ initialDoc, params, editUrl }: DocClientViewProps) {
+export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false); 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(isEditing);
   const [editableContent, setEditableContent] = useState(initialDoc.content);
   const [isSaving, startSaveTransition] = useTransition();
   const { toast } = useToast();
@@ -62,7 +63,10 @@ export default function DocClientView({ initialDoc, params, editUrl }: DocClient
           description: `"${result.updatedTitle || doc.title}" has been updated.`,
         });
         setIsEditing(false);
-        router.refresh(); 
+        // Instead of router.refresh(), navigate to the current path to re-fetch server components
+        // This ensures prev/next links are also updated if structure changed.
+        router.push(`/docs/${params.slug.join('/')}`); 
+        router.refresh(); // Still good for client-side state updates like search dialogs etc.
       } else {
         toast({
           title: 'Error Saving Document',
@@ -92,14 +96,6 @@ export default function DocClientView({ initialDoc, params, editUrl }: DocClient
               {isEditing ? 'View Mode' : 'Edit Content'}
             </Button>
         </div>
-        {editUrl && !isEditing && (
-          <div className="mt-4 text-sm">
-            <Link href={editUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:text-primary/80 hover:underline">
-              <PencilLine className="mr-1.5 h-4 w-4" />
-              Edit this page on GitHub
-            </Link>
-          </div>
-        )}
       </header>
 
       {isEditing ? (
@@ -134,7 +130,38 @@ export default function DocClientView({ initialDoc, params, editUrl }: DocClient
           </div>
         </div>
       ) : (
-        <MarkdownRenderer content={doc.content} />
+        <>
+          <MarkdownRenderer content={doc.content} />
+          {(prevDoc || nextDoc) && (
+            <div className="mt-12 flex flex-col sm:flex-row justify-between items-stretch gap-4 border-t pt-8">
+              {prevDoc ? (
+                <Link 
+                  href={prevDoc.href} 
+                  className="flex-1 group flex items-center gap-3 text-primary p-4 rounded-lg border border-border hover:border-primary/70 hover:bg-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <ArrowLeft className="h-5 w-5 shrink-0 transition-transform group-hover:-translate-x-1" />
+                  <div className="text-left">
+                    <span className="text-xs text-muted-foreground block">Previous</span>
+                    <span className="block font-medium text-foreground group-hover:text-primary transition-colors">{prevDoc.title}</span>
+                  </div>
+                </Link>
+              ) : <div className="flex-1" /> /* Placeholder for spacing */}
+              
+              {nextDoc ? (
+                <Link 
+                  href={nextDoc.href} 
+                  className="flex-1 group flex items-center justify-end gap-3 text-primary p-4 rounded-lg border border-border hover:border-primary/70 hover:bg-muted/50 transition-all focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <div className="text-right">
+                    <span className="text-xs text-muted-foreground block">Next</span>
+                    <span className="block font-medium text-foreground group-hover:text-primary transition-colors">{nextDoc.title}</span>
+                  </div>
+                  <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" />
+                </Link>
+              ) : <div className="flex-1" /> /* Placeholder for spacing */}
+            </div>
+          )}
+        </>
       )}
     </article>
   );

@@ -1,7 +1,7 @@
 
 // src/app/(docs)/[...slug]/page.tsx
 import { notFound } from 'next/navigation';
-import { getDocumentContent, getAllMarkdownPaths } from '@/lib/docs';
+import { getDocumentContent, getAllMarkdownPaths, getPrevNextDocs } from '@/lib/docs';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site.config';
 import DocClientView from './doc-client-view';
@@ -10,8 +10,6 @@ type Props = {
   params: { slug: string[] };
 };
 
-// Metadata function needs to fetch data directly.
-// This will run on the server for each page request if dynamic.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const doc = await getDocumentContent(params.slug);
   if (!doc) {
@@ -22,12 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `${doc.title} | ${siteConfig.name}`,
-    description: doc.description || siteConfig.description, // Fallback to site description
+    description: doc.description || siteConfig.description, 
     openGraph: {
         title: `${doc.title} | ${siteConfig.name}`,
         description: doc.description || siteConfig.description,
-        url: `${siteConfig.url}/docs/${params.slug.join('/')}`, // Construct specific page URL
-        // You might want specific images per page if available
+        url: `${siteConfig.url}/docs/${params.slug.join('/')}`, 
     },
     twitter: {
         title: `${doc.title} | ${siteConfig.name}`,
@@ -43,7 +40,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export const dynamic = 'force-dynamic'; // Ensure pages are dynamically rendered for latest content
+export const dynamic = 'force-dynamic'; 
 
 export default async function Page({ params }: Props) {
   const doc = await getDocumentContent(params.slug);
@@ -52,10 +49,7 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
-  // Construct edit URL
-  const relativePath = doc.filePath.substring(doc.filePath.indexOf('/src/content/docs/') + '/src/content/docs/'.length);
-  const editUrl = `${siteConfig.repo.url}/${siteConfig.repo.edit_uri}${relativePath}`;
+  const { prev: prevDoc, next: nextDoc } = await getPrevNextDocs(params.slug);
 
-
-  return <DocClientView initialDoc={doc} params={params} editUrl={editUrl} />;
+  return <DocClientView initialDoc={doc} params={params} prevDoc={prevDoc} nextDoc={nextDoc} />;
 }
