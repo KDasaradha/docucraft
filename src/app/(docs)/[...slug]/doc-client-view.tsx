@@ -132,6 +132,20 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
 
   const handleSave = async (isDraft: boolean = false) => {
     if (!doc || !canEdit) return;
+
+    if (!params || !params.slug || !Array.isArray(params.slug)) {
+      toast({
+        title: 'Navigation Error',
+        description: 'Page parameters are missing, cannot redirect after save. Please refresh the page.',
+        variant: 'destructive',
+      });
+      console.error('DocClientView: handleSave - params or params.slug is invalid. Params:', params);
+      // If params are missing, we might not want to proceed with saving, or save without redirecting.
+      // For now, we'll allow the save to proceed but the redirect might fail or be skipped.
+      // Alternatively, return here if navigation is critical post-save.
+      // return; // Uncomment this if you want to prevent saving if params are bad.
+    }
+
     startSaveTransition(async () => {
       const result = await saveDocumentContent(doc.filePath, editableContent);
       if (result.success) {
@@ -140,8 +154,21 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           description: isDraft ? `"${result.updatedTitle || doc.title}" has been saved as a draft (feature in development).` : `"${result.updatedTitle || doc.title}" has been updated.`,
         });
         setIsEditing(false);
-        router.push(`/docs/${params.slug.join('/')}`);
-        router.refresh(); 
+        
+        // Check params again before using, though the outer check should suffice for the closure
+        if (params && params.slug && Array.isArray(params.slug)) {
+          const slugPath = params.slug.join('/');
+          router.push(`/docs/${slugPath}`);
+          router.refresh(); 
+        } else {
+          // Fallback if params were somehow corrupted post initial check, or if we didn't return early
+          toast({
+            title: 'Saved, but Navigation Issue',
+            description: 'Document saved, but could not redirect. Please refresh.',
+            variant: 'destructive',
+          });
+          router.refresh(); // Still try to refresh
+        }
       } else {
         toast({
           title: 'Error Saving Document',
@@ -181,7 +208,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     
     const feedbackInput = {
       documentTitle: doc.title,
-      documentPath: `/docs/${params.slug.join('/')}`,
+      documentPath: `/docs/${params.slug ? params.slug.join('/') : 'unknown'}`, // Added check for params.slug
       isHelpful: wasHelpful,
       timestamp: new Date().toISOString(),
     };
@@ -342,10 +369,10 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username-login">Username</Label> {/* Changed id to avoid conflict */}
                 <Input
                   type="text"
-                  id="username"
+                  id="username-login"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -353,10 +380,10 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password-login">Password</Label> {/* Changed id to avoid conflict */}
                 <Input
                   type="password"
-                  id="password"
+                  id="password-login"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -412,4 +439,3 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     </article>
   );
 }
-

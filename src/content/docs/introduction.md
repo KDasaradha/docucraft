@@ -55,4 +55,3 @@ And a list:
 - Item 3
 - Item 4
 - Item 5
-- Item 6
