@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react'; // Removed useEffect
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypePrismPlus from 'rehype-prism-plus';
-import Prism from 'prismjs'; // Re-import Prism
-// Import languages you need, or use autoloader
+// Prism core is not explicitly needed here if rehype-prism-plus handles everything.
+// Languages are needed for rehype-prism-plus to use.
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-jsx';
@@ -16,9 +16,9 @@ import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff';
-// Import line numbers plugin (ensure CSS is also imported in globals.css)
-import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
-
+// Removed import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
+// The CSS for line numbers is imported in globals.css and should still apply
+// if rehype-prism-plus generates the correct classes.
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,8 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  useEffect(() => {
-    // Delay Prism highlighting slightly to ensure DOM is ready, especially for client-side rendered content
-    const timer = setTimeout(() => {
-      Prism.highlightAll(); // Restore Prism.highlightAll() call
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [content]);
+  // useEffect for Prism.highlightAll() removed.
+  // rehype-prism-plus should handle static generation of highlighted code.
 
   return (
     <ReactMarkdown
@@ -58,15 +53,12 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           const [copied, setCopied] = React.useState(false);
           const preRef = React.useRef<HTMLPreElement>(null);
 
-          // Extract text content from the pre element for copying
           const getCodeString = () => {
             if (preRef.current) {
-              // Attempt to get text from the code element inside pre
               const codeElement = preRef.current.querySelector('code');
               if (codeElement) {
                 return codeElement.innerText;
               }
-              // Fallback to pre's innerText if no code element found (less likely with prism)
               return preRef.current.innerText;
             }
             return '';
@@ -82,14 +74,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
-          // rehype-prism-plus adds 'line-numbers' and 'language-xxx' to props.className
-          // We should pass these through directly.
-          // The classes added by rehype-prism-plus are what Prism.js uses to style.
-          // The useEffect with Prism.highlightAll() will re-apply highlighting if needed or if classes are dynamic.
+          // props.className will contain classes from rehype-prism-plus (e.g., language-xxxx, line-numbers)
+          // We merge it with 'my-6' for consistent margin.
           const preClassName = cn((props as any).className, 'my-6'); 
           
           return (
             <div className="relative group">
+              {/* Pass through props from rehype-prism-plus, including its generated className */}
               <pre {...props} ref={preRef} className={preClassName}>
                 {children}
               </pre>
