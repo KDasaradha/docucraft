@@ -65,9 +65,23 @@ export function SearchDialog() {
         e.preventDefault();
         setIsOpen((open) => !open);
       }
+
+      if (e.key === "Escape") {
+         setIsOpen(false);
+         setLocalQuery('');
+      }
     };
+
+    const restoreFocus = () => {
+      inputRef.current?.focus();
+    }
+
     document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    document.addEventListener('focus', restoreFocus); // Focus after unmount
+    return () => {
+      document.removeEventListener("keydown", down);
+      document.removeEventListener('focus', restoreFocus);
+    };
   }, []);
 
   // Keep localQuery in sync with input changes

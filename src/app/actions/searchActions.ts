@@ -44,3 +44,4 @@ export async function performSearch(prevState: SearchState | undefined, formData
     return { results: [], error: e.message || "An unexpected error occurred during search.", query, isLoading: false };
   }
 }
+
