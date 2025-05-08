@@ -66,6 +66,10 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+      fontFamily: {
+        sans: ['var(--font-geist-sans)'],
+        mono: ['var(--font-geist-mono)'],
+      },
   		keyframes: {
   			'accordion-down': {
   				from: {
@@ -87,8 +91,68 @@ export default {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+      typography: (theme: (path: string) => string) => ({
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': 'hsl(var(--foreground))',
+            '--tw-prose-headings': 'hsl(var(--foreground))',
+            '--tw-prose-lead': 'hsl(var(--foreground))',
+            '--tw-prose-links': 'hsl(var(--primary))',
+            '--tw-prose-bold': 'hsl(var(--foreground))',
+            '--tw-prose-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-bullets': 'hsl(var(--muted-foreground))',
+            '--tw-prose-hr': 'hsl(var(--border))',
+            '--tw-prose-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-quote-borders': 'hsl(var(--primary))',
+            '--tw-prose-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-code': 'hsl(var(--foreground))', 
+            '--tw-prose-pre-code': '#f8f8f2', 
+            '--tw-prose-pre-bg': '#272822', 
+            '--tw-prose-th-borders': 'hsl(var(--border))',
+            '--tw-prose-td-borders': 'hsl(var(--border))',
+            
+             '--tw-prose-invert-body': 'hsl(var(--foreground))',
+             '--tw-prose-invert-headings': 'hsl(var(--foreground))',
+             '--tw-prose-invert-links': 'hsl(var(--primary))',
+             '--tw-prose-invert-bold': 'hsl(var(--foreground))',
+             '--tw-prose-invert-counters': 'hsl(var(--muted-foreground))',
+             '--tw-prose-invert-bullets': 'hsl(var(--muted-foreground))',
+             '--tw-prose-invert-hr': 'hsl(var(--border))',
+             '--tw-prose-invert-quotes': 'hsl(var(--foreground))',
+             '--tw-prose-invert-quote-borders': 'hsl(var(--primary))',
+             '--tw-prose-invert-captions': 'hsl(var(--muted-foreground))',
+             '--tw-prose-invert-code': 'hsl(var(--foreground))',
+             '--tw-prose-invert-pre-code': '#f8f8f2',
+             '--tw-prose-invert-pre-bg': '#272822',
+             '--tw-prose-invert-th-borders': 'hsl(var(--border))',
+             '--tw-prose-invert-td-borders': 'hsl(var(--border))',
+             
+             // Customizations for markdown-content specifically
+             h1: { fontWeight: '700' },
+             a: { textDecoration: 'none'},
+             'a:hover': { textDecoration: 'underline',},
+             'code::before': { content: '"" !important' }, // Overriding prose defaults
+             'code::after': { content: '"" !important' },  // Overriding prose defaults
+          },
+        },
+        sm: { 
+          css: {
+            fontSize: '0.875rem', 
+            p: { marginTop: '0.5em', marginBottom: '0.5em' },
+            h1: { fontSize: '1.5rem', marginTop: '1em', marginBottom: '0.5em' }, 
+            h2: { fontSize: '1.25rem', marginTop: '0.8em', marginBottom: '0.4em' }, 
+            h3: { fontSize: '1.125rem', marginTop: '0.7em', marginBottom: '0.3em' }, 
+            pre: { padding: '0.5rem', margin: '0.5em 0', fontSize: '0.8rem' },
+            code: { fontSize: '0.8rem' }, // For inline code in prose-sm
+             'code::before': { content: '"" !important' },
+             'code::after': { content: '"" !important' },
+            ul: { marginTop: '0.5em', marginBottom: '0.5em' },
+            ol: { marginTop: '0.5em', marginBottom: '0.5em' },
+          }
+        }
+      }),
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
