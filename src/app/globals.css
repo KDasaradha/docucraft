@@ -5,12 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import a Prism.js theme. Okaidia is a good dark theme that can work on light backgrounds too with minor tweaks if needed. */
-/* MOVED TO TOP: @import 'prismjs/themes/prism-okaidia.css'; */
-/* Import line numbers plugin CSS */
-/* MOVED TO TOP: @import 'prismjs/plugins/line-numbers/prism-line-numbers.css'; */
-
-
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useActionState } from "react";
+// useFormState was renamed to useActionState in React
 import { useFormStatus } from "react-dom";
 import { Search, Loader2, AlertCircle, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger, // Added missing import
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -169,3 +171,4 @@ export function SearchDialog() {
     </Dialog>
   );
 }
+
