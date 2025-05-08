@@ -1,13 +1,15 @@
+
 // src/app/(docs)/[...slug]/doc-client-view.tsx
 
 'use client';
 
 import { notFound, useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
-import { saveDocumentContent } from '@/app/actions/docsActions';
+import { saveDocumentContent, summarizeCurrentDocument } from '@/app/actions/docsActions';
+import { submitFeedback } from '@/app/actions/feedbackActions';
 import { useToast } from '@/hooks/use-toast';
 import { type DocResult } from '@/lib/docs';
-import { Loader2, Edit3, XCircle, Save, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, Edit3, XCircle, Save, Eye, ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, FileTextIcon, MessageSquareQuote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import MarkdownRenderer from '@/components/docs/MarkdownRenderer';
@@ -16,15 +18,16 @@ import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"; // DialogClose removed as it's part of DialogContent now
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 type DocClientViewProps = {
   initialDoc: DocResult;
@@ -49,17 +52,20 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const { toast } = useToast();
   const router = useRouter();
 
-  // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'editor' | 'viewer' | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  // Login Dialog State
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // Authentication Function
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryResult, setSummaryResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<'helpful' | 'unhelpful' | null>(null);
+
+
   const authenticateUser = (usernameAttempt: string, passwordAttempt: string) => {
     const user = users.find(
       (u) => u.username === usernameAttempt && u.password === passwordAttempt
@@ -69,9 +75,9 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
       setIsAuthenticated(true);
       setUserRole(user.role);
       setLoginError(null);
-      setIsLoginDialogOpen(false); // Close dialog after successful login
-      setUsername(''); // Clear username
-      setPassword(''); // Clear password
+      setIsLoginDialogOpen(false);
+      setUsername(''); 
+      setPassword(''); 
     } else {
       setLoginError('Invalid credentials');
       setIsAuthenticated(false);
@@ -86,7 +92,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
-    setIsEditing(false); // Exit edit mode on logout
+    setIsEditing(false); 
   };
 
   const canEdit = isAuthenticated && (userRole === 'admin' || userRole === 'editor');
@@ -96,10 +102,11 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     setEditableContent(initialDoc.content);
     setIsEditing(false);
     setIsLoadingDoc(false);
+    setFeedbackSubmitted(null); // Reset feedback on doc change
+    setSummaryResult(null); // Reset summary on doc change
   }, [initialDoc]);
 
   useEffect(() => {
-    // Reset login form when dialog closes
     if (!isLoginDialogOpen) {
       setUsername('');
       setPassword('');
@@ -123,19 +130,18 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     return null;
   }
 
-  const handleSave = async () => {
-    if (!doc || !canEdit) return; // Ensure user can edit
+  const handleSave = async (isDraft: boolean = false) => {
+    if (!doc || !canEdit) return;
     startSaveTransition(async () => {
       const result = await saveDocumentContent(doc.filePath, editableContent);
       if (result.success) {
         toast({
-          title: 'Document Saved',
-          description: `"${result.updatedTitle || doc.title}" has been updated.`,
+          title: isDraft ? 'Draft Saved (Conceptual)' : 'Document Saved',
+          description: isDraft ? `"${result.updatedTitle || doc.title}" has been saved as a draft (feature in development).` : `"${result.updatedTitle || doc.title}" has been updated.`,
         });
         setIsEditing(false);
-        // Re-fetch data by navigating to the current path
         router.push(`/docs/${params.slug.join('/')}`);
-        router.refresh(); // Refresh client-side state
+        router.refresh(); 
       } else {
         toast({
           title: 'Error Saving Document',
@@ -145,6 +151,10 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
       }
     });
   };
+  
+  const handleRegularSave = () => handleSave(false);
+  const handleDraftSave = () => handleSave(true);
+
 
   const handleCancel = () => {
     if (!doc) return;
@@ -152,33 +162,78 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     setIsEditing(false);
   };
 
+  const handleSummarize = async () => {
+    if (!doc) return;
+    setIsSummarizing(true);
+    setSummaryResult(null);
+    setIsSummaryDialogOpen(true);
+    const result = await summarizeCurrentDocument(doc.content);
+    if (result.success && result.summary) {
+      setSummaryResult({ type: 'success', message: result.summary });
+    } else {
+      setSummaryResult({ type: 'error', message: result.error || 'Could not generate summary.' });
+    }
+    setIsSummarizing(false);
+  };
+
+  const handleFeedback = async (wasHelpful: boolean) => {
+    if (!doc || feedbackSubmitted) return;
+    
+    const feedbackInput = {
+      documentTitle: doc.title,
+      documentPath: `/docs/${params.slug.join('/')}`,
+      isHelpful: wasHelpful,
+      timestamp: new Date().toISOString(),
+    };
+
+    const result = await submitFeedback(feedbackInput);
+    if (result.success) {
+      toast({
+        title: 'Feedback Submitted',
+        description: result.message,
+      });
+      setFeedbackSubmitted(wasHelpful ? 'helpful' : 'unhelpful');
+    } else {
+      toast({
+        title: 'Feedback Error',
+        description: result.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+
   return (
     <article className="w-full">
       <header className="mb-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{doc.title}</h1>
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl break-words">{doc.title}</h1>
             {doc.description && <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>}
           </div>
-          <div>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
             {!isAuthenticated ? (
-              <Button onClick={() => setIsLoginDialogOpen(true)} variant="outline" size="sm" className="shrink-0">
+              <Button onClick={() => setIsLoginDialogOpen(true)} variant="outline" size="sm">
                 Login
               </Button>
             ) : (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">Logged in as {userRole}</span>
-                <Button onClick={handleLogout} variant="outline" size="sm" className="shrink-0">
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">Logged in as {userRole}</span>
+                <Button onClick={handleLogout} variant="outline" size="sm">
                   Logout
                 </Button>
                 {canEdit && (
-                  <Button onClick={() => setIsEditing(!isEditing)} variant="outline" size="sm" className="shrink-0">
+                  <Button onClick={() => setIsEditing(!isEditing)} variant="outline" size="sm">
                     {isEditing ? <Eye className="mr-2 h-4 w-4" /> : <Edit3 className="mr-2 h-4 w-4" />}
                     {isEditing ? 'View Mode' : 'Edit Content'}
                   </Button>
                 )}
               </div>
             )}
+            <Button onClick={handleSummarize} variant="outline" size="sm" disabled={isSummarizing}>
+              {isSummarizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquareQuote className="mr-2 h-4 w-4" />}
+              Summarize
+            </Button>
           </div>
         </div>
       </header>
@@ -208,7 +263,11 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
               <XCircle className="mr-2 h-4 w-4" />
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleDraftSave} variant="secondary" disabled={isSaving}>
+              <Save className="mr-2 h-4 w-4" />
+              Save as Draft
+            </Button>
+            <Button onClick={handleRegularSave} disabled={isSaving}>
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Save Changes
             </Button>
@@ -217,6 +276,30 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
       ) : (
         <>
           <MarkdownRenderer content={doc.content} />
+          
+          <div className="mt-10 pt-6 border-t">
+            <p className="text-sm font-medium text-muted-foreground mb-2">Was this page helpful?</p>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant={feedbackSubmitted === 'helpful' ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => handleFeedback(true)}
+                disabled={!!feedbackSubmitted}
+              >
+                <ThumbsUp className="mr-2 h-4 w-4" /> Helpful
+              </Button>
+              <Button 
+                variant={feedbackSubmitted === 'unhelpful' ? "destructive" : "outline"} 
+                size="sm" 
+                onClick={() => handleFeedback(false)}
+                disabled={!!feedbackSubmitted}
+              >
+                <ThumbsDown className="mr-2 h-4 w-4" /> Not Helpful
+              </Button>
+            </div>
+             {feedbackSubmitted && <p className="text-xs text-muted-foreground mt-2">Thanks for your feedback!</p>}
+          </div>
+
           {(prevDoc || nextDoc) && (
             <div className="mt-12 flex flex-col sm:flex-row justify-between items-stretch gap-4 border-t pt-8">
               {prevDoc ? (
@@ -249,7 +332,6 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         </>
       )}
       <Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
-        {/* DialogTrigger is not needed if the dialog is controlled programmatically */}
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Login</DialogTitle>
@@ -267,6 +349,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+                  autoComplete="username"
                 />
               </div>
               <div className="grid gap-2">
@@ -277,11 +360,13 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                 />
               </div>
-              {loginError && <p className="text-destructive text-sm">{loginError}</p>}
+              {loginError && <p className="text-sm text-destructive">{loginError}</p>}
             </div>
             <DialogFooter>
+               <Button type="button" variant="outline" onClick={() => setIsLoginDialogOpen(false)}>Cancel</Button>
               <Button type="submit">
                 Login
               </Button>
@@ -289,6 +374,42 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           </form>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isSummaryDialogOpen} onOpenChange={setIsSummaryDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <FileTextIcon className="mr-2 h-5 w-5" /> Document Summary
+            </DialogTitle>
+            <DialogDescription>
+              AI-generated summary for &quot;{doc?.title}&quot;.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-[60vh] overflow-y-auto">
+            {isSummarizing && (
+              <div className="flex items-center justify-center space-x-2 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span>Generating summary...</span>
+              </div>
+            )}
+            {summaryResult && summaryResult.type === 'success' && (
+              <Alert>
+                <AlertDescription>{summaryResult.message}</AlertDescription>
+              </Alert>
+            )}
+            {summaryResult && summaryResult.type === 'error' && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{summaryResult.message}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsSummaryDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </article>
   );
 }
+

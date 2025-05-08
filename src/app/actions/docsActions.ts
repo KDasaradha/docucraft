@@ -1,9 +1,11 @@
+
 'use server';
 
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
 import { revalidatePath } from 'next/cache';
+import { summarizeDocument, type SummarizeDocumentInput, type SummarizeDocumentOutput } from '@/ai/flows/summarize-document-flow';
 
 interface SaveResult {
   success: boolean;
@@ -16,32 +18,28 @@ export async function saveDocumentContent(
   newBodyContent: string
 ): Promise<SaveResult> {
   try {
-    const contentRootDir = path.resolve(process.cwd(), 'src', 'content'); // Broader check
+    const contentRootDir = path.resolve(process.cwd(), 'src', 'content'); 
     const resolvedFilePath = path.resolve(filePath);
 
     if (!resolvedFilePath.startsWith(contentRootDir) || !resolvedFilePath.endsWith('.md')) {
       return { success: false, error: 'Invalid file path or type.' };
     }
     
-    // Read the original file to get its frontmatter
     const originalFileContent = await fs.readFile(resolvedFilePath, 'utf-8');
     const { data: frontmatter } = matter(originalFileContent);
 
-    // Create new full content with original frontmatter and new body
     const newFullFileContent = matter.stringify(newBodyContent, frontmatter);
 
-    // Write the updated content back to the file
     await fs.writeFile(resolvedFilePath, newFullFileContent, 'utf-8');
 
-    // Revalidate the path for the Next.js cache
     const docsDir = path.resolve(process.cwd(), 'src', 'content', 'docs');
     let relativeToDocsPath = path.relative(docsDir, resolvedFilePath);
-    relativeToDocsPath = relativeToDocsPath.replace(/\\/g, '/'); // Normalize slashes
+    relativeToDocsPath = relativeToDocsPath.replace(/\\/g, '/'); 
 
     let slugForRevalidation: string;
     if (relativeToDocsPath.endsWith('index.md') || relativeToDocsPath.endsWith('_index.md')) {
       slugForRevalidation = path.dirname(relativeToDocsPath);
-      if (slugForRevalidation === '.') slugForRevalidation = ''; // For root index.md
+      if (slugForRevalidation === '.') slugForRevalidation = ''; 
     } else {
       slugForRevalidation = relativeToDocsPath.replace(/\.md$/, '');
     }
@@ -49,11 +47,9 @@ export async function saveDocumentContent(
     const revalidationUrlPath = slugForRevalidation ? `/docs/${slugForRevalidation}` : '/docs';
     
     revalidatePath(revalidationUrlPath);
-    // If it's an index file, also revalidate the path without trailing slash for consistency if it's not root
     if ((relativeToDocsPath.endsWith('index.md') || relativeToDocsPath.endsWith('_index.md')) && slugForRevalidation !== '') {
       revalidatePath(`/docs/${slugForRevalidation.replace(/\/$/, '')}`);
     }
-     // Revalidate the home page as well as it depends on the first doc path
     revalidatePath('/');
     revalidatePath('/api/first-doc-path');
 
@@ -62,5 +58,32 @@ export async function saveDocumentContent(
   } catch (e: any) {
     console.error('Error saving document content:', e);
     return { success: false, error: e.message || 'Failed to save document.' };
+  }
+}
+
+
+interface SummarizeResult {
+  success: boolean;
+  summary?: string;
+  error?: string;
+}
+
+export async function summarizeCurrentDocument(markdownContent: string): Promise<SummarizeResult> {
+  if (!markdownContent.trim()) {
+    return { success: false, error: 'Document content is empty.' };
+  }
+
+  try {
+    const input: SummarizeDocumentInput = { markdownContent };
+    const output: SummarizeDocumentOutput = await summarizeDocument(input);
+    
+    if (output && output.summary) {
+      return { success: true, summary: output.summary };
+    } else {
+      return { success: false, error: 'Failed to generate summary from AI.' };
+    }
+  } catch (e: any) {
+    console.error('Error summarizing document:', e);
+    return { success: false, error: e.message || 'An unexpected error occurred while summarizing.' };
   }
 }
