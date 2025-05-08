@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -11,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -19,6 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -137,6 +138,7 @@ const SidebarProvider = React.forwardRef<
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH,
+                "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
                 "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
                 ...style,
               } as React.CSSProperties
@@ -197,17 +199,17 @@ const Sidebar = React.forwardRef<
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
             side={side}
+            className={cn("w-[var(--sidebar-width-mobile)] bg-sidebar text-sidebar-foreground p-0 flex flex-col", className)}
           >
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <SheetHeader className="px-4 py-3 border-b border-sidebar-border">
+              <SheetTitle>Navigation</SheetTitle>
+            </SheetHeader>
+            <ScrollArea className="flex-1">
+              <div className="flex flex-col h-full">
+                {children}
+              </div>
+            </ScrollArea>
           </SheetContent>
         </Sheet>
       )
@@ -673,7 +675,7 @@ const SidebarMenuSkeleton = React.forwardRef<
       )}
       {skeletonWidth !== null ? (
         <Skeleton
-          className="h-4 flex-1 max-w-[--skeleton-width]"
+          className="h-4 flex-1 max-w-[var(--skeleton-width)]"
           data-sidebar="menu-skeleton-text"
           style={
             {
