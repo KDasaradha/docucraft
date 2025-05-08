@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useEffect, useRef, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Search, Loader2, AlertCircle, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,13 +36,12 @@ function SubmitButton() {
 export function SearchDialog() {
   const [isOpen, setIsOpen] = useState(false);
   // formState is for the result of the action, localQuery for the input field value
-  const [formState, formAction] = useFormState(performSearch, initialState);
+  const [formState, formAction, isPending] = useActionState(performSearch, initialState);
   const [localQuery, setLocalQuery] = useState('');
   
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { pending } = useFormStatus();
 
   // Reset local state when dialog opens
   useEffect(() => {
@@ -76,7 +75,7 @@ export function SearchDialog() {
 
   // Determine what content to show in results area
   const getResultsContent = () => {
-    if (pending) {
+    if (isPending) {
       return (
         <div className="flex items-center justify-center py-8 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin mr-2" />
