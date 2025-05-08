@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -650,10 +651,12 @@ const SidebarMenuSkeleton = React.forwardRef<
     showIcon?: boolean
   }
 >(({ className, showIcon = false, ...props }, ref) => {
-  // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+  const [skeletonWidth, setSkeletonWidth] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    // Calculate random width only on the client side after hydration
+    setSkeletonWidth(`${Math.floor(Math.random() * 40) + 50}%`);
+  }, []);
 
   return (
     <div
@@ -668,15 +671,20 @@ const SidebarMenuSkeleton = React.forwardRef<
           data-sidebar="menu-skeleton-icon"
         />
       )}
-      <Skeleton
-        className="h-4 flex-1 max-w-[--skeleton-width]"
-        data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          } as React.CSSProperties
-        }
-      />
+      {skeletonWidth !== null ? (
+        <Skeleton
+          className="h-4 flex-1 max-w-[--skeleton-width]"
+          data-sidebar="menu-skeleton-text"
+          style={
+            {
+              "--skeleton-width": skeletonWidth,
+            } as React.CSSProperties
+          }
+        />
+      ) : (
+        // Placeholder for SSR or before client-side width calculation
+        <Skeleton className="h-4 flex-1 max-w-[70%]" data-sidebar="menu-skeleton-text-placeholder" />
+      )}
     </div>
   )
 })

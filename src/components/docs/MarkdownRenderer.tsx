@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect } from 'react';
@@ -56,23 +57,24 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         },
         pre: ({ node, children, ...props }) => {
           const [copied, setCopied] = React.useState(false);
-          
-          // Attempt to find the code element and its content
-          let codeString = '';
-          let language = '';
+          const preRef = React.useRef<HTMLPreElement>(null);
 
-          if (node && node.children && node.children.length > 0) {
-            const codeNode = node.children.find(child => child.type === 'element' && child.tagName === 'code') as any;
-            if (codeNode && codeNode.children && codeNode.children.length > 0) {
-              codeString = codeNode.children.map((child: any) => child.value || '').join('');
-              if (codeNode.properties && codeNode.properties.className) {
-                const langMatch = (codeNode.properties.className as string[]).join(' ').match(/language-(\w+)/);
-                if (langMatch) language = langMatch[1];
+          // Extract text content from the pre element for copying
+          const getCodeString = () => {
+            if (preRef.current) {
+              // Attempt to get text from the code element inside pre
+              const codeElement = preRef.current.querySelector('code');
+              if (codeElement) {
+                return codeElement.innerText;
               }
+              // Fallback to pre's innerText if no code element found (less likely with prism)
+              return preRef.current.innerText;
             }
-          }
+            return '';
+          };
           
           const handleCopy = () => {
+            const codeString = getCodeString();
             if (codeString) {
               navigator.clipboard.writeText(codeString).then(() => {
                 setCopied(true);
@@ -81,16 +83,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
-          const preClassName = cn(
-            (props as any).className, // className from rehypePrismPlus
-            language && !((props as any).className || '').includes(`language-${language}`) ? `language-${language}` : '', 
-            'line-numbers' // Required for Prism line numbers plugin
-          );
-
-
+          // rehype-prism-plus adds 'line-numbers' and 'language-xxx' to props.className
+          // We should pass these through directly.
+          const preClassName = cn((props as any).className, 'my-6'); // Add custom margin if needed
+          
           return (
-            <div className="relative group my-6">
-              <pre {...props} className={preClassName}>
+            <div className="relative group">
+              <pre {...props} ref={preRef} className={preClassName}>
                 {children}
               </pre>
               <Button
