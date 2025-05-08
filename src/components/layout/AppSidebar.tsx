@@ -1,5 +1,5 @@
-
 // src/components/layout/AppSidebar.tsx
+'use client';
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -135,9 +135,16 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 200); // Shorter delay
-    return () => clearTimeout(timer);
-  }, []);
+    // Check if navigationItems are loaded to set isLoading to false
+    if (navigationItems && navigationItems.length > 0) {
+      setIsLoading(false);
+    } else {
+      // Optional: set a timeout if you still want a minimum loading display time
+      // or handle cases where navigationItems might be slow to load.
+      const timer = setTimeout(() => setIsLoading(false), 200); // Shorter delay
+      return () => clearTimeout(timer);
+    }
+  }, [navigationItems]);
   
   const handleLinkClick = () => {
     if (isMobile) {
@@ -158,7 +165,7 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
         </div>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
-            {[...Array(navigationItems.length || 5)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
+            {[...Array(navigationItems?.length || 5)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
           </div>
         </ScrollArea>
       </aside>
