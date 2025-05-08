@@ -1,6 +1,8 @@
 ---
 title: Introduction
-description: Welcome to DocuCraft, a modern documentation platform designed for developers seeking clarity, speed, and customization.
+description: >-
+  Welcome to DocuCraft, a modern documentation platform designed for developers
+  seeking clarity, speed, and customization.
 order: 1
 ---
 
@@ -51,3 +53,5 @@ And a list:
   - Sub Item A
   - Sub Item B
 - Item 3
+- Item 4
+- Item 5

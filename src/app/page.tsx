@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
+import { siteConfig } from '@/config/site.config'; // Import siteConfig
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,17 +24,20 @@ export default function HomePage() {
         }
         const data = await res.json();
         
-        if (data.path) {
+        if (data.path && data.path !== '/') { // Ensure path is not just root
           console.log(`[HomePage] API returned path: ${data.path}`);
           setTargetPath(data.path); 
         } else {
-          console.warn('[HomePage] API did not return a path, using default /docs/introduction.');
-          setTargetPath('/docs/introduction'); 
+          // Fallback if API returns no path or just '/'
+          const defaultDocPath = '/docs/introduction'; // Default to introduction
+          console.warn(`[HomePage] API did not return a valid path or returned root, using default ${defaultDocPath}.`);
+          setTargetPath(defaultDocPath); 
         }
       } catch (e: any) {
         console.error("[HomePage] Failed to get first doc path, redirecting to default.", e);
         setError(e.message || "Unknown error fetching path.");
-        setTargetPath('/docs/introduction'); 
+        const defaultDocPath = '/docs/introduction'; // Default to introduction on error
+        setTargetPath(defaultDocPath); 
       } finally {
         setLoading(false);
       }
@@ -51,32 +55,31 @@ export default function HomePage() {
 
   if (loading) { 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4">
-        <Skeleton className="h-16 w-1/2 " />
-        <Skeleton className="h-8 w-3/4 " />
-        <Skeleton className="h-8 w-3/4 " />
-        <Skeleton className="h-8 w-2/3 " />
-        <p className="text-muted-foreground">Loading documentation...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4 bg-background">
+        <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-20 w-20 mb-4 animate-pulse" data-ai-hint="toothless dragon" />
+        <Skeleton className="h-12 w-3/4 max-w-md" />
+        <Skeleton className="h-8 w-1/2 max-w-sm" />
+        <p className="text-lg text-muted-foreground">Loading {siteConfig.name}...</p>
       </div>
     );
   }
 
   if (error) {
      return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-background">
+        <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-16 w-16 mb-4" data-ai-hint="toothless dragon" />
         <h1 className="text-2xl font-bold text-destructive mb-4">Redirection Error</h1>
         <p className="text-muted-foreground mb-2">Could not determine the initial documentation page.</p>
-        <p className="text-sm text-destructive-foreground bg-destructive p-2 rounded-md">{error}</p>
-        <p className="mt-4">Redirecting to a default page shortly...</p>
+        <p className="text-sm text-destructive-foreground bg-destructive p-2 rounded-md max-w-md">{error}</p>
+        <p className="mt-4 text-muted-foreground">Redirecting to a default page shortly...</p>
       </div>
     );
   }
 
-  // Should be redirecting, so theoretically this won't be seen for long.
-  // If it is seen, it means the redirect isn't happening.
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <p className="text-muted-foreground">Preparing to redirect...</p>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+      <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-20 w-20 mb-4" data-ai-hint="toothless dragon" />
+      <p className="text-lg text-muted-foreground">Preparing to redirect you to {siteConfig.name}...</p>
     </div>
   ); 
 }

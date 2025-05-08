@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -17,6 +18,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       // Add other image hostnames if your markdown files use them
+      // Example for a potential self-hosted or CDN logo if not using public folder
+      // {
+      //   protocol: 'https',
+      //   hostname: 'your-cdn.com',
+      // },
     ],
   },
 };

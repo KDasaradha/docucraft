@@ -2,7 +2,7 @@
 'use client';
 
 import { notFound, useRouter } from 'next/navigation';
-import { getDocumentContent, type DocResult } from '@/lib/docs';
+import { type DocResult } from '@/lib/docs';
 import MarkdownRenderer from '@/components/docs/MarkdownRenderer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEffect, useState, useTransition } from 'react';
@@ -10,15 +10,17 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { saveDocumentContent } from '@/app/actions/docsActions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Edit3, XCircle, Save, Eye } from 'lucide-react';
+import { Loader2, Edit3, XCircle, Save, Eye, PencilLine } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 type DocClientViewProps = {
   initialDoc: DocResult;
   params: { slug: string[] };
+  editUrl: string; // Added editUrl prop
 };
 
-export default function DocClientView({ initialDoc, params }: DocClientViewProps) {
+export default function DocClientView({ initialDoc, params, editUrl }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false); 
   const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +33,7 @@ export default function DocClientView({ initialDoc, params }: DocClientViewProps
     setDoc(initialDoc);
     setEditableContent(initialDoc.content);
     setIsEditing(false); 
-    setIsLoadingDoc(false); // Ensure loading is false when new initialDoc is received
+    setIsLoadingDoc(false);
   }, [initialDoc]);
 
   if (isLoadingDoc) {
@@ -46,7 +48,7 @@ export default function DocClientView({ initialDoc, params }: DocClientViewProps
   }
   
   if (!doc) {
-    notFound(); // Should be caught by Server Component, but good fallback
+    notFound();
     return null; 
   }
   
@@ -60,7 +62,7 @@ export default function DocClientView({ initialDoc, params }: DocClientViewProps
           description: `"${result.updatedTitle || doc.title}" has been updated.`,
         });
         setIsEditing(false);
-        router.refresh(); // Re-fetch server-side data and re-render
+        router.refresh(); 
       } else {
         toast({
           title: 'Error Saving Document',
@@ -79,15 +81,25 @@ export default function DocClientView({ initialDoc, params }: DocClientViewProps
 
   return (
     <article className="w-full">
-      <header className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{doc.title}</h1>
-          {doc.description && <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>}
+      <header className="mb-8">
+        <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{doc.title}</h1>
+                {doc.description && <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>}
+            </div>
+            <Button onClick={() => setIsEditing(!isEditing)} variant="outline" size="sm" className="shrink-0">
+              {isEditing ? <Eye className="mr-2 h-4 w-4" /> : <Edit3 className="mr-2 h-4 w-4" />}
+              {isEditing ? 'View Mode' : 'Edit Content'}
+            </Button>
         </div>
-        <Button onClick={() => setIsEditing(!isEditing)} variant="outline" size="sm">
-          {isEditing ? <Eye className="mr-2 h-4 w-4" /> : <Edit3 className="mr-2 h-4 w-4" />}
-          {isEditing ? 'View Mode' : 'Edit Content'}
-        </Button>
+        {editUrl && !isEditing && (
+          <div className="mt-4 text-sm">
+            <Link href={editUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:text-primary/80 hover:underline">
+              <PencilLine className="mr-1.5 h-4 w-4" />
+              Edit this page on GitHub
+            </Link>
+          </div>
+        )}
       </header>
 
       {isEditing ? (

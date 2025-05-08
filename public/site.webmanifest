@@ -1,0 +1,22 @@
+
+{
+  "name": "Comprehensive Technology Documentation",
+  "short_name": "DevDocs++",
+  "description": "A unified guide covering FastAPI, Application Architecture, DevOps, DevSecOps, CI/CD, and related software engineering practices.",
+  "icons": [
+    {
+      "src": "/assets/toothless_logo_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/toothless_logo_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#008080"
+}
