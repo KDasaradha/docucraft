@@ -1,3 +1,4 @@
+
 import type { ReactNode } from 'react';
 import AppHeader from '@/components/layout/AppHeader';
 import AppSidebar from '@/components/layout/AppSidebar';
@@ -15,7 +16,8 @@ export default async function DocsLayout({ children }: { children: ReactNode }) 
         <AppHeader />
         <div className="flex flex-1 overflow-hidden pt-[var(--header-height)]"> {/* Adjust pt for fixed header */}
           <AppSidebar navigationItems={navigationItems} />
-          <ScrollArea className="flex-1 h-[calc(100vh-var(--header-height))]"> {/* Adjust height for fixed header */}
+          {/* Removed h-[calc(100vh-var(--header-height))] to rely on flex-1 from parent */}
+          <ScrollArea className="flex-1"> 
             <main className="container mx-auto px-4 py-8 lg:px-8 lg:py-12">
               {children}
             </main>
