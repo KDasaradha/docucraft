@@ -1,11 +1,13 @@
+
 "use client";
 
-import React from 'react'; // Removed useEffect
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypePrismPlus from 'rehype-prism-plus';
-// Prism core is not explicitly needed here if rehype-prism-plus handles everything.
-// Languages are needed for rehype-prism-plus to use.
+
+// Ensure Prism core is loaded before language components
+import 'prismjs/components/prism-core'; 
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-jsx';
@@ -16,9 +18,6 @@ import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff';
-// Removed import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
-// The CSS for line numbers is imported in globals.css and should still apply
-// if rehype-prism-plus generates the correct classes.
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,9 +29,6 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  // useEffect for Prism.highlightAll() removed.
-  // rehype-prism-plus should handle static generation of highlighted code.
-
   return (
     <ReactMarkdown
       className={cn('markdown-content', className)}
@@ -59,6 +55,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
               if (codeElement) {
                 return codeElement.innerText;
               }
+              // Fallback for structures where <code> might not be the direct child or if text is directly in <pre>
+              let textContent = '';
+              preRef.current.querySelectorAll('span.code-line').forEach(line => {
+                 textContent += line.textContent + '\n';
+              });
+              if (textContent.trim()) return textContent.trim();
+              
               return preRef.current.innerText;
             }
             return '';
@@ -74,13 +77,10 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
-          // props.className will contain classes from rehype-prism-plus (e.g., language-xxxx, line-numbers)
-          // We merge it with 'my-6' for consistent margin.
-          const preClassName = cn((props as any).className, 'my-6'); 
+          const preClassName = cn('my-6', (props as any).className); 
           
           return (
             <div className="relative group">
-              {/* Pass through props from rehype-prism-plus, including its generated className */}
               <pre {...props} ref={preRef} className={preClassName}>
                 {children}
               </pre>
@@ -96,9 +96,23 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             </div>
           );
         },
+        code: ({ node, className, children, ...props }) => {
+            // For inline code, `rehype-prism-plus` might not add a language class.
+            // Inline code should not have line numbers or a copy button.
+            const match = /language-(\w+)/.exec(className || '');
+            if (match || (node?.parentElement?.tagName === 'pre')) {
+              // This is part of a code block, rely on the <pre> component's rendering
+              // and `rehype-prism-plus` to add its specific classes to <code>.
+              // The `code-highlight` class might be added by rehype-prism-plus.
+              return <code className={cn(className, 'code-highlight')} {...props}>{children}</code>;
+            }
+            // This is inline code, apply default prose styling for inline code.
+            return <code className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)} {...props}>{children}</code>;
+        },
       }}
     >
       {content}
     </ReactMarkdown>
   );
 }
+
