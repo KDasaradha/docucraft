@@ -1,5 +1,5 @@
 // src/components/layout/AppSidebarClient.tsx
-'use client';
+"use client";
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -140,7 +140,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             <SidebarMenuSub>
               {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={`${index}-${subItem.title}-${subItem.href || 'defaultHrefKey'}`} 
+                  key={`${index}-${subItem.title}-${subItem.href || `sub-item-${index}`}`} 
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
@@ -168,7 +168,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             <SidebarMenuSub>
               {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={`${index}-${subItem.title}-${subItem.href || 'defaultHrefKey'}`}
+                  key={`${index}-${subItem.title}-${subItem.href || `sub-header-${index}`}`}
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
@@ -270,7 +270,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
             <SidebarMenu className="p-2">
               {navigationItems.map((item, index) => (
                 <RecursiveNavItem
-                  key={`${index}-${item.title}-${item.href || 'defaultHrefKey'}`}
+                  key={`${index}-${item.title}-${item.href || `top-level-item-${index}`}`}
                   item={item}
                   level={0}
                   isCollapsed={isCollapsed}
@@ -284,3 +284,4 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     </Sidebar>
   );
 }
+
