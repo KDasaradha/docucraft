@@ -1,11 +1,13 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypePrismPlus from 'rehype-prism-plus';
 
-// Ensure Prism core is loaded before language components
+// Ensure Prism core and specific languages are imported if rehype-prism-plus needs them
+// or if any client-side Prism interaction (beyond highlighting by rehype-prism-plus) is planned.
+// For rehype-prism-plus, these imports make the languages available to its underlying refractor.
 import 'prismjs/components/prism-core'; 
 import 'prismjs/components/prism-markup'; 
 import 'prismjs/components/prism-css';
@@ -19,11 +21,8 @@ import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff';
-
-// Import Prism line numbers plugin JS. CSS for it is in globals.css.
-import 'prismjs/plugins/line-numbers/prism-line-numbers';
-// Import Prismjs itself
-import Prism from 'prismjs';
+// Import Prism line numbers plugin CSS. JS might not be needed if rehype-prism-plus handles it.
+// The CSS is in globals.css. If rehype-prism-plus adds line number classes, CSS will style them.
 
 
 import { cn } from '@/lib/utils';
@@ -35,7 +34,7 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-// Common components for both SSR and client-side hydration consistency
+// Common components for structural elements, consistent for SSR and client.
 const commonComponents: Components = {
   h1: ({node, ...props}: any) => <h1 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
   h2: ({node, ...props}: any) => <h2 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
@@ -48,49 +47,47 @@ const commonComponents: Components = {
   },
 };
 
+// Components for SSR and initial client render.
+// These should render the HTML structure exactly as rehype-prism-plus would have generated it.
+const ssrAndInitialClientComponents: Components = {
+  ...commonComponents,
+  pre: ({ node, children, ...props }) => {
+    // `props` will include `className` (e.g., "language-typescript line-numbers")
+    // added by `rehype-prism-plus`. We pass these through.
+    // Tailwind prose styles (like `my-6`) will apply via the parent `markdown-content` class.
+    return <pre {...props}>{children}</pre>;
+  },
+  code: ({ node, inline, className, children, ...props }) => {
+    if (inline) {
+      // Inline code styling is handled by global CSS targeting:
+      // .markdown-content :where(code):not(:where(pre > *))
+      return <code className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", className)} {...props}>{children}</code>;
+    }
+    // For code blocks, `className` (e.g., "language-typescript") is passed by ReactMarkdown
+    // from what `rehype-prism-plus` added to the AST node.
+    return <code className={className} {...props}>{children}</code>;
+  },
+};
+
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const markdownRootRef = useRef<HTMLDivElement>(null);
+  // markdownRootRef is not strictly needed anymore if Prism.highlightAllUnder is removed,
+  // but keeping it doesn't harm if other client-side DOM manipulations were planned.
+  const markdownRootRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (isMounted && markdownRootRef.current) {
-      const timerId = setTimeout(() => {
-        if (markdownRootRef.current) {
-          Prism.highlightAllUnder(markdownRootRef.current);
-        }
-      }, 0);
-      return () => clearTimeout(timerId);
-    }
-  }, [isMounted, content]);
+  // Removed useEffect for Prism.highlightAllUnder as rehype-prism-plus handles highlighting.
 
-  const components: Components = {
+  // Components for client-side render after mount (enhancements like copy button).
+  const clientSideComponents: Components = {
     ...commonComponents,
-    pre: ({ node, children, ...preProps }) => {
-      let languageClass = '';
-      const codeChild = React.Children.toArray(children).find(
-        (child: any) => child.type === 'code' && child.props.className
-      ) as React.ReactElement | undefined;
-
-      if (codeChild && codeChild.props.className) {
-        const match = /language-(\w+)/.exec(codeChild.props.className);
-        if (match) {
-          languageClass = `language-${match[1]}`;
-        }
-      }
-      
-      const preFinalClassName = cn(
-        'line-numbers', // For Prism line numbers plugin - ensures this class comes first
-        languageClass // Ensures pre has language-xxx if code block specified it
-      );
-
-      // Client-side render after mount: Add the copy button functionality.
-      const [copied, setCopied] = React.useState(false);
-      const preElementRef = React.useRef<HTMLPreElement>(null);
+    pre: ({ node, children, ...props }) => { // `props` includes className from rehype-prism-plus
+      const [copied, setCopied] = useState(false);
+      const preElementRef = useRef<HTMLPreElement>(null);
 
       const getCodeString = () => {
         if (preElementRef.current?.querySelector('code')) {
@@ -111,9 +108,12 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         }
       };
       
+      // The actual &lt;pre&gt; tag and its children (including &lt;code&gt; and token spans)
+      // are rendered by ReactMarkdown's default behavior using the AST modified by rehype-prism-plus.
+      // We just wrap it for the copy button.
       return (
         <div className="relative group"> 
-          <pre {...preProps} ref={preElementRef} className={preFinalClassName}>
+          <pre {...props} ref={preElementRef}>
             {children}
           </pre>
           <Button
@@ -128,72 +128,48 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         </div>
       );
     },
-     code: ({ children, className: codeClassName, node, ...restProps }) => {
-      const isInlineCode = !node?.position?.start.line || !node?.parent || (node.parent as any)?.tagName !== 'pre';
-      
-      if (isInlineCode) {
-        // Inline code: styled by .markdown-content :where(code):not(:where(pre > *)) in globals.css
-        return <code {...restProps} className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", codeClassName)}>{children}</code>;
+    code: ({ node, inline, className, children, ...props }) => {
+       if (inline) {
+        return <code className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", className)} {...props}>{children}</code>;
       }
-
-      // Code block: Prism adds classes like 'code-highlight' and 'language-xxx'
-      // The className prop from react-markdown for fenced code blocks usually has 'language-xxx'.
-      // Prism.highlightAllUnder will handle tokenization.
-      return <code {...restProps} className={cn(codeClassName, 'code-highlight')}>{children}</code>;
+      // For code blocks, `className` from rehype-prism-plus is passed.
+      // The content `children` will be the already tokenized spans from rehype-prism-plus.
+      return <code className={className} {...props}>{children}</code>;
     }
   };
   
-  // For SSR and initial client render before hydration, use a simpler set of components
-  // to ensure server and client output matches.
-  // The dynamic parts (copy button, Prism highlighting) are applied after mount.
+  // For SSR and initial client render before hydration, use components that simply pass through
+  // classes from rehype-prism-plus. No copy button here.
   if (!isMounted) {
-     const ssrComponents: Components = {
-      ...commonComponents,
-      pre: ({ node, children, ...preProps }) => {
-        // For SSR and initial client render, make PRE tag class consistent and minimal.
-        // Line numbers plugin needs "line-numbers".
-        // Actual language highlighting classes are primarily on the CODE tag.
-        // This helps avoid hydration mismatch for the <pre> tag's className.
-        return (
-          <pre {...preProps} className="line-numbers">
-            {children}
-          </pre>
-        );
-      },
-       code: ({ children, className: codeClassName, node, ...restProps }) => {
-        const isInlineCode = !node?.position?.start.line || !node?.parent || (node.parent as any)?.tagName !== 'pre';
-        if (isInlineCode) {
-          return <code {...restProps} className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", codeClassName)}>{children}</code>;
-        }
-        // For SSR, ensure the language class is present for Prism's CSS to apply basic block styles
-        // `code-highlight` might not be needed or applied consistently by Prism on SSR without JS.
-        // ReactMarkdown provides codeClassName (e.g., "language-typescript") for code blocks.
-        return <code {...restProps} className={codeClassName}>{children}</code>;
-      }
-    };
-    // We must use these props to ensure server and client initial render match.
     return (
-      <ReactMarkdown
-        className={cn('markdown-content', className)}
-        remarkPlugins={[remarkGfm]}
-        components={ssrComponents} // Use SSR-safe components
-      >
-        {content}
-      </ReactMarkdown>
+      // The ref is not used here, but ReactMarkdown still needs a root if we don't pass a ref to it directly.
+      // An outer div for the ref is only needed if the ref itself is used for DOM manipulation on mount.
+      // Since Prism.highlightAllUnder is removed, the div with ref might not be needed unless for other purposes.
+      // For now, let's keep the structure consistent for ReactMarkdown's expectations.
+      <div ref={markdownRootRef} className={className}> 
+        <ReactMarkdown
+          className='markdown-content' // Applied to the root element rendered by ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
+          components={ssrAndInitialClientComponents} 
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
     );
   }
 
-  // Client-side render after mount, uses full components with client-side enhancements
+  // Client-side render after mount, uses components with client-side enhancements (e.g., copy button)
   return (
-    <div ref={markdownRootRef}>
+    <div ref={markdownRootRef} className={className}>
       <ReactMarkdown
-        className={cn('markdown-content', className)}
+        className='markdown-content'
         remarkPlugins={[remarkGfm]}
-        components={components} // Use full components with client-side logic
+        rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
+        components={clientSideComponents}
       >
         {content}
       </ReactMarkdown>
     </div>
   );
 }
-
