@@ -13,31 +13,25 @@ export default async function DocsLayout({ children }: { children: ReactNode }) 
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-background">
         <AppHeader />
         <div className="flex flex-1 overflow-hidden pt-[var(--header-height)]">
-          {/* AppSidebarClient renders a Sidebar component which includes a placeholder div 
-              that occupies space in the normal document flow. This placeholder div's width 
-              adjusts based on whether the sidebar is expanded or collapsed.
-          */}
           <AppSidebarClient navigationItems={navigationItems} />
           
-          {/* 
-            The ScrollArea contains the main content. As a flex-1 item, it will take up 
-            the remaining space next to the AppSidebarClient's placeholder div.
-            Explicit margins are removed as the placeholder div handles the spacing.
-            The transition on the placeholder div within the Sidebar component will 
-            animate the width change, and flex-1 on ScrollArea will adapt to it.
-          */}
           <ScrollArea
             className={cn(
-              "flex-1 transition-all duration-200 ease-in-out"
-              // Removed md:ml-[var(--sidebar-width)] and 
-              // group-data-[state=collapsed]/sidebar-wrapper:md:ml-[var(--sidebar-width-icon)]
-              // The sidebar's internal placeholder div is now responsible for managing this spacing.
+              "flex-1 transition-all duration-200 ease-in-out",
+              // The sidebar's internal placeholder div now handles the left margin.
+              // The following classes are effectively managed by the peer group selectors in sidebar.tsx
+              // "md:ml-[var(--sidebar-width)]",
+              // "group-data-[state=collapsed]/sidebar-wrapper:md:ml-[var(--sidebar-width-icon)]"
             )}
+            // style={{
+            //   // This is now controlled by the sibling div's width (the placeholder from Sidebar component)
+            //   // marginLeft: 'var(--current-sidebar-width, var(--sidebar-width))'
+            // } as React.CSSProperties}
           >
-            <main className="container mx-auto px-4 py-8 lg:px-8 lg:py-12">
+            <main className="container mx-auto max-w-5xl px-4 sm:px-6 py-8 lg:px-8 lg:py-12">
               {children}
             </main>
             <AppFooter />
@@ -47,4 +41,3 @@ export default async function DocsLayout({ children }: { children: ReactNode }) 
     </SidebarProvider>
   );
 }
-
