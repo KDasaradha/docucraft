@@ -15,9 +15,8 @@ import {
   useSidebar,
   SidebarMenuSkeleton,
   SheetClose, 
-  SheetTitle, // Imported from sidebar.tsx which re-exports from sheet.tsx
+  SheetTitle, 
 } from '@/components/ui/sidebar';
-// Removed direct import of SheetClose from "@/components/ui/sheet" as it's now exported from sidebar.tsx
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
@@ -98,7 +97,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
         item.isSection && level === 0 && "font-semibold text-sm",
         item.isSection && level > 0 && !isFolderLink && "font-medium opacity-80 text-xs"
       )}>{item.title}</span>
-      {item.href.startsWith('http') && !isCollapsed && (
+      {item.href && item.href.startsWith('http') && !isCollapsed && (
         <ExternalLink className="ml-1 h-3.5 w-3.5 text-muted-foreground shrink-0" />
       )}
       {hasSubItems && !isCollapsed && (
@@ -133,15 +132,15 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             isActive={itemIsActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
           >
-            <Link {...commonLinkProps}> {/* onClick for Link is handled in commonLinkProps */}
+            <Link {...commonLinkProps}> 
               {itemTitleContent}
             </Link>
           </SidebarMenuButton>
           {!isCollapsed && isOpen && (
             <SidebarMenuSub>
-              {item.items?.map((subItem) => (
+              {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={subItem.href || subItem.title} 
+                  key={`${index}-${subItem.title}-${subItem.href || 'defaultHrefKey'}`} 
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
@@ -167,9 +166,9 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
           </SidebarMenuButton>
           {!isCollapsed && isOpen && (
             <SidebarMenuSub>
-              {item.items?.map((subItem) => (
+              {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={subItem.href || subItem.title} 
+                  key={`${index}-${subItem.title}-${subItem.href || 'defaultHrefKey'}`}
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
@@ -192,7 +191,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
         isActive={isDirectlyActive && !subSectionHeaderStyling} 
         className={cn(subSectionHeaderStyling)}
       >
-        <Link {...commonLinkProps}> {/* onClick for Link is handled in commonLinkProps */}
+        <Link {...commonLinkProps}> 
           {itemTitleContent}
         </Link>
       </SidebarMenuButton>
@@ -246,13 +245,12 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   return (
     <Sidebar
       variant="sidebar" 
-      // className prop moved to SheetContent/aside for mobile/desktop respectively
     >
        <SidebarHeader className={cn(
            "p-3 border-b border-sidebar-border flex items-center justify-between", 
            isCollapsed && "justify-center"
         )}>
-        {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>} {/* Ensures SheetTitle for accessibility */}
+        {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>} 
         <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"}/>
         {isMobile && (
           <SheetClose asChild>
@@ -263,16 +261,16 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           </SheetClose>
         )}
       </SidebarHeader>
-      <SidebarContent> {/* SidebarContent is now the ScrollArea */}
+      <SidebarContent> 
           {isLoading && isMobile ? ( 
             <div className="p-2 space-y-0.5">
               {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={true} />)}
             </div>
           ) : (
             <SidebarMenu className="p-2">
-              {navigationItems.map((item) => (
+              {navigationItems.map((item, index) => (
                 <RecursiveNavItem
-                  key={item.href || item.title} 
+                  key={`${index}-${item.title}-${item.href || 'defaultHrefKey'}`}
                   item={item}
                   level={0}
                   isCollapsed={isCollapsed}
