@@ -15,12 +15,12 @@ import {
   useSidebar,
   SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
-import { SheetTitle } from '@/components/ui/sheet'; // Corrected import
+import { SheetTitle, SheetClose } from '@/components/ui/sheet'; // Corrected import
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronRight, X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 interface AppSidebarClientProps {
@@ -32,7 +32,7 @@ interface RecursiveNavItemProps {
   level: number;
   isCollapsed: boolean;
   currentPath: string;
-  onLinkClick: () => void; 
+  onLinkClick: () => void;
 }
 
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isCollapsed, currentPath, onLinkClick }) => {
@@ -40,7 +40,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   // An item is active if its href matches the current path,
   // or if the current path starts with the item's href (for parent directories).
   // Special case: avoid matching root ('/docs') for all subpages if not intended.
-  const isActive = item.href === currentPath || 
+  const isActive = item.href === currentPath ||
                    (item.href !== '/docs' && currentPath.startsWith(item.href) && (currentPath.length === item.href.length || currentPath[item.href.length] === '/'));
 
 
@@ -53,11 +53,11 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   const hasSubItems = item.items && item.items.length > 0;
 
   const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
     setIsOpen(!isOpen);
   };
-  
+
   const itemTitleContent = (
     <>
       <span className="truncate flex-grow">{item.title}</span>
@@ -100,8 +100,15 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
         </SidebarMenuButton>
         {!isCollapsed && isOpen && (
           <SidebarMenuSub>
-            {item.items?.map((subItem) => (
-              <RecursiveNavItem key={subItem.href} item={subItem} level={level + 1} isCollapsed={isCollapsed} currentPath={currentPath} onLinkClick={onLinkClick} />
+            {item.items?.map((subItem, index) => ( // Added index
+              <RecursiveNavItem
+                key={`${subItem.href}-${index}`} // Use href and index for unique key
+                item={subItem}
+                level={level + 1}
+                isCollapsed={isCollapsed}
+                currentPath={currentPath}
+                onLinkClick={onLinkClick}
+              />
             ))}
           </SidebarMenuSub>
         )}
@@ -131,22 +138,19 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
 
 export default function AppSidebarClient({ navigationItems }: AppSidebarClientProps) {
-  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar(); 
+  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if navigationItems are loaded to set isLoading to false
     if (navigationItems && navigationItems.length > 0) {
       setIsLoading(false);
     } else {
-      // Optional: set a timeout if you still want a minimum loading display time
-      // or handle cases where navigationItems might be slow to load.
-      const timer = setTimeout(() => setIsLoading(false), 200); // Shorter delay
+      const timer = setTimeout(() => setIsLoading(false), 200);
       return () => clearTimeout(timer);
     }
   }, [navigationItems]);
-  
+
   const handleLinkClick = () => {
     if (isMobile) {
       setOpenMobile(false);
@@ -155,13 +159,14 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
 
   const isCollapsed = !isMobile && sidebarState === 'collapsed';
 
-  if (isLoading && !isMobile) { 
+  // This placeholder is for desktop loading state
+  if (isLoading && !isMobile) {
     return (
       <aside className={cn(
-        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40", 
+        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40",
         isCollapsed ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]"
       )}>
-         <SidebarHeader className={cn("p-4 border-b border-sidebar-border", isCollapsed && "p-2 flex justify-center")}>
+         <SidebarHeader className={cn("p-4 border-b border-sidebar-border flex items-center", isCollapsed && "p-2 justify-center")}>
           <Logo collapsed={isCollapsed} />
         </SidebarHeader>
         <ScrollArea className="flex-1">
@@ -172,27 +177,35 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
       </aside>
     );
   }
-  
+
   return (
-    <Sidebar 
-      collapsible={isMobile ? "offcanvas" : "icon"} 
-      className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40" 
-      variant="sidebar"
+    <Sidebar
+      collapsible={isMobile ? "offcanvas" : "icon"}
+      className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40"
+      variant="sidebar" // Ensure this is the desired variant
     >
-       <SidebarHeader className={cn("p-4 border-b border-sidebar-border", isCollapsed && "p-2 flex justify-center")}>
+       <SidebarHeader className={cn("p-4 border-b border-sidebar-border flex items-center justify-between", isCollapsed && "p-2 justify-center")}>
         <Logo collapsed={isCollapsed} />
         {/* Add a visually hidden SheetTitle for accessibility if Sidebar renders a SheetContent internally */}
         {isMobile && <SheetTitle className="sr-only">Navigation Menu</SheetTitle>}
+        {isMobile && (
+           <SheetClose asChild>
+             <Button variant="ghost" size="icon" className="h-7 w-7">
+               <X className="h-4 w-4" />
+               <span className="sr-only">Close</span>
+             </Button>
+           </SheetClose>
+        )}
       </SidebarHeader>
       <SidebarContent asChild>
         <ScrollArea className="flex-1">
           <SidebarMenu className="p-2">
-            {navigationItems.map((item) => (
-              <RecursiveNavItem 
-                key={item.href} 
-                item={item} 
-                level={0} 
-                isCollapsed={isCollapsed} 
+            {navigationItems.map((item, index) => ( // Added index
+              <RecursiveNavItem
+                key={`${item.href}-${index}`} // Use href and index for unique key
+                item={item}
+                level={0}
+                isCollapsed={isCollapsed}
                 currentPath={pathname}
                 onLinkClick={handleLinkClick}
               />
@@ -203,4 +216,3 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     </Sidebar>
   );
 }
-
