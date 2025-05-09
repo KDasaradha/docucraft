@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Sidebar,
+  // Sidebar component is now mainly for desktop <aside>
+  Sidebar as DesktopSidebar, 
   SidebarHeader,
   SidebarContent,
   SidebarMenu,
@@ -14,9 +15,10 @@ import {
   SidebarMenuSub,
   useSidebar,
   SidebarMenuSkeleton,
-  SheetClose, 
-  SheetTitle, 
+  SheetClose, // From ui/sidebar which re-exports Radix's SheetClose
+  RadixSheetTitle as SheetTitle, // From ui/sidebar which re-exports Radix's SheetTitle
 } from '@/components/ui/sidebar';
+import { SheetContent as MobileSheetContent } from "@/components/ui/sheet"; // Actual SheetContent for mobile
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
@@ -32,9 +34,9 @@ interface AppSidebarClientProps {
 interface RecursiveNavItemProps {
   item: NavItem;
   level: number;
-  isCollapsed: boolean;
+  isCollapsed: boolean; // For desktop collapsed state
   currentPath: string;
-  onLinkClick: () => void;
+  onLinkClick: () => void; // For mobile sheet close
 }
 
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isCollapsed, currentPath, onLinkClick }) => {
@@ -55,7 +57,6 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   const isActiveAncestor = normalizedItemHref ? normalizedCurrentPath.startsWith(normalizedItemHref + '/') : false;
   
   const itemIsActive = isDirectlyActive || (isActiveAncestor && item.items && item.items.length > 0);
-
 
   useEffect(() => {
     if ((isActiveAncestor || (isDirectlyActive && item.items && item.items.length > 0)) && !isOpen) {
@@ -79,14 +80,20 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       </div>
     );
   }
-
+  
   const handleToggleOrNavigate = (e: React.MouseEvent) => {
     if (hasSubItems && (!isFolderLink || (item.href && item.href.startsWith('#')))) { 
       e.preventDefault();
       e.stopPropagation();
       setIsOpen(!isOpen);
     } else if (hasSubItems && isFolderLink) { 
+      // Allow navigation for folder links but also toggle submenu
       setIsOpen(!isOpen); 
+    }
+    // If it's a direct link without sub-items, or a folder link, let navigation proceed.
+    // onLinkClick will handle closing mobile sheet.
+    if(!hasSubItems || isFolderLink) {
+      onLinkClick();
     }
   };
   
@@ -100,7 +107,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       {item.href && item.href.startsWith('http') && !isCollapsed && (
         <ExternalLink className="ml-1 h-3.5 w-3.5 text-muted-foreground shrink-0" />
       )}
-      {hasSubItems && !isCollapsed && (
+      {hasSubItems && (!isCollapsed || useSidebar().isMobile ) && ( // Show chevrons on mobile expanded too
         isOpen ? <ChevronDown className="ml-1 h-4 w-4 shrink-0" /> : <ChevronRight className="ml-1 h-4 w-4 shrink-0" />
       )}
     </>
@@ -108,93 +115,78 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
   const commonLinkProps = {
     href: item.href || '#', 
-    onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (hasSubItems && (!isFolderLink || (item.href && item.href.startsWith('#')))) {
-        e.preventDefault(); 
-      }
-      onLinkClick(); 
-    },
     target: item.href && item.href.startsWith('http') ? '_blank' : undefined,
     rel: item.href && item.href.startsWith('http') ? 'noopener noreferrer' : undefined,
   };
 
   const subSectionHeaderStyling = item.isSection && level > 0 && !isFolderLink && "text-xs opacity-90 font-normal";
 
-  if (hasSubItems) {
-    if (isFolderLink && !(item.href && item.href.startsWith('#'))) { 
-      return (
-        <SidebarMenuItem>
-          <SidebarMenuButton
+  const renderButtonAsLink = (
+    <Link {...commonLinkProps} passHref legacyBehavior>
+        <SidebarMenuButton
             onClick={handleToggleOrNavigate}
             tooltip={isCollapsed ? item.title : undefined}
             aria-expanded={isOpen}
-            asChild
             isActive={itemIsActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
+            hasSubItems={hasSubItems}
+            isOpen={isOpen}
           >
-            <Link {...commonLinkProps}> 
-              {itemTitleContent}
-            </Link>
+            {itemTitleContent}
           </SidebarMenuButton>
-          {!isCollapsed && isOpen && (
-            <SidebarMenuSub>
-              {item.items?.map((subItem, index) => (
-                <RecursiveNavItem
-                  key={`${index}-${subItem.title}-${subItem.href || `sub-item-${index}`}`} 
-                  item={subItem}
-                  level={level + 1}
-                  isCollapsed={isCollapsed}
-                  currentPath={currentPath}
-                  onLinkClick={onLinkClick}
-                />
-              ))}
-            </SidebarMenuSub>
-          )}
-        </SidebarMenuItem>
-      );
-    } else { 
-      return (
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            onClick={handleToggleOrNavigate}
+    </Link>
+  );
+  
+  const renderButtonDirectly = (
+     <SidebarMenuButton
+        onClick={handleToggleOrNavigate}
+        tooltip={isCollapsed ? item.title : undefined}
+        aria-expanded={isOpen}
+        isActive={itemIsActive && !subSectionHeaderStyling}
+        className={cn(subSectionHeaderStyling)}
+        hasSubItems={hasSubItems}
+        isOpen={isOpen}
+      >
+        {itemTitleContent}
+      </SidebarMenuButton>
+  );
+
+
+  if (hasSubItems) {
+    return (
+      <SidebarMenuItem>
+        {isFolderLink && !(item.href && item.href.startsWith('#')) ? renderButtonAsLink : renderButtonDirectly}
+        {(!isCollapsed || useSidebar().isMobile) && isOpen && ( // Show sub-menu on mobile if open
+          <SidebarMenuSub>
+            {item.items?.map((subItem, index) => (
+              <RecursiveNavItem
+                key={`${subItem.href || subItem.title}-${index}`} // Ensure unique key
+                item={subItem}
+                level={level + 1}
+                isCollapsed={isCollapsed}
+                currentPath={currentPath}
+                onLinkClick={onLinkClick}
+              />
+            ))}
+          </SidebarMenuSub>
+        )}
+      </SidebarMenuItem>
+    );
+  }
+
+  // No sub-items
+  return (
+    <SidebarMenuItem>
+      <Link {...commonLinkProps} passHref legacyBehavior>
+        <SidebarMenuButton
+            onClick={onLinkClick} // Only closes sheet on mobile
             tooltip={isCollapsed ? item.title : undefined}
-            aria-expanded={isOpen}
-            isActive={itemIsActive && !subSectionHeaderStyling}
+            isActive={isDirectlyActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
           >
             {itemTitleContent}
           </SidebarMenuButton>
-          {!isCollapsed && isOpen && (
-            <SidebarMenuSub>
-              {item.items?.map((subItem, index) => (
-                <RecursiveNavItem
-                  key={`${index}-${subItem.title}-${subItem.href || `sub-header-${index}`}`}
-                  item={subItem}
-                  level={level + 1}
-                  isCollapsed={isCollapsed}
-                  currentPath={currentPath}
-                  onLinkClick={onLinkClick}
-                />
-              ))}
-            </SidebarMenuSub>
-          )}
-        </SidebarMenuItem>
-      );
-    }
-  }
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        tooltip={isCollapsed ? item.title : undefined}
-        isActive={isDirectlyActive && !subSectionHeaderStyling} 
-        className={cn(subSectionHeaderStyling)}
-      >
-        <Link {...commonLinkProps}> 
-          {itemTitleContent}
-        </Link>
-      </SidebarMenuButton>
+      </Link>
     </SidebarMenuItem>
   );
 };
@@ -206,13 +198,19 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (navigationItems && navigationItems.length > 0) {
-      setIsLoading(false);
-    } else {
-      const timer = setTimeout(() => setIsLoading(false), 100); 
-      return () => clearTimeout(timer);
+    // This effect ensures that isMobile from useSidebar context is settled before rendering
+    // and helps mitigate hydration mismatches for mobile/desktop specific rendering.
+    if (typeof isMobile === 'boolean') { // Check if isMobile is determined
+      if (navigationItems && navigationItems.length > 0) {
+        setIsLoading(false);
+      } else {
+        // Simulate loading if navigationItems are fetched async later, or just set to false
+        const timer = setTimeout(() => setIsLoading(false), 50); // Short delay for perceived loading
+        return () => clearTimeout(timer);
+      }
     }
-  }, [navigationItems]);
+    // If isMobile is undefined, keep isLoading true until it's resolved.
+  }, [navigationItems, isMobile]);
 
 
   const handleLinkClick = () => {
@@ -221,67 +219,79 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     }
   };
 
-  const isCollapsed = !isMobile && sidebarState === 'collapsed';
+  const isCollapsed = !isMobile && sidebarState === "collapsed";
   
-  if (isLoading && !isMobile) {
-    const numSkeletons = 8;
+  const sidebarMenuContent = (
+    <SidebarMenu className="p-2">
+      {navigationItems.map((item, index) => (
+        <RecursiveNavItem
+          key={`${item.href || item.title}-${index}`} // Ensure unique key
+          item={item}
+          level={0}
+          isCollapsed={isCollapsed}
+          currentPath={pathname}
+          onLinkClick={handleLinkClick}
+        />
+      ))}
+    </SidebarMenu>
+  );
+
+  const sidebarStructure = (
+    <>
+      <SidebarHeader className={cn(isCollapsed && "justify-center")}>
+        {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>}
+        <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"} />
+        {/* Close button is handled by RadixSheetContent now if isMobile */}
+      </SidebarHeader>
+      <SidebarContent>
+        {isLoading && !isMobile ? (
+          <div className="p-2 space-y-0.5">
+            {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed} />)}
+          </div>
+        ) : isLoading && isMobile ? (
+            <div className="p-2 space-y-0.5">
+                {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={true} />)}
+            </div>
+        ) : (
+          sidebarMenuContent
+        )}
+      </SidebarContent>
+    </>
+  );
+
+  if (typeof isMobile === 'undefined' || (isLoading && isMobile === undefined)) {
+     // Render a consistent skeleton for SSR and initial client render before isMobile is known
+     // This should match the desktop collapsed skeleton to avoid layout shifts if it defaults to desktop first
     return (
       <aside className={cn(
         "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40",
-        isCollapsed ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]"
+        "w-[var(--sidebar-width-icon)]" // Default to collapsed for SSR
       )}>
-         <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center", isCollapsed && "justify-center")}>
-          <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"}/>
+         <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center justify-center")}>
+          <Logo collapsed={true} />
         </SidebarHeader>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-0.5"> 
-            {[...Array(numSkeletons)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed} />)}
+            {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={false} />)}
           </div>
         </ScrollArea>
       </aside>
     );
   }
+
+
+  if (isMobile) {
+    return (
+      <MobileSheetContent side="left" className="p-0 flex flex-col w-[var(--sidebar-width)]">
+        {sidebarStructure}
+      </MobileSheetContent>
+    );
+  }
   
+  // Desktop view
   return (
-    <Sidebar
-      variant="sidebar" 
-    >
-       <SidebarHeader className={cn(
-           "p-3 border-b border-sidebar-border flex items-center justify-between", 
-           isCollapsed && "justify-center"
-        )}>
-        {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>} 
-        <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"}/>
-        {isMobile && (
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <X className="h-4.5 w-4.5" />
-              <span className="sr-only">Close menu</span>
-            </Button>
-          </SheetClose>
-        )}
-      </SidebarHeader>
-      <SidebarContent> 
-          {isLoading && isMobile ? ( 
-            <div className="p-2 space-y-0.5">
-              {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={true} />)}
-            </div>
-          ) : (
-            <SidebarMenu className="p-2">
-              {navigationItems.map((item, index) => (
-                <RecursiveNavItem
-                  key={`${index}-${item.title}-${item.href || `top-level-item-${index}`}`}
-                  item={item}
-                  level={0}
-                  isCollapsed={isCollapsed}
-                  currentPath={pathname}
-                  onLinkClick={handleLinkClick}
-                />
-              ))}
-            </SidebarMenu>
-          )}
-      </SidebarContent>
-    </Sidebar>
+    <DesktopSidebar variant="sidebar">
+      {sidebarStructure}
+    </DesktopSidebar>
   );
 }
-
