@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
 import { createContext, useContext, useState, useEffect, useMemo, useCallback, forwardRef } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X, Menu, type LucideIcon } from "lucide-react" // Assuming Menu is used for trigger
+import { X, Menu, type LucideIcon } from "lucide-react" 
 import { cn } from "@/lib/utils"
 import { Slot } from "@radix-ui/react-slot"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
@@ -12,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { SheetTitle as RadixSheetTitle } from "@/components/ui/sheet"; // Import SheetTitle from sheet.tsx
 
 // --- Sidebar Context ---
 type SidebarState = "expanded" | "collapsed" | "offcanvas"
@@ -68,11 +70,10 @@ export function SidebarProvider({
 
   useEffect(() => {
     if (!isMobileView) {
-      setOpenMobile(false) // Close mobile drawer if view changes to desktop
+      setOpenMobile(false) 
     }
   }, [isMobileView])
 
-  // Define CSS variables based on state
   const sidebarWidthVar = state === 'collapsed' && !isMobileView && collapsible !== 'offcanvas'
     ? 'var(--sidebar-width-icon)'
     : 'var(--sidebar-width)'
@@ -98,8 +99,6 @@ export function SidebarProvider({
             ['--current-sidebar-width' as string]: currentSidebarWidthVar,
           }}
         >
-           {/* This div acts as a placeholder for the fixed sidebar, preventing content overlap */}
-           {/* Render placeholder only on desktop and when sidebar is not off-canvas */}
            {!isMobileView && collapsible !== "offcanvas" && (
              <div
                 className={cn(
@@ -117,11 +116,11 @@ export function SidebarProvider({
 }
 
 
-// --- Sheet Components (for mobile off-canvas sidebar) ---
 const Sheet = DialogPrimitive.Root
 const SheetTrigger = DialogPrimitive.Trigger
 const SheetClose = DialogPrimitive.Close
 const SheetPortal = DialogPrimitive.Portal
+
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -143,7 +142,6 @@ const sheetVariants = cva(
     variants: {
       side: {
         left: "inset-y-0 left-0 h-full w-[var(--sidebar-width)] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
-        // Add other sides if needed
       },
     },
     defaultVariants: {
@@ -163,11 +161,10 @@ const SheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
-      onOpenAutoFocus={(e) => e.preventDefault()} // Prevent auto-focus on first element
+      onOpenAutoFocus={(e) => e.preventDefault()} 
       {...props}
     >
       {children}
-       {/* Close button is often placed in SidebarHeader inside this content */}
     </DialogPrimitive.Content>
   </SheetPortal>
 ))
@@ -178,20 +175,10 @@ const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 )
 SheetHeader.displayName = "SheetHeader"
 
-const SheetTitle = React.forwardRef< // Added for accessibility
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn("text-lg font-semibold text-foreground", className)}
-    {...props}
-  />
-))
-SheetTitle.displayName = DialogPrimitive.Title.displayName
+// Exporting SheetTitle to be used in AppSidebarClient
+export const SheetTitle = RadixSheetTitle;
 
 
-// --- SidebarMain Component ---
 const sidebarVariants = cva(
   "flex flex-col transition-all duration-200 ease-in-out group",
   {
@@ -203,7 +190,7 @@ const sidebarVariants = cva(
       collapsibleType: {
         icon: "data-[state=collapsed]:w-[var(--sidebar-width-icon)] data-[state=expanded]:w-[var(--sidebar-width)]",
         button: "data-[state=collapsed]:w-[var(--sidebar-width-icon)] data-[state=expanded]:w-[var(--sidebar-width)]",
-        offcanvas: "w-[var(--sidebar-width)]", // Full width when open as off-canvas
+        offcanvas: "w-[var(--sidebar-width)]", 
       },
     },
     defaultVariants: {
@@ -213,7 +200,7 @@ const sidebarVariants = cva(
 )
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof sidebarVariants> {
-  collapsible?: CollapsibleType // Propagate this for styling based on current mode
+  collapsible?: CollapsibleType 
 }
 
 const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
@@ -226,27 +213,20 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetTrigger asChild>
-          {/* This trigger is usually placed in AppHeader for mobile */}
-          {/* <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Open sidebar</span>
-          </Button> */}
           <div /> 
         </SheetTrigger>
         <SheetContent side="left" className={cn("p-0 flex flex-col", className)} {...props}>
-          {/* Content for mobile drawer is typically children */}
           {children}
         </SheetContent>
       </Sheet>
     )
   }
 
-  // Desktop sidebar
   return (
     <aside
       ref={ref}
       className={cn(sidebarVariants({ variant, collapsibleType: effectiveCollapsible, className }))}
-      data-state={state} // Use context state for desktop
+      data-state={state} 
       {...props}
     >
       {children}
@@ -256,11 +236,10 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
 Sidebar.displayName = "Sidebar"
 
 
-// --- SidebarTrigger (Hamburger Menu) ---
 export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     const { toggleSidebar, isMobile } = useSidebar()
-    if (!isMobile) return null // Only show on mobile if it's an off-canvas trigger
+    if (!isMobile) return null 
 
     return (
       <Button
@@ -278,14 +257,13 @@ export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 SidebarTrigger.displayName = "SidebarTrigger"
 
-// --- Sidebar Components ---
 const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
         "flex h-[var(--header-height)] items-center border-b border-sidebar-border p-3",
-        "data-[state=collapsed]:justify-center", // Center content when collapsed
+        "group-data-[state=collapsed]/sidebar:justify-center", 
         className
       )}
       {...props}
@@ -297,7 +275,6 @@ SidebarHeader.displayName = "SidebarHeader"
 
 const SidebarContent = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
-    // Use ScrollArea for content
     return (
       <ScrollArea ref={ref} className={cn("flex-1", className)} {...props}>
         {children}
@@ -335,7 +312,7 @@ const SidebarMenuItem = forwardRef<HTMLLIElement, React.HTMLAttributes<HTMLLIEle
   ({ className, ...props }, ref) => (
     <li
       ref={ref}
-      className={cn("", className)} // No specific item styling, handled by button
+      className={cn("", className)} 
       {...props}
     />
   )
@@ -365,7 +342,7 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         <span
           className={cn(
             "truncate flex-1 text-left",
-            isCollapsed && "hidden", // Hide text when collapsed
+            isCollapsed && "hidden", 
           )}
         >
           {children || label}
@@ -379,8 +356,8 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         variant={isActive ? "sidebarAccent" : "ghostSidebar"}
         className={cn(
           "h-9 w-full justify-start gap-2.5",
-          isCollapsed && "justify-center", // Center icon when collapsed
-          `pl-${2 + (level * 2)}`, // Indentation based on level
+          isCollapsed && "justify-center", 
+          `pl-${2 + (level * 2)}`, 
           className
         )}
         asChild={asChild}
@@ -411,13 +388,13 @@ const SidebarMenuSub = forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLULi
     const { state, isMobile } = useSidebar();
     const isCollapsed = !isMobile && state === "collapsed";
 
-    if (isCollapsed) return null; // Don't render submenus when collapsed
+    if (isCollapsed) return null; 
 
     return (
       <ul
         ref={ref}
         className={cn(
-          "ml-0 space-y-0.5 data-[state=collapsed]:hidden", // Indent handled by button level
+          "ml-0 space-y-0.5 group-data-[state=collapsed]/sidebar:hidden", 
           className
         )}
         {...props}
@@ -430,37 +407,44 @@ SidebarMenuSub.displayName = "SidebarMenuSub";
 
 const SidebarMenuSkeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { showIcon?: boolean, showText?: boolean }>(
   ({ className, showIcon = true, showText = true, ...props }, ref) => {
-    const { state, isMobile, collapsible } = useSidebar(); // Use context here
+    const { state, isMobile, collapsible } = useSidebar(); 
     const isCollapsed = !isMobile && state === "collapsed" && collapsible !== "offcanvas";
+    
+    const [skeletonTextWidth, setSkeletonTextWidth] = useState('75%'); 
+
+    useEffect(() => {
+      setSkeletonTextWidth(`${Math.floor(Math.random() * (85 - 55 + 1)) + 55}%`);
+    }, []);
+
 
     return (
       <div
         ref={ref}
         data-sidebar="menu-skeleton"
         className={cn(
-          "h-9 w-full rounded-md flex items-center gap-2.5 px-2.5", // Matches button padding
+          "h-9 w-full rounded-md flex items-center gap-2.5 px-2.5", 
           isCollapsed && "justify-center",
           className
         )}
         {...props}
       >
-        {showIcon && !isCollapsed && ( // Icon only if not collapsed
+        {showIcon && !isCollapsed && ( 
            <Skeleton
             className="size-4 rounded-md bg-sidebar-foreground/10"
             data-sidebar="menu-skeleton-icon"
           />
         )}
-         {showIcon && isCollapsed && ( // Larger icon when collapsed
+         {showIcon && isCollapsed && ( 
            <Skeleton
-            className="size-5 rounded-md bg-sidebar-foreground/10"
+            className="size-5 rounded-md bg-sidebar-foreground/10" 
             data-sidebar="menu-skeleton-icon"
           />
         )}
-        {showText && !isCollapsed && ( // Text only if not collapsed
+        {showText && !isCollapsed && ( 
           <Skeleton
             className="h-4 flex-1 max-w-[var(--skeleton-width,75%)] rounded-sm bg-sidebar-foreground/10"
             data-sidebar="menu-skeleton-text"
-            style={{['--skeleton-width' as string]: `${Math.floor(Math.random() * (85 - 55 + 1)) + 55}%` }}
+            style={{['--skeleton-width' as string]: skeletonTextWidth }} 
           />
         )}
       </div>
@@ -468,21 +452,6 @@ const SidebarMenuSkeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
   }
 )
 SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton"
-
-
-// Button variants for sidebar
-// Ensure these are defined or extend existing Button variants in button.tsx and referenced in globals.css
-// For now, assuming they exist or are mapped to default/ghost with specific sidebar styling.
-// Example if you have custom variants:
-// const buttonVariants = cva(..., {
-//   variants: {
-//     variant: {
-//       // ... other variants
-//       sidebarAccent: "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90",
-//       ghostSidebar: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground/80",
-//     }
-//   }
-// })
 
 
 export {
@@ -495,8 +464,5 @@ export {
   SidebarMenuButton,
   SidebarMenuSub,
   SidebarMenuSkeleton,
-  SheetClose, // Export SheetClose if needed for custom close buttons in header
-  SheetTitle  // Export SheetTitle
+  SheetClose, 
 }
-
-    

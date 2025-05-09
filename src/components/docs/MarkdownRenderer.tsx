@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypePrismPlus from 'rehype-prism-plus';
@@ -38,22 +39,58 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const commonComponents = {
+    h1: ({node, ...props}: any) => <h1 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    h2: ({node, ...props}: any) => <h2 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    h3: ({node, ...props}: any) => <h3 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    h4: ({node, ...props}: any) => <h4 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    h5: ({node, ...props}: any) => <h5 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    h6: ({node, ...props}: any) => <h6 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
+    img: ({node, src, alt, ...props}: any) => {
+      // eslint-disable-next-line @next/next/no-img-element
+      return <img src={src || ""} alt={alt || ""} {...props} className="rounded-md shadow-md my-4 max-w-full h-auto" />;
+    },
+  };
+
+  if (!isClient) {
+    // Server-side rendering: basic Markdown without Prism highlighting or complex components
+    return (
+      <ReactMarkdown
+        className={cn('markdown-content', className)}
+        remarkPlugins={[remarkGfm]}
+        components={{
+          ...commonComponents,
+          pre: ({children}) => <pre className="my-6">{children}</pre>,
+          code: ({children, className: codeClassName, node}) => {
+            // Basic handling for code blocks on SSR to get language class
+            // but not the full Prism tokenization.
+            const isCodeBlock = node?.parentElement?.tagName === 'pre';
+            if (isCodeBlock) {
+                 return <code className={codeClassName}>{children}</code>;
+            }
+            return <code className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', codeClassName)}>{children}</code>;
+          }
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  }
+
+  // Client-side rendering with full Prism highlighting
   return (
     <ReactMarkdown
       className={cn('markdown-content', className)}
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
       components={{
-        h1: ({node, ...props}) => <h1 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        h2: ({node, ...props}) => <h2 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        h3: ({node, ...props}) => <h3 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        h4: ({node, ...props}) => <h4 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        h5: ({node, ...props}) => <h5 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        h6: ({node, ...props}) => <h6 id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />,
-        img: ({node, src, alt, ...props}) => {
-          // eslint-disable-next-line @next/next/no-img-element
-          return <img src={src || ""} alt={alt || ""} {...props} className="rounded-md shadow-md my-4 max-w-full h-auto" />;
-        },
+        ...commonComponents,
         pre: ({ node, children, ...props }) => {
           const [copied, setCopied] = React.useState(false);
           const preRef = React.useRef<HTMLPreElement>(null);
@@ -64,7 +101,6 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
               if (codeElement) {
                 return codeElement.innerText;
               }
-              // Fallback for structures where <code> might not be the direct child or if text is directly in <pre>
               let textContent = '';
               preRef.current.querySelectorAll('span.code-line').forEach(line => {
                  textContent += line.textContent + '\n';
@@ -86,8 +122,6 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
-          // props.className will contain classes like "language-typescript", "line-numbers" etc.
-          // from rehypePrismPlus.
           const preClassName = cn('my-6', (props as any).className); 
           
           return (
@@ -108,16 +142,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           );
         },
         code: ({ node, className, children, ...props }) => {
-            // For inline code, `rehype-prism-plus` might not add a language class.
-            // Inline code should not have line numbers or a copy button.
             const match = /language-(\w+)/.exec(className || '');
+            // If it's part of a <code> block, rehype-prism-plus provides the full className.
+            // We should just pass it through.
             if (match || (node?.parentElement?.tagName === 'pre')) {
-              // This is part of a code block, rely on the <pre> component's rendering
-              // and `rehype-prism-plus` to add its specific classes to <code>.
-              // The `code-highlight` class might be added by rehype-prism-plus.
-              return <code className={cn(className, 'code-highlight')} {...props}>{children}</code>;
+              return <code className={className} {...props}>{children}</code>;
             }
-            // This is inline code, apply default prose styling for inline code.
+            // For inline code not in a <pre> block
             return <code className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)} {...props}>{children}</code>;
         },
       }}
@@ -126,3 +157,4 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     </ReactMarkdown>
   );
 }
+
