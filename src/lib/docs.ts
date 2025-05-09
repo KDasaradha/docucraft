@@ -2,13 +2,14 @@
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
-import { navigationConfig, type NavConfigItem } from '@/config/navigation'; // Import from new config
+import { navigationConfig, type NavConfigItem } from '@/config/navigation'; 
+import { siteConfig } from '@/config/site.config';
 
 export interface NavItem {
   title: string;
   href: string;
   order?: number;
-  items?: NavItem[]; // Changed from children back to items to match AppSidebarClient
+  items?: NavItem[]; 
   isExternal?: boolean;
 }
 
@@ -19,39 +20,38 @@ export interface DocResult {
   content: string;
   title: string;
   description?: string;
-  order?: number; // Added order to DocResult
+  order?: number; 
   filePath: string;
 }
 
 
-// Function to transform NavConfigItem to NavItem, potentially fetching order from frontmatter
 async function processNavConfigItem(configItem: NavConfigItem): Promise<NavItem> {
   const navItem: NavItem = {
     title: configItem.title,
-    href: configItem.path || '#', // Default href if path is undefined
+    href: configItem.path || '#', 
     order: configItem.order,
     isExternal: configItem.isExternal,
   };
 
-  // If path exists and it's not an anchor link, try to get order from frontmatter
-  if (configItem.path && !configItem.path.includes('#') && !configItem.isExternal) {
+  if (configItem.path && !configItem.path.includes('#') && !configItem.isExternal && !configItem.path.startsWith('http')) {
     const slugArray = configItem.path.replace(/^\/docs\/?/, '').split('/').filter(Boolean);
-    if (slugArray.length > 0 || configItem.path === '/docs') { // Check if it's a content page or root /docs
-        try {
-            const doc = await getDocumentContent(slugArray.length > 0 ? slugArray : []); // Pass empty for root /docs
-            if (doc && doc.order !== undefined) {
-                navItem.order = doc.order;
-            }
-        } catch (e) {
-            // console.warn(`Could not fetch frontmatter for ${configItem.path}, using order from config.`);
+    try {
+        const doc = await getDocumentContent(slugArray);
+        if (doc && doc.order !== undefined) {
+            navItem.order = doc.order;
         }
+        // Ensure title from frontmatter is used if available, overriding config title
+        if (doc && doc.title) {
+            navItem.title = doc.title;
+        }
+    } catch (e) {
+        // console.warn(`Could not fetch frontmatter for ${configItem.path}, using order/title from config.`);
     }
   }
 
 
   if (configItem.children && configItem.children.length > 0) {
     navItem.items = await Promise.all(configItem.children.map(processNavConfigItem));
-    // Sort children by their order
     navItem.items.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.title.localeCompare(b.title));
   }
 
@@ -60,100 +60,89 @@ async function processNavConfigItem(configItem: NavConfigItem): Promise<NavItem>
 
 export async function getNavigation(): Promise<NavItem[]> {
   const processedNav = await Promise.all(navigationConfig.map(processNavConfigItem));
-  // Sort top-level items by their order
   processedNav.sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.title.localeCompare(b.title));
   return processedNav;
 }
 
-
 export async function getDocumentContent(slug: string[]): Promise<DocResult | null> {
-  const originalSlugForLog = slug.join('/');
-  const isCustomPage = slug.length === 1 && slug[0] === 'custom_404';
-  const currentContentDir = isCustomPage ? rootContentDir : contentDir;
+  const isCustom404Page = slug.length === 1 && slug[0] === 'custom_404';
+  const baseDir = isCustom404Page ? rootContentDir : contentDir;
   
-  let processedSlugArray = [...slug]; 
+  // Normalize slug array: filter out empty strings that might result from splitting paths like "/"
+  const normalizedSlugArray = slug.filter(Boolean); 
+  const slugPath = normalizedSlugArray.join(path.sep);
 
-  // Correctly handle root /docs page (slug array is empty or [''])
-  let slugPathForFile = processedSlugArray.filter(Boolean).join('/');
-  
-  let baseFilePathWithoutExt: string;
-  let actualFilePath: string | undefined;
-  let isDirectoryAttempt = false;
+  let fullPath: string | undefined;
+  const potentialPaths: string[] = [];
 
-  if (slugPathForFile === '' || slugPathForFile === '/') { // Root /docs page
-    baseFilePathWithoutExt = currentContentDir; // Base is contentDir itself
-    isDirectoryAttempt = true; // Treat as directory to look for index.md or _index.md
+  if (isCustom404Page) {
+    potentialPaths.push(path.join(baseDir, `${slugPath}.md`));
   } else {
-    baseFilePathWithoutExt = path.join(currentContentDir, slugPathForFile);
+    if (normalizedSlugArray.length === 0) { // Root /docs page
+      potentialPaths.push(path.join(baseDir, 'index.md'));
+      potentialPaths.push(path.join(baseDir, '_index.md'));
+    } else {
+      // Attempt 1: As a direct .md file (e.g., /docs/category/document.md)
+      potentialPaths.push(path.join(baseDir, `${slugPath}.md`));
+      // Attempt 2: As an index.md file in a directory (e.g., /docs/category/document/index.md)
+      potentialPaths.push(path.join(baseDir, slugPath, 'index.md'));
+      // Attempt 3: As an _index.md file in a directory (e.g., /docs/category/document/_index.md)
+      potentialPaths.push(path.join(baseDir, slugPath, '_index.md'));
+    }
+  }
+  
+  for (const p of potentialPaths) {
+    try {
+      // Check if file exists and is a file
+      const stats = await fs.stat(p).catch(() => null);
+      if (stats && stats.isFile()) {
+        fullPath = p;
+        break;
+      }
+    } catch {
+      // Continue to next potential path
+    }
+  }
+
+  if (!fullPath) {
+    console.warn(`[DocuCraft] Document not found for slug: ["${slug.join('", "')}"] (normalized: "${slugPath}"). Tried paths: ${potentialPaths.join(', ')}`);
+    return null;
   }
 
   try {
-    const stats = await fs.stat(baseFilePathWithoutExt).catch(() => null);
-    if (stats && stats.isDirectory()) {
-      isDirectoryAttempt = true;
-      const indexMdPath = path.join(baseFilePathWithoutExt, 'index.md');
-      const underscoreIndexMdPath = path.join(baseFilePathWithoutExt, '_index.md');
+    const fileContentString = await fs.readFile(fullPath, 'utf-8');
+    const { data, content: bodyContent } = matter(fileContentString);
 
-      if ((await fs.stat(indexMdPath).catch(() => null))?.isFile()) {
-        actualFilePath = indexMdPath;
-      } else if ((await fs.stat(underscoreIndexMdPath).catch(() => null))?.isFile()) {
-        actualFilePath = underscoreIndexMdPath;
-      }
-    }
-
-    if (!actualFilePath && slugPathForFile !== '') { // Don't add .md if slugPathForFile is empty (root)
-      const mdFilePath = baseFilePathWithoutExt + '.md';
-      if ((await fs.stat(mdFilePath).catch(() => null))?.isFile()) {
-        actualFilePath = mdFilePath;
-      }
-    }
-    
-    // This specific check for root /docs index.md or _index.md might be redundant if the above logic handles it
-    // It was intended for the case where slug is []
-    if (processedSlugArray.length === 0 && slugPathForFile === '' && !actualFilePath && !isCustomPage) { 
-        const rootIndexMdPath = path.join(contentDir, 'index.md'); 
-        const rootUnderscoreIndexMdPath = path.join(contentDir, '_index.md'); 
-        if ((await fs.stat(rootIndexMdPath).catch(()=>null))?.isFile()) {
-            actualFilePath = rootIndexMdPath;
-        } else if ((await fs.stat(rootUnderscoreIndexMdPath).catch(()=>null))?.isFile()) {
-            actualFilePath = rootUnderscoreIndexMdPath;
-        }
-    }
-
-    if (actualFilePath) {
-      const fileContentString = await fs.readFile(actualFilePath, 'utf-8');
-      const { data, content: bodyContent } = matter(fileContentString);
-      
-      let title = data.title;
-      if (!title) {
-        const fileName = path.basename(actualFilePath, '.md');
-        if (fileName !== 'index' && fileName !== '_index' && processedSlugArray.length > 0 && processedSlugArray[processedSlugArray.length -1] !== '') {
-           title = processedSlugArray[processedSlugArray.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        } else if (fileName !== 'index' && fileName !== '_index') {
-            title = fileName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    let title = data.title;
+    if (!title) {
+      // Intelligent title generation if not in frontmatter
+      const fileName = path.basename(fullPath, '.md');
+      if (fileName !== 'index' && fileName !== '_index') {
+        // Use the last part of the slug or the filename itself
+        title = normalizedSlugArray.length > 0 
+          ? normalizedSlugArray[normalizedSlugArray.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+          : fileName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      } else {
+        // For index files, use the parent directory name
+        const parentDirName = path.basename(path.dirname(fullPath));
+        // Ensure parentDirName is not the base content directory itself (e.g., 'docs' or 'content')
+        if (parentDirName && parentDirName !== path.basename(baseDir)) {
+          title = parentDirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         } else {
-            const parentDirName = path.basename(path.dirname(actualFilePath));
-            if (parentDirName !== path.basename(contentDir) && parentDirName !== path.basename(rootContentDir)) {
-                 title = parentDirName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            } else {
-                title = data.site_name || "Documentation Home";
-            }
+          title = siteConfig.name; // Fallback for root index.md
         }
       }
-      
-      return {
-        content: bodyContent,
-        title,
-        description: data.description,
-        order: data.order !== undefined ? Number(data.order) : undefined,
-        filePath: actualFilePath,
-      };
     }
     
-    console.warn(`[DocuCraft] Document not found. Original Slug: '${originalSlugForLog}', Processed Slug Array for File: '${slugPathForFile}', Base path tried: '${baseFilePathWithoutExt}', IsDirAttempt: ${isDirectoryAttempt}`);
-    return null;
+    return {
+      content: bodyContent,
+      title,
+      description: data.description,
+      order: data.order !== undefined ? Number(data.order) : undefined,
+      filePath: fullPath,
+    };
   } catch (error) {
-    console.error(`[DocuCraft] Error in getDocumentContent for original slug "${originalSlugForLog}":`, error);
+    console.error(`[DocuCraft] Error reading or parsing document at "${fullPath}" for slug ["${slug.join('", "')}"]:`, error);
     return null;
   }
 }
@@ -162,35 +151,29 @@ export async function getDocumentContent(slug: string[]): Promise<DocResult | nu
 export async function getAllMarkdownPaths(): Promise<string[][]> {
   const paths: string[][] = [];
   
-  // Helper function to extract file paths from NavConfigItem recursively
-  function extractPathsFromConfig(items: NavConfigItem[], currentPathParts: string[] = []) {
+  function extractPathsFromConfig(items: NavConfigItem[]) {
     for (const item of items) {
-      if (item.path && !item.path.includes('#') && !item.isExternal) {
-        // Convert href path to slug array
-        // e.g., /docs/category/page -> ['category', 'page']
-        // e.g., /docs -> []
+      if (item.path && !item.path.includes('#') && !item.isExternal && !item.path.startsWith('http')) {
         const slugArray = item.path.replace(/^\/docs\/?/, '').split('/').filter(Boolean);
         paths.push(slugArray);
       }
       if (item.children) {
-        // For children, the parent's path part is already included if it's a directory structure
-        // This logic might need refinement based on how paths are structured in config
-        extractPathsFromConfig(item.children, currentPathParts);
+        extractPathsFromConfig(item.children);
       }
     }
   }
 
   extractPathsFromConfig(navigationConfig);
-
-  // Deduplicate paths
-  const uniquePaths = Array.from(new Set(paths.map(p => p.join('/'))))
-    .map(pStr => pStr.split('/').filter(Boolean));
   
-  // Ensure root path `[]` is included if /docs is in navigationConfig
-  if (navigationConfig.some(item => item.path === '/docs')) {
-    if (!uniquePaths.some(p => p.length === 0)) {
-      uniquePaths.push([]);
-    }
+  const uniquePathStrings = new Set(paths.map(p => p.join('/')));
+  const uniquePaths = Array.from(uniquePathStrings).map(pStr => pStr === '' ? [] : pStr.split('/'));
+  
+  // Ensure root path `[]` is included if /docs is in navigationConfig and not yet present
+  const hasRootPath = navigationConfig.some(item => item.path === '/docs' || item.path === '/docs/');
+  const rootPathExists = uniquePaths.some(p => p.length === 0);
+
+  if (hasRootPath && !rootPathExists) {
+    uniquePaths.push([]);
   }
   
   return uniquePaths;
@@ -213,12 +196,13 @@ export async function getFirstDocPath(): Promise<string> {
   const navItems = await getNavigation(); 
   if (navItems.length === 0) {
     console.warn("[DocuCraft] No navigation items found. Defaulting to /docs/introduction.");
-    return '/docs/introduction';
+    return '/docs/introduction'; // Fallback
   }
 
   function findFirstValidPath(items: NavItem[]): string | null {
     for (const item of items) {
-      if (item.href && item.href !== '#') {
+      // Ensure href is a valid document path, not an anchor or external link
+      if (item.href && item.href !== '#' && !item.href.includes('#') && !item.isExternal && !item.href.startsWith('http')) {
         return item.href;
       }
       if (item.items && item.items.length > 0) {
@@ -234,8 +218,8 @@ export async function getFirstDocPath(): Promise<string> {
     return firstPath;
   }
   
-  console.warn(`[DocuCraft] First valid navigation item href not found. Defaulting. NavItems: ${JSON.stringify(navItems)}`);
-  return '/docs/introduction';
+  console.warn(`[DocuCraft] First valid navigation item href not found. Defaulting to /docs/introduction. NavItems: ${JSON.stringify(navItems)}`);
+  return '/docs/introduction'; // Fallback
 }
 
 
@@ -243,7 +227,7 @@ function getAllPagesInOrder(navItems: NavItem[]): { href: string; title: string 
     const pages: { href: string; title: string }[] = [];
     function recurse(items: NavItem[]) {
         for (const item of items) {
-            if (item.href && item.href !== '#' && !item.href.startsWith('http') && !item.href.includes('#')) {
+            if (item.href && item.href !== '#' && !item.href.startsWith('http') && !item.href.includes('#') && !item.isExternal) {
               pages.push({ href: item.href, title: item.title });
             }
             if (item.items && item.items.length > 0) {
@@ -263,21 +247,20 @@ export async function getPrevNextDocs(currentSlugArray: string[]): Promise<{
   const allPages = getAllPagesInOrder(navItems);
 
   let currentHref = "/docs"; 
-  if (currentSlugArray.length > 0 && !(currentSlugArray.length === 1 && currentSlugArray[0] === '')) {
-    const slugPath = currentSlugArray.join('/');
-    currentHref = `/docs/${slugPath}`;
+  const normalizedCurrentSlug = currentSlugArray.filter(Boolean).join('/');
+  if (normalizedCurrentSlug) {
+    currentHref = `/docs/${normalizedCurrentSlug}`;
   }
-  currentHref = currentHref.replace(/\/index$/, ''); 
-  if (currentHref === '/docs/') currentHref = '/docs';
+  
+  // Normalize hrefs for comparison (remove trailing /index or /_index)
+  const normalizeHref = (href: string) => href.replace(/\/(index|_index)$/, '') || '/docs';
 
-  const currentIndex = allPages.findIndex(page => {
-    let pageHrefNormalized = page.href.replace(/\/index$/, '');
-    if (pageHrefNormalized === '/docs/') pageHrefNormalized = '/docs';
-    return pageHrefNormalized === currentHref;
-  });
+  const normalizedCurrentPageHref = normalizeHref(currentHref);
+
+  const currentIndex = allPages.findIndex(page => normalizeHref(page.href) === normalizedCurrentPageHref);
 
   if (currentIndex === -1) {
-    console.warn(`[getPrevNextDocs] Current href "${currentHref}" (from slug: "${currentSlugArray.join('/')}") not found in flattened navigation. All page hrefs:`, allPages.map(p => p.href));
+    console.warn(`[getPrevNextDocs] Current href "${currentHref}" (normalized: "${normalizedCurrentPageHref}", from slug: "${currentSlugArray.join('/')}") not found in flattened navigation. All page hrefs:`, allPages.map(p => ({orig: p.href, norm: normalizeHref(p.href)})));
     return { prev: null, next: null };
   }
 

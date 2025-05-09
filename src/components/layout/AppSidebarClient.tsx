@@ -1,3 +1,4 @@
+
 // src/components/layout/AppSidebarClient.tsx
 'use client';
 
@@ -15,7 +16,7 @@ import {
   useSidebar,
   SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
-import { SheetTitle, SheetClose } from '@/components/ui/sheet'; // Corrected import
+import { SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -37,27 +38,53 @@ interface RecursiveNavItemProps {
 
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isCollapsed, currentPath, onLinkClick }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // An item is active if its href matches the current path,
-  // or if the current path starts with the item's href (for parent directories).
-  // Special case: avoid matching root ('/docs') for all subpages if not intended.
-  const isActive = item.href === currentPath ||
-                   (item.href !== '/docs' && currentPath.startsWith(item.href) && (currentPath.length === item.href.length || currentPath[item.href.length] === '/'));
-
-
-  useEffect(() => {
-    if (isActive && item.items && item.items.length > 0) {
-      setIsOpen(true);
+  
+  // Normalize item.href and currentPath for consistent matching
+  // Removes trailing '/index' or '/_index' and ensures no trailing slash for comparison unless it's root "/docs"
+  const normalizePath = (p: string) => {
+    let normalized = p.replace(/\/(index|_index)$/, '');
+    if (normalized !== '/docs' && normalized.endsWith('/')) {
+      normalized = normalized.slice(0, -1);
     }
-  }, [isActive, item.items]);
-
-  const hasSubItems = item.items && item.items.length > 0;
-
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen(!isOpen);
+    return normalized || '/docs'; // Ensure root path is consistent
   };
 
+  const normalizedItemHref = item.href ? normalizePath(item.href) : null;
+  const normalizedCurrentPath = normalizePath(currentPath);
+
+  // An item is directly active if its normalized href matches the normalized current path.
+  const isDirectlyActive = normalizedItemHref === normalizedCurrentPath;
+  
+  // An item is an active ancestor if the current path starts with its href (for parent directories),
+  // and it's not the item itself.
+  const isActiveAncestor = normalizedItemHref ? normalizedCurrentPath.startsWith(normalizedItemHref + '/') : false;
+  
+  const isActive = isDirectlyActive || isActiveAncestor;
+
+  useEffect(() => {
+    // Auto-open if it's an active ancestor or directly active and has children
+    if ((isActiveAncestor || (isDirectlyActive && item.items && item.items.length > 0)) && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isActiveAncestor, isDirectlyActive, item.items, isOpen]);
+
+
+  const hasSubItems = item.items && item.items.length > 0;
+  // A folder item is considered a link if its href is not "#" and not an anchor link
+  const isFolderLink = item.href && item.href !== '#' && !item.href.includes('#');
+
+  const handleToggleOrNavigate = (e: React.MouseEvent) => {
+    if (hasSubItems && !isFolderLink) { // If it's a pure folder (no direct page), just toggle
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(!isOpen);
+    } else if (hasSubItems && isFolderLink) { // If it's a folder with a page, toggle and allow navigation
+      setIsOpen(!isOpen);
+      // Navigation will be handled by the Link component, no e.preventDefault() here unless Link is child of Button
+    }
+    // If it's a leaf node or a folder link, onLinkClick will be called by the Link component
+  };
+  
   const itemTitleContent = (
     <>
       <span className="truncate flex-grow">{item.title}</span>
@@ -72,60 +99,90 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
   const commonLinkProps = {
     href: item.href,
-    onClick: onLinkClick,
+    onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      // If it's a folder that only toggles, prevent default link behavior
+      if (hasSubItems && !isFolderLink && item.href ==='#') {
+        e.preventDefault();
+      }
+      onLinkClick(); // Close mobile sidebar if open
+    },
     target: item.href.startsWith('http') ? '_blank' : undefined,
     rel: item.href.startsWith('http') ? 'noopener noreferrer' : undefined,
-    className: "flex items-center w-full"
   };
 
+  const buttonClassName = cn(
+    "w-full justify-start items-center",
+    (isDirectlyActive || (isActiveAncestor && !hasSubItems) ) && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold", // Highlight if directly active or an ancestor leading to a leaf
+    level > 0 && !isCollapsed && `pl-${4 + level * 2}`
+  );
+
   if (hasSubItems) {
-    return (
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          onClick={handleToggle} // Button always toggles for folders
-          className={cn(
-            "w-full justify-start items-center", // Ensure items-center
-            isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
-            level > 0 && !isCollapsed && `pl-${4 + level * 2}`
-          )}
-          tooltip={isCollapsed ? item.title : undefined}
-          aria-expanded={isOpen}
-        >
-           {/* For folders, the link part should still navigate if clicked directly, but toggle is primary */}
-           <Link {...commonLinkProps} legacyBehavior>
-            <a className="flex items-center flex-grow min-w-0"> {/* Ensure link takes space */}
+    if (isFolderLink) { // Folder with its own page
+      return (
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            onClick={handleToggleOrNavigate}
+            className={buttonClassName}
+            tooltip={isCollapsed ? item.title : undefined}
+            aria-expanded={isOpen}
+            asChild
+          >
+            <Link {...commonLinkProps}>
               {itemTitleContent}
-            </a>
-          </Link>
-        </SidebarMenuButton>
-        {!isCollapsed && isOpen && (
-          <SidebarMenuSub>
-            {item.items?.map((subItem, index) => ( // Added index
-              <RecursiveNavItem
-                key={`${subItem.href}-${index}`} // Use href and index for unique key
-                item={subItem}
-                level={level + 1}
-                isCollapsed={isCollapsed}
-                currentPath={currentPath}
-                onLinkClick={onLinkClick}
-              />
-            ))}
-          </SidebarMenuSub>
-        )}
-      </SidebarMenuItem>
-    );
+            </Link>
+          </SidebarMenuButton>
+          {!isCollapsed && isOpen && (
+            <SidebarMenuSub>
+              {item.items?.map((subItem, index) => (
+                <RecursiveNavItem
+                  key={`${subItem.href}-${index}`}
+                  item={subItem}
+                  level={level + 1}
+                  isCollapsed={isCollapsed}
+                  currentPath={currentPath}
+                  onLinkClick={onLinkClick}
+                />
+              ))}
+            </SidebarMenuSub>
+          )}
+        </SidebarMenuItem>
+      );
+    } else { // Pure folder (no direct page, href likely '#')
+      return (
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            onClick={handleToggleOrNavigate}
+            className={buttonClassName}
+            tooltip={isCollapsed ? item.title : undefined}
+            aria-expanded={isOpen}
+          >
+            {itemTitleContent}
+          </SidebarMenuButton>
+          {!isCollapsed && isOpen && (
+            <SidebarMenuSub>
+              {item.items?.map((subItem, index) => (
+                <RecursiveNavItem
+                  key={`${subItem.href}-${index}`}
+                  item={subItem}
+                  level={level + 1}
+                  isCollapsed={isCollapsed}
+                  currentPath={currentPath}
+                  onLinkClick={onLinkClick}
+                />
+              ))}
+            </SidebarMenuSub>
+          )}
+        </SidebarMenuItem>
+      );
+    }
   }
 
   // Leaf node (no sub-items)
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild // Use asChild to pass props to the Link component
-        className={cn(
-          "w-full justify-start items-center", // Ensure items-center
-          isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-semibold",
-          level > 0 && !isCollapsed && `pl-${4 + level * 2}`
-        )}
+        asChild
+        className={buttonClassName}
         tooltip={isCollapsed ? item.title : undefined}
       >
         <Link {...commonLinkProps}>
@@ -146,7 +203,8 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     if (navigationItems && navigationItems.length > 0) {
       setIsLoading(false);
     } else {
-      const timer = setTimeout(() => setIsLoading(false), 200);
+      // If navigationItems is empty or not yet loaded, show skeleton for a bit
+      const timer = setTimeout(() => setIsLoading(false), 300); // Increased timeout slightly
       return () => clearTimeout(timer);
     }
   }, [navigationItems]);
@@ -159,7 +217,6 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
 
   const isCollapsed = !isMobile && sidebarState === 'collapsed';
 
-  // This placeholder is for desktop loading state
   if (isLoading && !isMobile) {
     return (
       <aside className={cn(
@@ -171,22 +228,21 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
         </SidebarHeader>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
-            {[...Array(navigationItems?.length || 5)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
+            {[...Array(navigationItems?.length || 8)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
           </div>
         </ScrollArea>
       </aside>
     );
   }
-
+  
   return (
     <Sidebar
       collapsible={isMobile ? "offcanvas" : "icon"}
       className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40"
-      variant="sidebar" // Ensure this is the desired variant
+      variant="sidebar"
     >
        <SidebarHeader className={cn("p-4 border-b border-sidebar-border flex items-center justify-between", isCollapsed && "p-2 justify-center")}>
         <Logo collapsed={isCollapsed} />
-        {/* Add a visually hidden SheetTitle for accessibility if Sidebar renders a SheetContent internally */}
         {isMobile && <SheetTitle className="sr-only">Navigation Menu</SheetTitle>}
         {isMobile && (
            <SheetClose asChild>
@@ -199,18 +255,24 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
       </SidebarHeader>
       <SidebarContent asChild>
         <ScrollArea className="flex-1">
-          <SidebarMenu className="p-2">
-            {navigationItems.map((item, index) => ( // Added index
-              <RecursiveNavItem
-                key={`${item.href}-${index}`} // Use href and index for unique key
-                item={item}
-                level={0}
-                isCollapsed={isCollapsed}
-                currentPath={pathname}
-                onLinkClick={handleLinkClick}
-              />
-            ))}
-          </SidebarMenu>
+          {isLoading && isMobile ? ( // Loading skeleton for mobile
+            <div className="p-2 space-y-1">
+              {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={true} />)}
+            </div>
+          ) : (
+            <SidebarMenu className="p-2">
+              {navigationItems.map((item, index) => (
+                <RecursiveNavItem
+                  key={`${item.href}-${index}`}
+                  item={item}
+                  level={0}
+                  isCollapsed={isCollapsed}
+                  currentPath={pathname}
+                  onLinkClick={handleLinkClick}
+                />
+              ))}
+            </SidebarMenu>
+          )}
         </ScrollArea>
       </SidebarContent>
     </Sidebar>
