@@ -59,6 +59,8 @@ body {
     --sidebar-ring: 180 80% 40%;
 
     --header-height: 4rem; /* Define header height for calc() */
+    --sidebar-width: 16rem; /* Default expanded sidebar width */
+    --sidebar-width-icon: 3.5rem; /* Collapsed sidebar width (icon only) */
   }
 
   .dark {
@@ -119,8 +121,24 @@ body {
 
   /* Markdown Content Styling */
   .markdown-content {
-    @apply prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary hover:prose-a:text-primary/80 prose-code:font-mono prose-code:before:content-[''] prose-code:after:content-[''] prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-sm;
+    @apply prose prose-slate dark:prose-invert max-w-none 
+           prose-headings:font-semibold 
+           prose-a:text-primary hover:prose-a:text-primary/80 
+           prose-code:font-mono prose-code:before:content-[''] prose-code:after:content-[''] 
+           /* Inline code styling is handled by the more specific selector below or by Tailwind prose defaults */
+           /* prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-sm */
+           ;
   }
+
+  /* Specific styling for inline code elements NOT inside a <pre> block */
+  .markdown-content :where(code):not(:where(pre > *)) {
+    @apply bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono;
+    /* Ensure before/after content (backticks) from prose are also reset if needed */
+    &::before, &::after {
+        content: "" !important;
+    }
+  }
+
 
   .markdown-content h1:not(:first-child) { /* Avoid double margin if page already has a header */
     @apply text-3xl lg:text-4xl font-bold mt-8 mb-6 pb-2 border-b;
@@ -160,15 +178,14 @@ body {
   }
 
   /* Code block styling with Prism.js */
-  /* Base for Okaidia, adjust if needed */
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-md;
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-md; /* my-6 for margin top/bottom */
     background-color: #272822 !important; /* Okaidia background, important to override prose */
   }
   
   /* Ensure code inside pre also uses a mono font, and remove default browser styling */
   .markdown-content pre[class*="language-"] code[class*="language-"] {
-    @apply font-mono text-sm bg-transparent p-0;
+    @apply font-mono text-sm bg-transparent p-0; /* Reset padding/bg for code inside pre */
     color: #f8f8f2 !important; /* Okaidia default text color */
     text-shadow: none !important;
   }
@@ -180,7 +197,7 @@ body {
   }
   .markdown-content .line-numbers-rows > span::before {
     color: #999 !important; /* Color for line numbers */
-    @apply text-slate-600;
+    @apply text-slate-600; /* Ensure this applies in dark mode too, or adjust */
   }
   
   /* Adjusting some Prism Okaidia colors slightly for better contrast if needed */
@@ -215,10 +232,11 @@ body {
     color: #fd971f !important; /* Orange */
   }
 
-  /* Prose specific small fixes */
+  /* Prose specific small fixes for inline code if still needed */
+  /* This should be covered by .markdown-content :where(code):not(:where(pre > *)) */
   .prose :where(code):not(:where([class~="not-prose"] *))::before,
   .prose :where(code):not(:where([class~="not-prose"] *))::after {
-    content: "" !important; /* Remove backticks from inline code */
+    content: "" !important; 
   }
 }
 

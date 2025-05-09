@@ -59,9 +59,10 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   };
 
   if (!isClient) {
-    // Server-side rendering: 
-    // rehype-prism-plus will still process and add classes to props.className.
-    // We must use these props to ensure server and client initial render match.
+    // Server-side rendering and initial client-side render pass:
+    // Use ReactMarkdown's default rendering for `pre` and `code` after rehype-prism-plus
+    // has modified the HAST. Styling is handled by globals.css.
+    // This ensures server and client initial render match.
     return (
       <ReactMarkdown
         className={cn('markdown-content', className)}
@@ -69,22 +70,9 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
         components={{
           ...commonComponents,
-          pre: ({ node, children, ...props }) => {
-            // (props as any).className will include classes from rehype-prism-plus (e.g., language-ts, line-numbers)
-            // We merge our base 'my-6' class with these.
-            const ssrPreClassName = cn('my-6', (props as any).className);
-            // Pass all props (including tabindex if added by rehype-prism-plus)
-            return <pre {...props} className={ssrPreClassName}>{children}</pre>;
-          },
-          code: ({ node, className: codeClassNameFromProps, children, ...props }) => {
-            const isCodeBlock = node?.parentElement?.tagName === 'pre';
-            if (isCodeBlock) {
-              // For code blocks, rehype-prism-plus provides the full className. Pass it through.
-              return <code {...props} className={codeClassNameFromProps}>{children}</code>;
-            }
-            // For inline code.
-            return <code {...props} className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', codeClassNameFromProps)}>{children}</code>;
-          }
+          // No custom 'pre' or 'code' components here for the SSR pass.
+          // This lets rehype-prism-plus output be rendered directly by ReactMarkdown's defaults.
+          // Base styling for `pre` (like `my-6`) and inline `code` is applied via `globals.css`.
         }}
       >
         {content}
@@ -92,7 +80,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     );
   }
 
-  // Client-side rendering with full Prism highlighting and interactive elements (like copy button)
+  // Client-side rendering after hydration, with interactive elements (like copy button)
   return (
     <ReactMarkdown
       className={cn('markdown-content', className)}
@@ -106,16 +94,12 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
 
           const getCodeString = () => {
             if (preRef.current) {
+              // Attempt to get text content from the <code> element within <pre>
               const codeElement = preRef.current.querySelector('code');
               if (codeElement) {
                 return codeElement.innerText;
               }
-              let textContent = '';
-              preRef.current.querySelectorAll('span.code-line').forEach(line => {
-                 textContent += line.textContent + '\n';
-              });
-              if (textContent.trim()) return textContent.trim();
-              
+              // Fallback for structures where text might be directly in <pre> or complex spans (less ideal)
               return preRef.current.innerText;
             }
             return '';
@@ -131,7 +115,8 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
-          // (props as any).className will include classes from rehype-prism-plus
+          // (props as any).className will include classes from rehype-prism-plus (e.g., language-ts, line-numbers)
+          // We merge our base 'my-6' class with these, though 'my-6' is now primarily in globals.css
           const preClassName = cn('my-6', (props as any).className); 
           
           return (
@@ -152,19 +137,21 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             </div>
           );
         },
-        code: ({ node, className, children, ...props }) => {
-            // className here is what rehype-prism-plus adds (e.g., "language-typescript token comment")
-            const isCodeBlock = node?.parentElement?.tagName === 'pre';
-            if (isCodeBlock) {
-              return <code {...props} className={className}>{children}</code>;
-            }
-            // For inline code not in a <pre> block
-            return <code {...props} className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)}>{children}</code>;
-        },
+        // For inline code (not in a <pre> block), rely on global.css or Tailwind Prose styling.
+        // If specific client-side override for inline code is needed, it could be added here.
+        // code: ({ node, className, children, ...props }) => {
+        //   const isCodeBlock = node?.parentElement?.tagName === 'pre';
+        //   if (isCodeBlock) {
+        //     // This code is inside our custom 'pre' component above.
+        //     // It receives 'className' from rehype-prism-plus.
+        //     return <code {...props} className={className}>{children}</code>;
+        //   }
+        //   // For inline code:
+        //   return <code {...props} className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)}>{children}</code>;
+        // },
       }}
     >
       {content}
     </ReactMarkdown>
   );
 }
-
