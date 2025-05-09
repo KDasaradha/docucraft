@@ -1,4 +1,3 @@
-
 // src/app/(docs)/[...slug]/doc-client-view.tsx
 
 'use client';
@@ -57,8 +56,8 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [usernameInput, setUsernameInput] = useState(''); // Renamed to avoid conflict with global username
+  const [passwordInput, setPasswordInput] = useState(''); // Renamed to avoid conflict
 
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summaryResult, setSummaryResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -76,8 +75,8 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
       setUserRole(user.role);
       setLoginError(null);
       setIsLoginDialogOpen(false);
-      setUsername(''); 
-      setPassword(''); 
+      setUsernameInput(''); 
+      setPasswordInput(''); 
     } else {
       setLoginError('Invalid credentials');
       setIsAuthenticated(false);
@@ -86,7 +85,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   };
 
   const handleLogin = () => {
-    authenticateUser(username, password);
+    authenticateUser(usernameInput, passwordInput);
   };
 
   const handleLogout = () => {
@@ -102,14 +101,14 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     setEditableContent(initialDoc.content);
     setIsEditing(false);
     setIsLoadingDoc(false);
-    setFeedbackSubmitted(null); // Reset feedback on doc change
-    setSummaryResult(null); // Reset summary on doc change
+    setFeedbackSubmitted(null); 
+    setSummaryResult(null); 
   }, [initialDoc]);
 
   useEffect(() => {
     if (!isLoginDialogOpen) {
-      setUsername('');
-      setPassword('');
+      setUsernameInput('');
+      setPasswordInput('');
       setLoginError(null);
     }
   }, [isLoginDialogOpen]);
@@ -140,10 +139,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         variant: 'destructive',
       });
       console.error('DocClientView: handleSave - params or params.slug is invalid. Params:', params);
-      // If params are missing, we might not want to proceed with saving, or save without redirecting.
-      // For now, we'll allow the save to proceed but the redirect might fail or be skipped.
-      // Alternatively, return here if navigation is critical post-save.
-      // return; // Uncomment this if you want to prevent saving if params are bad.
+      return;
     }
 
     startSaveTransition(async () => {
@@ -155,20 +151,9 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        // Check params again before using, though the outer check should suffice for the closure
-        if (params && params.slug && Array.isArray(params.slug)) {
-          const slugPath = params.slug.join('/');
-          router.push(`/docs/${slugPath}`);
-          router.refresh(); 
-        } else {
-          // Fallback if params were somehow corrupted post initial check, or if we didn't return early
-          toast({
-            title: 'Saved, but Navigation Issue',
-            description: 'Document saved, but could not redirect. Please refresh.',
-            variant: 'destructive',
-          });
-          router.refresh(); // Still try to refresh
-        }
+        const slugPath = params.slug.join('/');
+        router.push(`/docs/${slugPath}`);
+        router.refresh(); 
       } else {
         toast({
           title: 'Error Saving Document',
@@ -208,7 +193,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     
     const feedbackInput = {
       documentTitle: doc.title,
-      documentPath: `/docs/${params.slug ? params.slug.join('/') : 'unknown'}`, // Added check for params.slug
+      documentPath: `/docs/${params.slug ? params.slug.join('/') : 'unknown'}`, 
       isHelpful: wasHelpful,
       timestamp: new Date().toISOString(),
     };
@@ -233,19 +218,19 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   return (
     <article className="w-full">
       <header className="mb-8">
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
           <div className="flex-1 min-w-0">
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl break-words">{doc.title}</h1>
             {doc.description && <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>}
           </div>
-          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center justify-start self-start md:self-auto md:justify-end gap-2 shrink-0 mt-4 md:mt-0">
             {!isAuthenticated ? (
               <Button onClick={() => setIsLoginDialogOpen(true)} variant="outline" size="sm">
                 Login
               </Button>
             ) : (
-              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">Logged in as {userRole}</span>
+              <>
+                <span className="text-sm text-muted-foreground whitespace-nowrap order-first md:order-none w-full md:w-auto mb-2 md:mb-0">Logged in as {userRole}</span>
                 <Button onClick={handleLogout} variant="outline" size="sm">
                   Logout
                 </Button>
@@ -255,7 +240,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
                     {isEditing ? 'View Mode' : 'Edit Content'}
                   </Button>
                 )}
-              </div>
+              </>
             )}
             <Button onClick={handleSummarize} variant="outline" size="sm" disabled={isSummarizing}>
               {isSummarizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquareQuote className="mr-2 h-4 w-4" />}
@@ -306,12 +291,13 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           
           <div className="mt-10 pt-6 border-t">
             <p className="text-sm font-medium text-muted-foreground mb-2">Was this page helpful?</p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <Button 
                 variant={feedbackSubmitted === 'helpful' ? "default" : "outline"} 
                 size="sm" 
                 onClick={() => handleFeedback(true)}
                 disabled={!!feedbackSubmitted}
+                className="w-full sm:w-auto"
               >
                 <ThumbsUp className="mr-2 h-4 w-4" /> Helpful
               </Button>
@@ -320,6 +306,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
                 size="sm" 
                 onClick={() => handleFeedback(false)}
                 disabled={!!feedbackSubmitted}
+                className="w-full sm:w-auto"
               >
                 <ThumbsDown className="mr-2 h-4 w-4" /> Not Helpful
               </Button>
@@ -369,23 +356,23 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="username-login">Username</Label> {/* Changed id to avoid conflict */}
+                <Label htmlFor="username-login">Username</Label>
                 <Input
                   type="text"
                   id="username-login"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
                   required
                   autoComplete="username"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password-login">Password</Label> {/* Changed id to avoid conflict */}
+                <Label htmlFor="password-login">Password</Label>
                 <Input
                   type="password"
                   id="password-login"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
                   required
                   autoComplete="current-password"
                 />

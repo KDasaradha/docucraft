@@ -1,12 +1,21 @@
 ---
-title: Intermediate Python
-description: Intermediate concepts in Python programming.
-order: 2
+title: Python - Intermediate
 ---
 
-# Intermediate Python
+# Python - Intermediate Concepts
 
-This section delves into intermediate Python topics such as functions, classes, modules, and file handling.
-Build upon your basic knowledge.
+Key topics for intermediate Python include:
 
-Placeholder content for "Intermediate Python".
+- Object-Oriented Programming (OOP): Classes, objects, inheritance, polymorphism, encapsulation
+- File Handling (reading, writing, appending files, context managers `with` statement)
+- Error and Exception Handling (try, except, else, finally, raising exceptions)
+- List Comprehensions, Dictionary Comprehensions, Set Comprehensions
+- Lambda Functions
+- Map, Filter, Reduce functions
+- Generators and Iterators
+- Decorators (basic understanding and usage)
+- Modules and Packages (creating and structuring, `__init__.py`)
+- Virtual Environments (venv, conda)
+- Working with standard library modules (e.g., `datetime`, `json`, `csv`, `os`, `sys`)
+- Regular Expressions (basics with `re` module)
+- Recursion

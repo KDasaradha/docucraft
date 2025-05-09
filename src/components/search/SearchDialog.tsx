@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useActionState } from "react";
-// useFormState was renamed to useActionState in React
 import { useFormStatus } from "react-dom";
 import { Search, Loader2, AlertCircle, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger, // Added missing import
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,7 +27,7 @@ const initialState: { results: string[]; error?: string; query?: string, isLoadi
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="gap-2 shrink-0">
+    <Button type="submit" disabled={pending} className="gap-2 shrink-0 sm:w-auto w-full">
       {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
       Search
     </Button>
@@ -37,7 +36,6 @@ function SubmitButton() {
 
 export function SearchDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  // formState is for the result of the action, localQuery for the input field value
   const [formState, formAction, isPending] = useActionState(performSearch, initialState);
   const [localQuery, setLocalQuery] = useState('');
   
@@ -45,20 +43,15 @@ export function SearchDialog() {
   const inputRef = useRef<HTMLInputElement>(null);
 
 
-  // Reset local state when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setLocalQuery(''); // Clear input field
-      // To clear formState, ideally formAction would be called with a 'reset' type
-      // Or, manage display to not show stale formState.results/error initially
-      // For now, explicitly setting a "not searched yet" view.
+      setLocalQuery(''); 
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
   }, [isOpen]);
 
-  // Keyboard shortcut to open search
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -66,30 +59,23 @@ export function SearchDialog() {
         setIsOpen((open) => !open);
       }
 
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && isOpen) {
+         e.preventDefault();
          setIsOpen(false);
          setLocalQuery('');
       }
     };
 
-    const restoreFocus = () => {
-      inputRef.current?.focus();
-    }
-
     document.addEventListener("keydown", down);
-    document.addEventListener('focus', restoreFocus); // Focus after unmount
     return () => {
       document.removeEventListener("keydown", down);
-      document.removeEventListener('focus', restoreFocus);
     };
-  }, []);
+  }, [isOpen]); // Added isOpen dependency to re-bind Escape if dialog opens by click
 
-  // Keep localQuery in sync with input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalQuery(e.target.value);
   };
 
-  // Determine what content to show in results area
   const getResultsContent = () => {
     if (isPending) {
       return (
@@ -99,7 +85,7 @@ export function SearchDialog() {
         </div>
       );
     }
-    if (formState?.error && formState.query === localQuery && localQuery !== "") { // Show error only if it matches current query
+    if (formState?.error && formState.query === localQuery && localQuery !== "") {
       return (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
@@ -131,7 +117,6 @@ export function SearchDialog() {
         </div>
       );
     }
-    // Initial state or after clearing search
     return (
       <div className="text-center text-muted-foreground py-8">
           <Info className="h-10 w-10 mx-auto mb-3 text-muted-foreground/70" />
@@ -159,24 +144,26 @@ export function SearchDialog() {
           <DialogTitle>Search Documentation</DialogTitle>
         </DialogHeader>
         <form action={formAction} ref={formRef} className="p-4 border-b">
-          <div className="flex w-full items-center space-x-2">
-            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-            <Input
-              ref={inputRef}
-              type="search"
-              name="query"
-              placeholder="e.g., API Reference, Getting Started..."
-              className="flex-1 h-10 border-0 shadow-none focus-visible:ring-0 text-base"
-              value={localQuery} // Controlled input
-              onChange={handleInputChange} // Update localQuery
-              autoComplete="off"
-            />
+          <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-2 w-full items-stretch sm:items-center">
+            <div className="flex-1 flex items-center">
+              <Search className="h-5 w-5 text-muted-foreground shrink-0 mr-2 sm:block hidden" />
+              <Input
+                ref={inputRef}
+                type="search"
+                name="query"
+                placeholder="e.g., API Reference, Getting Started..."
+                className="flex-1 h-10 border-0 shadow-none focus-visible:ring-0 text-base w-full"
+                value={localQuery}
+                onChange={handleInputChange}
+                autoComplete="off"
+              />
+            </div>
             <SubmitButton />
           </div>
         </form>
         
         <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="p-4 space-y-4 min-h-[200px]"> {/* Min height for better UX on empty/loading */}
+          <div className="p-4 space-y-4 min-h-[200px]"> 
             {getResultsContent()}
           </div>
         </ScrollArea>
@@ -185,4 +172,3 @@ export function SearchDialog() {
     </Dialog>
   );
 }
-

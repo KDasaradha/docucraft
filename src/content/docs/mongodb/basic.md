@@ -1,17 +1,21 @@
 ---
-title: Basic MongoDB
-description: Introduction to MongoDB, a NoSQL document database.
-order: 1
+title: MongoDB - Basic
 ---
 
-# Basic MongoDB
+# MongoDB - Basic Concepts
 
-MongoDB is a popular NoSQL document-oriented database. This section introduces MongoDB, explains its core concepts like collections and documents, and shows how to perform basic CRUD (Create, Read, Update, Delete) operations.
+Key topics for basic MongoDB include:
 
-Topics include:
-- Understanding NoSQL and document databases
-- Setting up MongoDB
-- Working with the Mongo shell
-- Basic query operations
-
-Placeholder content for "Basic MongoDB".
+- Introduction to NoSQL and MongoDB: Document databases, schema-less nature
+- Installation and Setup (MongoDB Community Server, Atlas)
+- MongoDB Shell (`mongosh` or legacy `mongo`)
+- Core Concepts: Databases, Collections, Documents, BSON
+- Basic CRUD Operations:
+    - `insertOne()`, `insertMany()`
+    - `find()` (querying documents, projection)
+    - `updateOne()`, `updateMany()` (update operators like `$set`, `$inc`, `$unset`)
+    - `deleteOne()`, `deleteMany()`
+- Data Types in MongoDB (String, Number, Boolean, Array, Object, ObjectId, Date, etc.)
+- Query Selectors (comparison: `$eq`, `$gt`, `$gte`, `$lt`, `$lte`, `$ne`, `$in`, `$nin`)
+- Logical Query Operators (`$and`, `$or`, `$not`, `$nor`)
+- Introduction to Indexes (creating a simple index on a field)
