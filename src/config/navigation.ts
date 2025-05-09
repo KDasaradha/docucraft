@@ -1,34 +1,34 @@
-
 export interface NavConfigItem {
   title: string;
-  path?: string; // This will be the href, e.g., /docs/topic/page
-  order?: number; // Order for sorting at the same level
+  path?: string;
+  order?: number;
   children?: NavConfigItem[];
-  isExternal?: boolean; // For external links
-  isSection?: boolean; // True if this item represents a section overview (maps to _index.md)
+  isExternal?: boolean;
+  isSection?: boolean;
 }
 
 export const navigationConfig: NavConfigItem[] = [
   {
-    title: "About",
-    path: "/docs/about",
+    title: "Home",
+    path: "/docs/index",
     order: 1,
   },
   {
-    title: "Getting Started", 
-    path: "/docs/getting-started",
+    title: "About",
+    path: "/docs/about",
     order: 2,
   },
   {
     title: "Comprehensive Guide",
-    path: "/docs/guides/comprehensive-fastapi-guide", 
+    path: "/docs/guides/comprehensive-fastapi-guide",
     order: 3,
+    isSection: true,
     children: [
-      // Section 1
       {
         title: "1. Intro to APIs & FastAPI",
-        path: "/docs/guides/comprehensive-fastapi-guide#1-introduction-to-apis-and-fastapi", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#1-introduction-to-apis-and-fastapi",
         order: 1,
+        isSection: true,
       },
       {
         title: "1.1 What is an API?",
@@ -50,11 +50,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/fastapi/introduction/introduction-to-fastapi",
         order: 5,
       },
-      // Section 2
       {
         title: "2. Core FastAPI Concepts",
-        path: "/docs/guides/comprehensive-fastapi-guide#2-core-fastapi-concepts", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#2-core-fastapi-concepts",
         order: 6,
+        isSection: true,
       },
       {
         title: "2.1 Basic FastAPI Application",
@@ -81,11 +81,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/fastapi/core-concepts/async-endpoints",
         order: 11,
       },
-      // Section 3
       {
         title: "3. Database Handling with SQLAlchemy",
-        path: "/docs/guides/comprehensive-fastapi-guide#3-database-handling-with-sqlalchemy", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#3-database-handling-with-sqlalchemy",
         order: 12,
+        isSection: true,
       },
       {
         title: "3.1 Introduction to SQLAlchemy",
@@ -122,11 +122,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/sqlalchemy/advanced-patterns/multi-tenancy",
         order: 19,
       },
-      // Section 4
       {
         title: "4. Advanced FastAPI Features",
-        path: "/docs/guides/comprehensive-fastapi-guide#4-advanced-fastapi-features", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#4-advanced-fastapi-features",
         order: 20,
+        isSection: true,
       },
       {
         title: "4.1 Dependency Injection",
@@ -203,11 +203,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/fastapi/advanced-features/request-context",
         order: 35,
       },
-      // Section 5
       {
         title: "5. FastAPI Security",
-        path: "/docs/guides/comprehensive-fastapi-guide#5-fastapi-security", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#5-fastapi-security",
         order: 36,
+        isSection: true,
       },
       {
         title: "5.1 Security Mechanisms Overview",
@@ -264,11 +264,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/fastapi/security/zero-trust",
         order: 47,
       },
-      // Section 6
       {
         title: "6. Performance & Optimization",
-        path: "/docs/guides/comprehensive-fastapi-guide#6-performance-and-optimization", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#6-performance-and-optimization",
         order: 48,
+        isSection: true,
       },
       {
         title: "6.1 Optimizing FastAPI Performance",
@@ -285,11 +285,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/sqlalchemy/performance/sqlalchemy-performance",
         order: 51,
       },
-      // Section 7
       {
         title: "7. Advanced SQLAlchemy",
-        path: "/docs/guides/comprehensive-fastapi-guide#7-advanced-sqlalchemy-techniques", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#7-advanced-sqlalchemy-techniques",
         order: 52,
+        isSection: true,
       },
       {
         title: "7.1 Advanced Querying",
@@ -321,11 +321,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/sqlalchemy/async/async-sqlalchemy",
         order: 58,
       },
-      // Section 8
       {
         title: "8. Pydantic Advanced Features",
-        path: "/docs/guides/comprehensive-fastapi-guide#8-pydantic-advanced-features", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#8-pydantic-advanced-features",
         order: 59,
+        isSection: true,
       },
       {
         title: "8.1 Custom Validators",
@@ -357,11 +357,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/pydantic/advanced-features/dataclasses",
         order: 65,
       },
-      // Section 9
       {
         title: "9. Async Programming",
-        path: "/docs/guides/comprehensive-fastapi-guide#9-async-programming", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#9-async-programming",
         order: 66,
+        isSection: true,
       },
       {
         title: "9.1 Sync vs. Async",
@@ -388,11 +388,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/data-streaming/async-generators",
         order: 71,
       },
-      // Section 10
       {
         title: "10. Integrations & Architectures",
-        path: "/docs/guides/comprehensive-fastapi-guide#10-integrations-and-architectures", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#10-integrations-and-architectures",
         order: 72,
+        isSection: true,
       },
       {
         title: "10.1 Third-Party Integrations",
@@ -419,11 +419,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/integrations-and-architectures/kafka-integration",
         order: 77,
       },
-      // Section 11
       {
         title: "11. Deployment & Testing",
-        path: "/docs/guides/comprehensive-fastapi-guide#11-deployment-and-testing", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#11-deployment-and-testing",
         order: 78,
+        isSection: true,
       },
       {
         title: "11.1 Deploying FastAPI",
@@ -445,11 +445,11 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/deployment-and-testing/load-testing",
         order: 82,
       },
-      // Section 12
       {
         title: "12. FastAPI Pro-Level Features",
-        path: "/docs/guides/comprehensive-fastapi-guide#12-fastapi-pro-level-features", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#12-fastapi-pro-level-features",
         order: 83,
+        isSection: true,
       },
       {
         title: "12.1 Custom ASGI Middleware",
@@ -466,143 +466,143 @@ export const navigationConfig: NavConfigItem[] = [
         path: "/docs/fastapi-pro/dynamic-route-generation",
         order: 86,
       },
-      // Section 13
       {
         title: "13. API Versioning",
-        path: "/docs/guides/comprehensive-fastapi-guide#13-api-versioning", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#13-api-versioning",
         order: 87,
+        isSection: true,
       },
       {
         title: "13.1 Versioning Strategies",
         path: "/docs/api-versioning/strategies",
         order: 88,
       },
-      // Section 14
       {
         title: "14. AI/ML Integration",
-        path: "/docs/guides/comprehensive-fastapi-guide#14-ai-and-machine-learning-integration", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#14-ai-and-machine-learning-integration",
         order: 89,
+        isSection: true,
       },
       {
         title: "14.1 Serving ML Models",
         path: "/docs/ai-ml-integration/serving-ml-models",
         order: 90,
       },
-      // Section 15
       {
         title: "15. Serverless Optimizations",
-        path: "/docs/guides/comprehensive-fastapi-guide#15-serverless-optimizations", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#15-serverless-optimizations",
         order: 91,
+        isSection: true,
       },
       {
         title: "15.1 Optimizing for Serverless",
         path: "/docs/serverless-optimizations/optimizing-for-serverless",
         order: 92,
       },
-      // Section 16
       {
         title: "16. Advanced Documentation",
-        path: "/docs/guides/comprehensive-fastapi-guide#16-advanced-documentation-practices", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#16-advanced-documentation-practices",
         order: 93,
+        isSection: true,
       },
       {
         title: "16.1 Enhanced API Documentation",
         path: "/docs/advanced-documentation/enhanced-api-docs",
         order: 94,
       },
-      // Section 17
       {
         title: "17. Data Streaming",
-        path: "/docs/guides/comprehensive-fastapi-guide#17-data-streaming-with-async-generators", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#17-data-streaming-with-async-generators",
         order: 95,
+        isSection: true,
       },
       {
         title: "17.1 Async Data Streaming",
         path: "/docs/data-streaming/async-generators",
         order: 96,
       },
-      // Section 18
       {
         title: "18. FastAPI with Rust",
-        path: "/docs/guides/comprehensive-fastapi-guide#18-fastapi-with-rust-extensions", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#18-fastapi-with-rust-extensions",
         order: 97,
+        isSection: true,
       },
       {
         title: "18.1 Integrating Rust",
         path: "/docs/fastapi-with-rust/integrating-rust",
         order: 98,
       },
-      // Section 19
       {
         title: "19. SQLAlchemy w/ Data Lakes",
-        path: "/docs/guides/comprehensive-fastapi-guide#19-sqlalchemy-with-data-lakes", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#19-sqlalchemy-with-data-lakes",
         order: 99,
+        isSection: true,
       },
       {
         title: "19.1 Querying Data Lakes",
         path: "/docs/sqlalchemy-with-datalakes/querying-data-lakes",
         order: 100,
       },
-      // Section 20
       {
         title: "20. Pydantic w/ Schema Registry",
-        path: "/docs/guides/comprehensive-fastapi-guide#20-pydantic-with-schema-registry", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#20-pydantic-with-schema-registry",
         order: 101,
+        isSection: true,
       },
       {
         title: "20.1 Schema Registry Integration",
         path: "/docs/pydantic-with-schema-registry/integration",
         order: 102,
       },
-      // Section 21
       {
         title: "21. Async GraphQL Subs",
-        path: "/docs/guides/comprehensive-fastapi-guide#21-async-graphql-subscriptions", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#21-async-graphql-subscriptions",
         order: 103,
+        isSection: true,
       },
       {
         title: "21.1 Implementing GraphQL Subscriptions",
         path: "/docs/async-graphql-subscriptions/implementation",
         order: 104,
       },
-      // Section 22
       {
         title: "22. FastAPI Edge Computing",
-        path: "/docs/guides/comprehensive-fastapi-guide#22-fastapi-with-edge-computing", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#22-fastapi-with-edge-computing",
         order: 105,
+        isSection: true,
       },
       {
         title: "22.1 Deploying FastAPI on Edge Nodes",
         path: "/docs/fastapi-edge-computing/deployment",
         order: 106,
       },
-      // Section 23
       {
         title: "23. Zero-Downtime Migrations",
-        path: "/docs/guides/comprehensive-fastapi-guide#23-zero-downtime-db-migrations", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#23-zero-downtime-db-migrations",
         order: 107,
+        isSection: true,
       },
       {
         title: "23.1 Zero-Downtime DB Migrations",
         path: "/docs/sqlalchemy/migrations/zero-downtime",
         order: 108,
       },
-      // Section 24
       {
         title: "24. FastAPI w/ Diff. Privacy",
-        path: "/docs/guides/comprehensive-fastapi-guide#24-fastapi-with-differential-privacy", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#24-fastapi-with-differential-privacy",
         order: 109,
+        isSection: true,
       },
       {
         title: "24.1 Implementing Differential Privacy",
         path: "/docs/fastapi/privacy/differential-privacy",
         order: 110,
       },
-      // Section 25
       {
         title: "25. Pydantic Static Typing",
-        path: "/docs/guides/comprehensive-fastapi-guide#25-pydantic-with-static-type-checking", // Anchor link
+        path: "/docs/guides/comprehensive-fastapi-guide#25-pydantic-with-static-type-checking",
         order: 111,
+        isSection: true,
       },
       {
         title: "25.1 Static Type Checking for Pydantic",
@@ -612,10 +612,8 @@ export const navigationConfig: NavConfigItem[] = [
     ],
   },
   {
-    title: "Other Guides",
+    title: "Guides",
     order: 4,
-    isSection: true, 
-    path: "/docs/guides", // Path for the section overview page itself
     children: [
       {
         title: "Getting Started",
@@ -632,115 +630,404 @@ export const navigationConfig: NavConfigItem[] = [
   {
     title: "Python",
     order: 5,
-    isSection: true,
-    path: "/docs/python",
     children: [
-      { title: "Basic Python", path: "/docs/python/basic", order: 1 },
-      { title: "Intermediate Python", path: "/docs/python/intermediate", order: 2 },
-      { title: "Advanced Python", path: "/docs/python/advanced", order: 3 },
-      { title: "Pro Python", path: "/docs/python/pro", order: 4 },
-      { title: "Python Hidden Gems", path: "/docs/python/hidden-gems", order: 5 },
+      {
+        title: "Basic",
+        path: "/docs/python/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/python/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/python/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/python/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/python/hidden-gems",
+        order: 5,
+      },
     ],
   },
   {
     title: "FastAPI",
     order: 6,
-    isSection: true,
-    path: "/docs/fastapi",
     children: [
-      { title: "Introduction", path: "/docs/fastapi/introduction", order: 1, isSection: true },
-      { title: "Core Concepts", path: "/docs/fastapi/core-concepts", order: 2, isSection: true },
-      { title: "Advanced Features", path: "/docs/fastapi/advanced-features", order: 3, isSection: true },
-      { title: "Pro-Level Features", path: "/docs/fastapi-pro", order: 4, isSection: true }, 
-      { title: "Performance & Optimization", path: "/docs/fastapi/performance", order: 5, isSection: true },
-      { title: "Security", path: "/docs/fastapi/security", order: 6, isSection: true },
-      { title: "FastAPI Hidden Gems", path: "/docs/fastapi/hidden-gems", order: 7 },
-      // Specific files under ecosystem, error-handling etc. are part of "Comprehensive Guide" or "Advanced Features"
-      { title: "Ecosystem", path: "/docs/fastapi/ecosystem", order: 8, isSection: true },
-      { title: "Error Handling", path: "/docs/fastapi/error-handling", order: 9, isSection: true },
-      { title: "OpenAPI", path: "/docs/fastapi/openapi", order: 10, isSection: true },
-      { title: "Requests", path: "/docs/fastapi/requests", order: 11, isSection: true },
-      { title: "Responses", path: "/docs/fastapi/responses", order: 12, isSection: true },
-      { title: "Routing", path: "/docs/fastapi/routing", order: 13, isSection: true },
-      { title: "Testing", path: "/docs/fastapi/testing", order: 14, isSection: true },
-      { title: "Real-time", path: "/docs/fastapi/real-time", order: 15, isSection: true },
-      { title: "Privacy", path: "/docs/fastapi/privacy", order: 16, isSection: true },
+      {
+        title: "Introduction",
+        path: "/docs/fastapi/introduction",
+        order: 1,
+        isSection: true,
+      },
+      {
+        title: "Core Concepts",
+        path: "/docs/fastapi/core-concepts",
+        order: 2,
+        isSection: true,
+      },
+      {
+        title: "Advanced Features",
+        path: "/docs/fastapi/advanced-features",
+        order: 3,
+        isSection: true,
+      },
+      {
+        title: "Pro-Level Features",
+        path: "/docs/fastapi-pro",
+        order: 4,
+        isSection: true,
+      },
+      {
+        title: "Performance & Optimization",
+        path: "/docs/fastapi/performance",
+        order: 5,
+        isSection: true,
+      },
+      {
+        title: "Security",
+        path: "/docs/fastapi/security",
+        order: 6,
+        isSection: true,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/fastapi/hidden-gems",
+        order: 7,
+      },
     ],
   },
   {
     title: "SQLAlchemy",
     order: 7,
-    isSection: true,
-    path: "/docs/sqlalchemy",
     children: [
-      { title: "Introduction", path: "/docs/sqlalchemy/introduction", order: 1, isSection: true },
-      { title: "FastAPI Integration", path: "/docs/sqlalchemy/fastapi-integration", order: 2, isSection: true },
-      { title: "Pydantic Integration", path: "/docs/sqlalchemy/pydantic-integration", order: 3, isSection: true },
-      { title: "Modeling", path: "/docs/sqlalchemy/modeling", order: 4, isSection: true },
-      { title: "Advanced Techniques", path: "/docs/sqlalchemy/advanced-techniques", order: 5, isSection: true },
-      { title: "Performance & Optimization", path: "/docs/sqlalchemy/performance/sqlalchemy-performance", order: 6 },
-      { title: "Advanced Patterns", path: "/docs/sqlalchemy/advanced-patterns", order: 7, isSection: true },
-      { title: "Async", path: "/docs/sqlalchemy/async", order: 8, isSection: true }, // This should point to /docs/sqlalchemy/async/_index.md
-      { title: "Migrations", path: "/docs/sqlalchemy/migrations", order: 9, isSection: true },
-      { title: "Best Practices", path: "/docs/sqlalchemy/best-practices", order: 10, isSection: true },
-      { title: "SQLAlchemy Hidden Gems", path: "/docs/sqlalchemy/hidden-gems", order: 11 },
-       { title: "Performance Sub-folder", path: "/docs/sqlalchemy/performance", order: 12, isSection: true }, // For /docs/sqlalchemy/performance/_index.md
+      {
+        title: "Introduction",
+        path: "/docs/sqlalchemy/introduction",
+        order: 1,
+        isSection: true,
+      },
+      {
+        title: "FastAPI Integration",
+        path: "/docs/sqlalchemy/fastapi-integration",
+        order: 2,
+        isSection: true,
+      },
+      {
+        title: "Pydantic Integration",
+        path: "/docs/sqlalchemy/pydantic-integration",
+        order: 3,
+        isSection: true,
+      },
+      {
+        title: "Modeling",
+        path: "/docs/sqlalchemy/modeling",
+        order: 4,
+        isSection: true,
+      },
+      {
+        title: "Advanced Techniques",
+        path: "/docs/sqlalchemy/advanced-techniques",
+        order: 5,
+        isSection: true,
+      },
+      {
+        title: "Performance & Optimization",
+        path: "/docs/sqlalchemy/performance/sqlalchemy-performance",
+        order: 6,
+      },
+      {
+        title: "Advanced Patterns",
+        path: "/docs/sqlalchemy/advanced-patterns",
+        order: 7,
+        isSection: true,
+      },
+      {
+        title: "Async",
+        path: "/docs/sqlalchemy/async",
+        order: 8,
+        isSection: true,
+      },
+      {
+        title: "Migrations",
+        path: "/docs/sqlalchemy/migrations",
+        order: 9,
+        isSection: true,
+      },
+      {
+        title: "Best Practices",
+        path: "/docs/sqlalchemy/best-practices",
+        order: 10,
+        isSection: true,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/sqlalchemy/hidden-gems",
+        order: 11,
+      },
     ],
   },
   {
     title: "Pydantic",
     order: 8,
-    isSection: true,
-    path: "/docs/pydantic",
     children: [
-      { title: "Basic Pydantic", path: "/docs/pydantic/basic", order: 1 },
-      { title: "Intermediate Pydantic", path: "/docs/pydantic/intermediate", order: 2 },
-      { title: "Advanced Features", path: "/docs/pydantic/advanced-features", order: 3, isSection: true },
-      { title: "Pro Pydantic", path: "/docs/pydantic/pro", order: 4 },
-      { title: "Type Checking", path: "/docs/pydantic/type-checking", order: 5, isSection: true },
-      { title: "Pydantic Hidden Gems", path: "/docs/pydantic/hidden-gems", order: 6 },
+      {
+        title: "Basic",
+        path: "/docs/pydantic/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/pydantic/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced Features",
+        path: "/docs/pydantic/advanced-features",
+        order: 3,
+        isSection: true,
+      },
+      {
+        title: "Pro",
+        path: "/docs/pydantic/pro",
+        order: 4,
+      },
+      {
+        title: "Type Checking",
+        path: "/docs/pydantic/type-checking",
+        order: 5,
+        isSection: true,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/pydantic/hidden-gems",
+        order: 6,
+      },
     ],
   },
   {
     title: "PostgreSQL",
     order: 9,
-    isSection: true,
-    path: "/docs/postgresql",
     children: [
-      { title: "Basic PostgreSQL", path: "/docs/postgresql/basic", order: 1 },
-      { title: "Intermediate PostgreSQL", path: "/docs/postgresql/intermediate", order: 2 },
-      { title: "Advanced PostgreSQL", path: "/docs/postgresql/advanced", order: 3 },
-      { title: "Pro PostgreSQL", path: "/docs/postgresql/pro", order: 4 },
-      { title: "PostgreSQL Hidden Gems", path: "/docs/postgresql/hidden-gems", order: 5 },
+      {
+        title: "Basic",
+        path: "/docs/postgresql/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/postgresql/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/postgresql/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/postgresql/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/postgresql/hidden-gems",
+        order: 5,
+      },
     ],
   },
   {
     title: "MongoDB",
     order: 10,
-    isSection: true,
-    path: "/docs/mongodb",
     children: [
-      { title: "Basic MongoDB", path: "/docs/mongodb/basic", order: 1 },
-      { title: "Intermediate MongoDB", path: "/docs/mongodb/intermediate", order: 2 },
-      { title: "Advanced MongoDB", path: "/docs/mongodb/advanced", order: 3 },
-      { title: "Pro MongoDB", path: "/docs/mongodb/pro", order: 4 },
-      { title: "MongoDB Hidden Gems", path: "/docs/mongodb/hidden-gems", order: 5 },
+      {
+        title: "Basic",
+        path: "/docs/mongodb/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/mongodb/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/mongodb/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/mongodb/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/mongodb/hidden-gems",
+        order: 5,
+      },
     ],
   },
-  // Standalone topics that were part of Comprehensive Guide but are now also top-level for easier access
-  // Ensure these paths exist as actual .md files or _index.md in respective directories
-  { title: "API Fundamentals", path: "/docs/api-fundamentals", order: 11, isSection: true },
-  { title: "API Versioning", path: "/docs/api-versioning", order: 12, isSection: true },
-  { title: "Async Programming", path: "/docs/async-programming", order: 13, isSection: true },
-  { title: "Data Streaming", path: "/docs/data-streaming", order: 14, isSection: true },
-  { title: "Deployment & Testing", path: "/docs/deployment-and-testing", order: 15, isSection: true },
-  { title: "Integrations & Architectures", path: "/docs/integrations-and-architectures", order: 16, isSection: true },
-  { title: "AI/ML Integration", path: "/docs/ai-ml-integration", order: 17, isSection: true },
-  { title: "Serverless Optimizations", path: "/docs/serverless-optimizations", order: 18, isSection: true },
-  { title: "Advanced Documentation", path: "/docs/advanced-documentation", order: 19, isSection: true },
-  { title: "FastAPI with Rust", path: "/docs/fastapi-with-rust", order: 20, isSection: true },
-  { title: "SQLAlchemy with Data Lakes", path: "/docs/sqlalchemy-with-datalakes", order: 21, isSection: true },
-  { title: "Pydantic with Schema Registry", path: "/docs/pydantic-with-schema-registry", order: 22, isSection: true },
-  { title: "Async GraphQL Subscriptions", path: "/docs/async-graphql-subscriptions", order: 23, isSection: true },
-  { title: "FastAPI Edge Computing", path: "/docs/fastapi-edge-computing", order: 24, isSection: true },
+  {
+    title: "JavaScript",
+    order: 11,
+    children: [
+      {
+        title: "Basic",
+        path: "/docs/javascript/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/javascript/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/javascript/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/javascript/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/javascript/hidden-gems",
+        order: 5,
+      },
+    ],
+  },
+  {
+    title: "React",
+    order: 12,
+    children: [
+      {
+        title: "Basic",
+        path: "/docs/react/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/react/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/react/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/react/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/react/hidden-gems",
+        order: 5,
+      },
+    ],
+  },
+  {
+    title: "Next.js",
+    order: 13,
+    children: [
+      {
+        title: "Basic",
+        path: "/docs/nextjs/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/nextjs/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/nextjs/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/nextjs/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/nextjs/hidden-gems",
+        order: 5,
+      },
+    ],
+  },
+  {
+    title: "HTML",
+    order: 14,
+    children: [
+      {
+        title: "Basic",
+        path: "/docs/html/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/html/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/html/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/html/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/html/hidden-gems",
+        order: 5,
+      },
+    ],
+  },
+  {
+    title: "CSS",
+    order: 15,
+    children: [
+      {
+        title: "Basic",
+        path: "/docs/css/basic",
+        order: 1,
+      },
+      {
+        title: "Intermediate",
+        path: "/docs/css/intermediate",
+        order: 2,
+      },
+      {
+        title: "Advanced",
+        path: "/docs/css/advanced",
+        order: 3,
+      },
+      {
+        title: "Pro",
+        path: "/docs/css/pro",
+        order: 4,
+      },
+      {
+        title: "Hidden Gems",
+        path: "/docs/css/hidden-gems",
+        order: 5,
+      },
+    ],
+  },
 ];

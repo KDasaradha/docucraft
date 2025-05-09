@@ -12,7 +12,7 @@ type Props = {
 // Metadata function needs to fetch data directly.
 // This will run on the server for each page request if dynamic.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const doc = await getDocumentContent(params.slug);
+  const doc = await getDocumentContent(params.slug.slice(1));
   if (!doc) {
     return {
       title: `Not Found | ${siteConfig.name}`,
@@ -52,13 +52,13 @@ export const dynamic = 'force-dynamic';
 // This is the main page component for a documentation page.
 // It fetches the content and renders it.
 export default async function Page({ params }: Props) {
-  const doc = await getDocumentContent(params.slug);
-
+  const doc = await getDocumentContent(params.slug.slice(1));
+  
   if (!doc) {
     notFound();
   }
 
-  const { prev: prevDoc, next: nextDoc } = await getPrevNextDocs(params.slug);
+  const { prev: prevDoc, next: nextDoc } = await getPrevNextDocs(params.slug.slice(1));
 
   return <DocClientView initialDoc={doc} params={params} prevDoc={prevDoc} nextDoc={nextDoc} />;
 }

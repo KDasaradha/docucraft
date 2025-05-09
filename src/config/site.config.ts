@@ -3,8 +3,8 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "DocuCraft", // Default, will be overridden by user's full_name if provided
-  fullName: "Comprehensive Technology Documentation",
-  description: "A unified guide covering FastAPI, Application Architecture, DevOps, DevSecOps, CI/CD, and related software engineering practices.",
+  fullName: "CTD",
+  description: "Comprehensive Technology Documentation. A unified guide covering FastAPI, Application Architecture, DevOps, DevSecOps, CI/CD, and related software engineering practices.",
   author: "KDasaradha",
   url: "https://night-fury.vercel.app", // Base URL of the deployed site
   repo: {
