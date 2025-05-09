@@ -1,17 +1,17 @@
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { GeistSans, GeistMono } from 'next/font/google'; // Corrected import for next/font
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { siteConfig } from '@/config/site.config';
 
-const geistSans = Geist({
+const geistSans = GeistSans({ // Corrected usage
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = GeistMono({ // Corrected usage
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     images: [
       {
-        url: `${siteConfig.url}${siteConfig.assets.logo}`, // Assuming logo is accessible for OG
-        width: 1200, // Provide appropriate dimensions
-        height: 630, // Provide appropriate dimensions
+        url: `${siteConfig.url}${siteConfig.assets.logo}`, 
+        width: 1200, 
+        height: 630, 
         alt: siteConfig.name,
       },
     ],
@@ -44,15 +44,15 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
-    // images: [`${siteConfig.url}${siteConfig.assets.logo}`], // If you have a Twitter-specific image
-    // creator: '@yourTwitterHandle', // Add if you have one
+    // images: [`${siteConfig.url}${siteConfig.assets.logo}`], 
+    // creator: '@yourTwitterHandle', 
   },
   icons: {
     icon: siteConfig.assets.favicon,
-    // shortcut: '/favicon-16x16.png', // Example for other icon sizes
-    // apple: '/apple-touch-icon.png', // Example for Apple touch icon
+    // shortcut: '/favicon-16x16.png', 
+    // apple: '/apple-touch-icon.png', 
   },
-  manifest: `${siteConfig.url}/site.webmanifest`, // Example, create this file in /public
+  manifest: `${siteConfig.url}/site.webmanifest`, 
 };
 
 export default function RootLayout({
@@ -64,6 +64,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body 
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        suppressHydrationWarning // Added here as well for good measure
       >
         <ThemeProvider
           attribute="class"
@@ -78,3 +79,4 @@ export default function RootLayout({
     </html>
   );
 }
+
