@@ -16,6 +16,7 @@ import {
   SidebarMenuSkeleton,
   SheetTitle, 
 } from '@/components/ui/sidebar';
+import { SheetClose } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 

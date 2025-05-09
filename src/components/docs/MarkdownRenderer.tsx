@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -87,12 +88,6 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         languageClass // Ensures pre has language-xxx if code block specified it
       );
 
-      if (!isMounted) {
-        // SSR and initial client render: plain <pre> and <code>.
-        // Prism.highlightAllUnder will enhance this on the client after mount.
-        return <pre {...preProps} className={preFinalClassName}>{children}</pre>;
-      }
-
       // Client-side render after mount: Add the copy button functionality.
       const [copied, setCopied] = React.useState(false);
       const preElementRef = React.useRef<HTMLPreElement>(null);
@@ -154,17 +149,16 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   if (!isMounted) {
      const ssrComponents: Components = {
       ...commonComponents,
-      pre: ({ children, ...preProps }) => {
-        let languageClass = '';
-        const codeChild = React.Children.toArray(children).find(
-          (child: any) => child.type === 'code' && child.props.className
-        ) as React.ReactElement | undefined;
-        if (codeChild && codeChild.props.className) {
-          const match = /language-(\w+)/.exec(codeChild.props.className);
-          if (match) languageClass = `language-${match[1]}`;
-        }
-        const preFinalClassName = cn('line-numbers', languageClass);
-        return <pre {...preProps} className={preFinalClassName}>{children}</pre>;
+      pre: ({ node, children, ...preProps }) => {
+        // For SSR and initial client render, make PRE tag class consistent and minimal.
+        // Line numbers plugin needs "line-numbers".
+        // Actual language highlighting classes are primarily on the CODE tag.
+        // This helps avoid hydration mismatch for the <pre> tag's className.
+        return (
+          <pre {...preProps} className="line-numbers">
+            {children}
+          </pre>
+        );
       },
        code: ({ children, className: codeClassName, node, ...restProps }) => {
         const isInlineCode = !node?.position?.start.line || !node?.parent || (node.parent as any)?.tagName !== 'pre';
@@ -173,6 +167,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         }
         // For SSR, ensure the language class is present for Prism's CSS to apply basic block styles
         // `code-highlight` might not be needed or applied consistently by Prism on SSR without JS.
+        // ReactMarkdown provides codeClassName (e.g., "language-typescript") for code blocks.
         return <code {...restProps} className={codeClassName}>{children}</code>;
       }
     };
@@ -201,3 +196,4 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     </div>
   );
 }
+
