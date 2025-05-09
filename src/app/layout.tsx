@@ -1,20 +1,15 @@
 
 import type { Metadata } from 'next';
-import { GeistSans, GeistMono } from 'next/font/google'; // Corrected import for next/font
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { siteConfig } from '@/config/site.config';
 
-const geistSans = GeistSans({ // Corrected usage
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = GeistMono({ // Corrected usage
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+// The GeistSans and GeistMono imports directly provide the necessary objects.
+// No need to call them as functions like with next/font/google.
+// Their .variable property will provide the CSS variable class names.
 
 export const metadata: Metadata = {
   title: {
@@ -63,7 +58,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body 
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased font-sans`}
         suppressHydrationWarning // Added here as well for good measure
       >
         <ThemeProvider
@@ -79,4 +74,3 @@ export default function RootLayout({
     </html>
   );
 }
-
