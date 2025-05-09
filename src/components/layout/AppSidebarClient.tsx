@@ -14,8 +14,8 @@ import {
   SidebarMenuSub,
   useSidebar,
   SidebarMenuSkeleton,
-  SheetTitle // Added SheetTitle
 } from '@/components/ui/sidebar';
+import { SheetTitle } from '@/components/ui/sheet'; // Corrected import
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -203,3 +203,4 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     </Sidebar>
   );
 }
+
