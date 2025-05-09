@@ -1,4 +1,4 @@
-// src/components/layout/AppSidebar.tsx
+// src/components/layout/AppSidebarClient.tsx
 'use client';
 
 import type { ReactNode } from 'react';
@@ -13,7 +13,8 @@ import {
   SidebarMenuButton,
   SidebarMenuSub,
   useSidebar,
-  SidebarMenuSkeleton
+  SidebarMenuSkeleton,
+  SheetTitle // Added SheetTitle
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs';
@@ -22,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-interface AppSidebarProps {
+interface AppSidebarClientProps {
   navigationItems: NavItem[];
 }
 
@@ -129,7 +130,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 };
 
 
-export default function AppSidebar({ navigationItems }: AppSidebarProps) {
+export default function AppSidebarClient({ navigationItems }: AppSidebarClientProps) {
   const { state: sidebarState, isMobile, setOpenMobile } = useSidebar(); 
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
@@ -157,12 +158,12 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
   if (isLoading && !isMobile) { 
     return (
       <aside className={cn(
-        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40", // Added positioning
+        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40", 
         isCollapsed ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]"
       )}>
-         <div className={cn("p-4 border-b border-sidebar-border", isCollapsed && "p-2 flex justify-center")}>
+         <SidebarHeader className={cn("p-4 border-b border-sidebar-border", isCollapsed && "p-2 flex justify-center")}>
           <Logo collapsed={isCollapsed} />
-        </div>
+        </SidebarHeader>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">
             {[...Array(navigationItems?.length || 5)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
@@ -175,12 +176,13 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
   return (
     <Sidebar 
       collapsible={isMobile ? "offcanvas" : "icon"} 
-      className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40" // Added positioning
+      className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40" 
       variant="sidebar"
-      // side="left" // Default, but explicit
     >
        <SidebarHeader className={cn("p-4 border-b border-sidebar-border", isCollapsed && "p-2 flex justify-center")}>
         <Logo collapsed={isCollapsed} />
+        {/* Add a visually hidden SheetTitle for accessibility if Sidebar renders a SheetContent internally */}
+        {isMobile && <SheetTitle className="sr-only">Navigation Menu</SheetTitle>}
       </SidebarHeader>
       <SidebarContent asChild>
         <ScrollArea className="flex-1">
@@ -198,7 +200,6 @@ export default function AppSidebar({ navigationItems }: AppSidebarProps) {
           </SidebarMenu>
         </ScrollArea>
       </SidebarContent>
-      {/* Footer can be added here if needed */}
     </Sidebar>
   );
 }
