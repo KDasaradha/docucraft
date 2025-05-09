@@ -14,9 +14,10 @@ import {
   SidebarMenuSub,
   useSidebar,
   SidebarMenuSkeleton,
-  SheetTitle, 
+  SheetClose, 
+  SheetTitle, // Imported from sidebar.tsx which re-exports from sheet.tsx
 } from '@/components/ui/sidebar';
-import { SheetClose } from "@/components/ui/sheet";
+// Removed direct import of SheetClose from "@/components/ui/sheet" as it's now exported from sidebar.tsx
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
@@ -54,12 +55,10 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   const isDirectlyActive = normalizedItemHref === normalizedCurrentPath;
   const isActiveAncestor = normalizedItemHref ? normalizedCurrentPath.startsWith(normalizedItemHref + '/') : false;
   
-  // An item is considered active if it's directly active OR an ancestor of the current path and has children to expand
   const itemIsActive = isDirectlyActive || (isActiveAncestor && item.items && item.items.length > 0);
 
 
   useEffect(() => {
-    // Expand if it's an active ancestor or a directly active item with children
     if ((isActiveAncestor || (isDirectlyActive && item.items && item.items.length > 0)) && !isOpen) {
       setIsOpen(true);
     }
@@ -67,7 +66,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
 
   const hasSubItems = item.items && item.items.length > 0;
-  const isFolderLink = item.href && item.href !== '#' && !item.href.includes('#') && !item.isExternal; // Ensure not external
+  const isFolderLink = item.href && item.href !== '#' && !item.href.includes('#') && !item.isExternal; 
   
   const isPureSectionHeader = item.isSection && (!item.href || item.href.startsWith('#')) && !hasSubItems;
 
@@ -76,7 +75,6 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     return (
       <div className={cn(
         "px-3 pt-5 pb-1 text-xs font-semibold text-sidebar-foreground/70 tracking-wider uppercase select-none truncate",
-        // isCollapsed && "hidden" // Already handled by parent conditional
       )}>
         {item.title}
       </div>
@@ -89,9 +87,8 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       e.stopPropagation();
       setIsOpen(!isOpen);
     } else if (hasSubItems && isFolderLink) { 
-      setIsOpen(!isOpen); // Toggle but allow navigation via Link component
+      setIsOpen(!isOpen); 
     }
-    // If it's a direct link (not a folder link with # or pure toggle), onLinkClick will handle closing mobile
   };
   
   const itemTitleContent = (
@@ -111,7 +108,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   );
 
   const commonLinkProps = {
-    href: item.href || '#', // Fallback to '#' if href is undefined
+    href: item.href || '#', 
     onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
       if (hasSubItems && (!isFolderLink || (item.href && item.href.startsWith('#')))) {
         e.preventDefault(); 
@@ -122,7 +119,6 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     rel: item.href && item.href.startsWith('http') ? 'noopener noreferrer' : undefined,
   };
 
-  // Styling for sub-section headers that are still buttons (e.g., expandable section headers)
   const subSectionHeaderStyling = item.isSection && level > 0 && !isFolderLink && "text-xs opacity-90 font-normal";
 
   if (hasSubItems) {
@@ -134,10 +130,10 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             tooltip={isCollapsed ? item.title : undefined}
             aria-expanded={isOpen}
             asChild
-            isActive={itemIsActive && !subSectionHeaderStyling} // Don't apply active style to mere sub-section headers
+            isActive={itemIsActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
           >
-            <Link {...commonLinkProps} onClick={onLinkClick}>
+            <Link {...commonLinkProps}> {/* onClick for Link is handled in commonLinkProps */}
               {itemTitleContent}
             </Link>
           </SidebarMenuButton>
@@ -188,16 +184,15 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     }
   }
 
-  // Leaf node (no sub-items)
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
         tooltip={isCollapsed ? item.title : undefined}
-        isActive={isDirectlyActive && !subSectionHeaderStyling} // Leaf node active state
+        isActive={isDirectlyActive && !subSectionHeaderStyling} 
         className={cn(subSectionHeaderStyling)}
       >
-        <Link {...commonLinkProps} onClick={onLinkClick}>
+        <Link {...commonLinkProps}> {/* onClick for Link is handled in commonLinkProps */}
           {itemTitleContent}
         </Link>
       </SidebarMenuButton>
@@ -215,8 +210,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     if (navigationItems && navigationItems.length > 0) {
       setIsLoading(false);
     } else {
-      // If navItems is empty or undefined, treat as loaded to show empty state or fallback
-      const timer = setTimeout(() => setIsLoading(false), 100); // Short delay for visual consistency
+      const timer = setTimeout(() => setIsLoading(false), 100); 
       return () => clearTimeout(timer);
     }
   }, [navigationItems]);
@@ -241,8 +235,8 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"}/>
         </SidebarHeader>
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-0.5"> {/* Reduced space-y */}
-            {[...Array(numSkeletons)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={!isCollapsed} />)}
+          <div className="p-2 space-y-0.5"> 
+            {[...Array(numSkeletons)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed} />)}
           </div>
         </ScrollArea>
       </aside>
@@ -251,33 +245,28 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   
   return (
     <Sidebar
-      collapsible={isMobile ? "offcanvas" : "icon"}
-      className="border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-40 shadow-lg md:shadow-none"
       variant="sidebar" 
+      // className prop moved to SheetContent/aside for mobile/desktop respectively
     >
        <SidebarHeader className={cn(
            "p-3 border-b border-sidebar-border flex items-center justify-between", 
            isCollapsed && "justify-center"
         )}>
+        {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>} {/* Ensures SheetTitle for accessibility */}
         <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"}/>
         {isMobile && (
-          <>
-            <SheetTitle className="sr-only">Main Menu</SheetTitle> 
-            {/* sr-only for accessibility, actual title might be handled by Logo or not needed visually */}
-            <SheetClose asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <X className="h-4.5 w-4.5" /> {/* Slightly larger X icon */}
-                <span className="sr-only">Close menu</span>
-              </Button>
-            </SheetClose>
-          </>
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <X className="h-4.5 w-4.5" />
+              <span className="sr-only">Close menu</span>
+            </Button>
+          </SheetClose>
         )}
       </SidebarHeader>
-      <SidebarContent asChild>
-        <ScrollArea className="flex-1">
+      <SidebarContent> {/* SidebarContent is now the ScrollArea */}
           {isLoading && isMobile ? ( 
-            <div className="p-2 space-y-0.5"> {/* Reduced space-y */}
-              {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showIcon={true} />)}
+            <div className="p-2 space-y-0.5">
+              {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={true} />)}
             </div>
           ) : (
             <SidebarMenu className="p-2">
@@ -293,7 +282,6 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
               ))}
             </SidebarMenu>
           )}
-        </ScrollArea>
       </SidebarContent>
     </Sidebar>
   );
