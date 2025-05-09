@@ -59,22 +59,31 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   };
 
   if (!isClient) {
-    // Server-side rendering: basic Markdown without Prism highlighting or complex components
+    // Server-side rendering: 
+    // rehype-prism-plus will still process and add classes to props.className.
+    // We must use these props to ensure server and client initial render match.
     return (
       <ReactMarkdown
         className={cn('markdown-content', className)}
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
         components={{
           ...commonComponents,
-          pre: ({children}) => <pre className="my-6">{children}</pre>,
-          code: ({children, className: codeClassName, node}) => {
-            // Basic handling for code blocks on SSR to get language class
-            // but not the full Prism tokenization.
+          pre: ({ node, children, ...props }) => {
+            // (props as any).className will include classes from rehype-prism-plus (e.g., language-ts, line-numbers)
+            // We merge our base 'my-6' class with these.
+            const ssrPreClassName = cn('my-6', (props as any).className);
+            // Pass all props (including tabindex if added by rehype-prism-plus)
+            return <pre {...props} className={ssrPreClassName}>{children}</pre>;
+          },
+          code: ({ node, className: codeClassNameFromProps, children, ...props }) => {
             const isCodeBlock = node?.parentElement?.tagName === 'pre';
             if (isCodeBlock) {
-                 return <code className={codeClassName}>{children}</code>;
+              // For code blocks, rehype-prism-plus provides the full className. Pass it through.
+              return <code {...props} className={codeClassNameFromProps}>{children}</code>;
             }
-            return <code className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', codeClassName)}>{children}</code>;
+            // For inline code.
+            return <code {...props} className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', codeClassNameFromProps)}>{children}</code>;
           }
         }}
       >
@@ -83,7 +92,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
     );
   }
 
-  // Client-side rendering with full Prism highlighting
+  // Client-side rendering with full Prism highlighting and interactive elements (like copy button)
   return (
     <ReactMarkdown
       className={cn('markdown-content', className)}
@@ -122,10 +131,12 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             }
           };
           
+          // (props as any).className will include classes from rehype-prism-plus
           const preClassName = cn('my-6', (props as any).className); 
           
           return (
             <div className="relative group">
+              {/* Pass all props from rehype-prism-plus to the <pre> tag */}
               <pre {...props} ref={preRef} className={preClassName}>
                 {children}
               </pre>
@@ -142,14 +153,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           );
         },
         code: ({ node, className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || '');
-            // If it's part of a <code> block, rehype-prism-plus provides the full className.
-            // We should just pass it through.
-            if (match || (node?.parentElement?.tagName === 'pre')) {
-              return <code className={className} {...props}>{children}</code>;
+            // className here is what rehype-prism-plus adds (e.g., "language-typescript token comment")
+            const isCodeBlock = node?.parentElement?.tagName === 'pre';
+            if (isCodeBlock) {
+              return <code {...props} className={className}>{children}</code>;
             }
             // For inline code not in a <pre> block
-            return <code className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)} {...props}>{children}</code>;
+            return <code {...props} className={cn('bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm', className)}>{children}</code>;
         },
       }}
     >
