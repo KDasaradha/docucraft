@@ -103,7 +103,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
         <ExternalLink className="ml-1 h-3.5 w-3.5 text-muted-foreground shrink-0" />
       )}
       {hasSubItems && (!isCollapsed || useSidebar().isMobile ) && (
-        isOpen ? <ChevronDown className="ml-1 h-4 w-4 shrink-0" /> : <ChevronRight className="ml-1 h-4 w-4 shrink-0" />
+        isOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />
       )}
     </>
   );
@@ -157,7 +157,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
           <SidebarMenuSub>
             {item.items?.map((subItem, index) => (
               <RecursiveNavItem
-                key={`${subItem.href || subItem.title}-${index}-${level + 1}`} 
+                key={`${subItem.href || subItem.title}-${index}-${level + 1}-${item.isSection}`} 
                 item={subItem}
                 level={level + 1}
                 isCollapsed={isCollapsed}
@@ -199,7 +199,9 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
       if (navigationItems && navigationItems.length > 0) {
         setIsLoading(false);
       } else {
-        const timer = setTimeout(() => setIsLoading(false), 50); 
+        // If nav items are empty or not yet loaded, still mark loading as false after a brief delay
+        // to prevent infinite skeleton display.
+        const timer = setTimeout(() => setIsLoading(false), 100); // Increased timeout slightly
         return () => clearTimeout(timer);
       }
     }
@@ -215,7 +217,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const isCollapsed = !isMobile && sidebarState === "collapsed";
   
   const sidebarMenuContent = (
-    <SidebarMenu> {/* Removed p-2, handled by SidebarMenuButton's pl and px */}
+    <SidebarMenu> 
       {navigationItems.map((item, index) => (
         <RecursiveNavItem
           key={`${item.href || item.title}-${index}-level0-${item.isSection}`}
@@ -232,7 +234,6 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const sidebarStructure = (
     <>
       <SidebarHeader className={cn(isCollapsed && "justify-center", isResizing && "!cursor-ew-resize")}>
-         {/* Add SheetTitle here for accessibility when it's a SheetContent */}
         {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>}
         <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"} />
         {isMobile && (
@@ -245,14 +246,10 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
         )}
       </SidebarHeader>
       <SidebarContent className={cn(isResizing && "!cursor-ew-resize")}>
-        {isLoading && !isMobile ? (
+        {isLoading ? ( // Simplified isLoading check
           <div className="p-2 space-y-0.5">
-            {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed} />)}
+            {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed || isMobile} />)}
           </div>
-        ) : isLoading && isMobile ? (
-            <div className="p-2 space-y-0.5">
-                {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={true} />)}
-            </div>
         ) : (
           sidebarMenuContent
         )}
@@ -260,12 +257,11 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     </>
   );
 
-  // Initial render before isMobile is determined by the hook
   if (isMobile === undefined) {
     return (
       <aside className={cn(
         "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-30",
-        "w-[var(--sidebar-width-icon)]" // Default to collapsed icon view for SSR/initial desktop
+        "w-[var(--sidebar-width-icon)]" 
       )}>
          <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center justify-center")}>
           <Logo collapsed={true} />
@@ -278,21 +274,9 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
       </aside>
     );
   }
-
-
-  if (isMobile) {
-    // DesktopSidebar here becomes RadixSheetContentOriginal because SidebarProvider wraps with <Sheet>
-    // And Sidebar component returns RadixSheetContentOriginal when isMobile is true
-    return (
-      <DesktopSidebar variant="sidebar" className={cn("fixed top-0 bottom-0 left-0 z-40", isResizing && "!cursor-ew-resize")}>
-          {sidebarStructure}
-      </DesktopSidebar>
-    );
-  }
   
-  // DesktopSidebar here is the <aside>
   return (
-    <DesktopSidebar variant="sidebar" className={cn("fixed top-[var(--header-height)] bottom-0 left-0 z-30", isResizing && "!cursor-ew-resize")}>
+    <DesktopSidebar variant="sidebar" collapsible={useSidebar().collapsible}>
       {sidebarStructure}
     </DesktopSidebar>
   );

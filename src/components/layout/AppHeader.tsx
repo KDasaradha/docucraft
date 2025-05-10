@@ -1,3 +1,4 @@
+// src/components/layout/AppHeader.tsx
 "use client"; 
 
 import React from 'react'; 
@@ -8,7 +9,7 @@ import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { cn } from '@/lib/utils';
 
 export default function AppHeader() {
-  const { isMobile } = useSidebar(); // Get isMobile state from context
+  const { isMobile } = useSidebar(); 
 
   return (
     <header 
@@ -19,15 +20,19 @@ export default function AppHeader() {
       style={{ height: 'var(--header-height)' } as React.CSSProperties} 
     >
       <div className="container flex h-full items-center max-w-full px-4 sm:px-6 lg:px-8">
-        {/* Conditionally render SidebarTrigger based on isMobile state */}
-        {isMobile === true && ( 
-          <div className="md:hidden mr-2"> {/* md:hidden ensures CSS also hides it on larger screens */}
-            <SidebarTrigger />
-          </div>
-        )}
-        <div className={cn(isMobile === true ? "ml-2" : "", "hidden md:block")}> {/* Adjust logo margin if trigger is present */}
+        
+        <div className="md:hidden mr-2"> 
+           {/* SidebarTrigger should internally handle its visibility based on isMobile via useSidebar hook */}
+           {/* Or, if SidebarTrigger doesn't use the hook, we conditionally render it here */}
+           {isMobile && <SidebarTrigger />}
+        </div>
+        
+        {/* Logo: Always render, use CSS to hide on mobile if SidebarTrigger is shown. Or adjust margins. */}
+        {/* Forcing visibility with md:block and hiding with mobile specific class if needed */}
+        <div className={cn("hidden md:block", isMobile ? "ml-0" : "")}> {/* Adjusted: if mobile trigger is shown, logo might need less margin or be hidden */}
          <Logo className="py-0 px-0" />
         </div>
+        
         <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
           <SearchDialog />
           <ThemeToggle />
