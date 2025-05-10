@@ -133,15 +133,9 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const handleSave = async (isDraft: boolean = false) => {
     if (!doc || !canEdit) return;
 
-    if (!params || !params.slug || !Array.isArray(params.slug)) {
-      toast({
-        title: 'Navigation Error',
-        description: 'Page parameters are missing, cannot redirect after save. Please refresh the page.',
-        variant: 'destructive',
-      });
-      console.error('DocClientView: handleSave - params or params.slug is invalid. Params:', params);
-      return;
-    }
+    // The saveDocumentContent action itself does not rely on params.slug from the client view for saving the file.
+    // It uses doc.filePath. Revalidation paths are also derived from filePath.
+    // We will proceed with the save and handle redirection carefully.
 
     startSaveTransition(async () => {
       const result = await saveDocumentContent(doc.filePath, editableContent);
@@ -152,12 +146,21 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        // Ensure params.slug is valid before trying to join
-        const slugPath = params.slug ? params.slug.join('/') : '';
-        if (slugPath) {
+        // Redirect logic: Check params.slug validity here for client-side navigation.
+        // The revalidation in saveDocumentContent uses the filePath to determine revalidation paths.
+        if (params && Array.isArray(params.slug) && params.slug.length > 0) {
+          const slugPath = params.slug.join('/');
           router.push(`/docs/${slugPath}`);
         } else {
-            router.push('/docs'); // Fallback if slug is somehow empty, though this should ideally not happen for a doc page
+          // Log a warning if params.slug is not as expected, then redirect to a fallback.
+          console.warn('DocClientView: handleSave - params.slug is invalid or empty. Redirecting to /docs. Params:', params);
+          toast({
+            title: 'Save Successful, Navigation Issue',
+            description: 'Document saved, but there was an issue with page parameters for client-side redirect. Redirecting to documentation home.',
+            variant: 'default', 
+            duration: 7000,
+          });
+          router.push('/docs'); // Fallback redirect
         }
         router.refresh(); 
       } else {
