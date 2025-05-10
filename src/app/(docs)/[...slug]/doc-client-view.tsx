@@ -84,7 +84,8 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     }
   };
 
-  const handleLogin = () => {
+  const handleLoginSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     authenticateUser(usernameInput, passwordInput);
   };
 
@@ -151,8 +152,13 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        const slugPath = params.slug.join('/');
-        router.push(`/docs/${slugPath}`);
+        // Ensure params.slug is valid before trying to join
+        const slugPath = params.slug ? params.slug.join('/') : '';
+        if (slugPath) {
+          router.push(`/docs/${slugPath}`);
+        } else {
+            router.push('/docs'); // Fallback if slug is somehow empty, though this should ideally not happen for a doc page
+        }
         router.refresh(); 
       } else {
         toast({
@@ -353,7 +359,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
               Enter your username and password to access editing features.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+          <form onSubmit={handleLoginSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="username-login">Username</Label>
@@ -426,3 +432,4 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     </article>
   );
 }
+
