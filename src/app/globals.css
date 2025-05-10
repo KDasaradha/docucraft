@@ -14,7 +14,7 @@ body {
     --background: 220 20% 99%; /* Extremely light, almost white, cool gray - Main page background */
     --foreground: 220 15% 20%; /* Dark cool gray */
 
-    --header-background: 220 20% 97%; /* Softer light gray for header */
+    --header-background: 220 15% 96%; /* Softer light gray for header (using muted value) */
     --header-foreground: 220 15% 20%;
 
     --muted: 220 15% 96%; 
@@ -63,8 +63,10 @@ body {
 
     --header-height: 4rem; 
     --sidebar-width-default: 16rem; /* Default expanded sidebar width */
+    --sidebar-width-min: 12rem; /* Minimum resizable sidebar width */
+    --sidebar-width-max: 24rem; /* Maximum resizable sidebar width */
     --sidebar-width-icon: 3.5rem; /* Collapsed sidebar width (icon only) */
-    /* --sidebar-width: var(--sidebar-width-default); /* JS will override this for resizable */
+    /* --sidebar-width is dynamically set by JS for resizable sidebar */
     /* current-sidebar-width will be set by JS for main content margin adjustment */
   }
 
