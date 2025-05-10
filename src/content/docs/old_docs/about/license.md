@@ -3,22 +3,26 @@ title: License
 description: Placeholder content for License.
 order: 1
 ---
+# 📄 License
 
-# License
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT), a permissive and open-source license.  
+It is **free for anyone** to use, modify, and share — whether for personal, educational, or commercial purposes.
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+## ✅ Permissions
+You are free to:
+- Use the software for **commercial** or **private** purposes
+- **Modify** the codebase to suit your needs
+- **Distribute** original or modified versions
+- Integrate it into other projects
 
-## Permissions
-- Commercial use
-- Modification
-- Distribution
-- Private use
+## ⚠️ Limitations
+This software is provided:
+- **Without warranty** of any kind, express or implied
+- With **no liability** for any damages arising from its use
 
-## Limitations
-- No liability
-- No warranty
+## 📌 Conditions
+To comply with the license:
+- You **must include** the original license text and copyright
+  notice in all copies or significant portions of the software
 
-## Conditions
-- License and copyright notice must be included in all copies or substantial portions of the software.
-
-For full details, refer to the [MIT License](https://opensource.org/licenses/MIT).
+For full legal terms, refer to the [MIT License](https://opensource.org/licenses/MIT).
