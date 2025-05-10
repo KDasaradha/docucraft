@@ -1,43 +1,104 @@
 // src/components/layout/AppHeader.tsx
 "use client"; 
 
-import React from 'react'; 
+import React, { useEffect, useRef } from 'react'; 
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Logo } from '@/components/shared/Logo';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { SearchDialog } from '@/components/search/SearchDialog';
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"; 
 import { cn } from '@/lib/utils';
 
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 export default function AppHeader() {
   const { isMobile } = useSidebar(); 
+  const headerRef = useRef<HTMLElement>(null);
+
+  // GSAP animation for header background on scroll
+  useEffect(() => {
+    if (typeof window !== "undefined" && headerRef.current) {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: document.body,
+          start: "top top",
+          end: "+=100", // Animate over the first 100px of scroll
+          scrub: 0.5, // Smooth scrubbing
+        }
+      });
+
+      // Animate background color and box-shadow
+      // Note: GSAP directly animates style.backgroundColor. For HSL variables, direct manipulation is complex.
+      // We'll use direct colors here or you can set up CSS classes and toggle them.
+      // For simplicity, direct color animation or opacity change might be easier.
+      // Let's try animating opacity of a background layer or box-shadow for a subtle effect.
+      
+      // Instead of direct background, let's animate a subtle shadow or border
+      tl.to(headerRef.current, {
+        boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Light shadow for light mode
+        // For dark mode, you'd need a different shadow color or conditional logic
+        // This will be applied universally for now.
+        borderBottomWidth: "1px",
+        // borderColor: "hsl(var(--border))", // This would also need theme awareness
+      });
+
+      return () => {
+        tl.kill(); // Cleanup GSAP animation on component unmount
+      };
+    }
+  }, []);
+
+  // Framer Motion variant for button hover/tap
+  const buttonVariants = {
+    hover: { scale: 1.05, transition: { duration: 0.2 } },
+    tap: { scale: 0.95 }
+  };
 
   return (
-    <header 
+    <motion.header
+      ref={headerRef}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-opacity-60",
-        "bg-[hsl(var(--header-background))] text-[hsl(var(--header-foreground))]" 
+        "fixed top-0 left-0 right-0 z-50 w-full border-b border-transparent backdrop-blur supports-[backdrop-filter]:bg-opacity-60", // Start with transparent border
+        "bg-header text-header-foreground" // Renamed custom CSS variables
       )}
-      style={{ height: 'var(--header-height)' } as React.CSSProperties} 
+      style={{ 
+        height: 'var(--header-height)',
+        // Framer motion can also be used for initial animation
+        // initial: { y: -100, opacity: 0 },
+        // animate: { y: 0, opacity: 1 },
+        // transition: { duration: 0.5, ease: "easeOut" }
+      } as React.CSSProperties} 
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
     >
       <div className="container flex h-full items-center max-w-full px-4 sm:px-6 lg:px-8">
         
         <div className="md:hidden mr-2"> 
-           {/* SidebarTrigger should internally handle its visibility based on isMobile via useSidebar hook */}
-           {/* Or, if SidebarTrigger doesn't use the hook, we conditionally render it here */}
-           {isMobile && <SidebarTrigger />}
+           {isMobile && (
+             <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+               <SidebarTrigger />
+             </motion.div>
+           )}
         </div>
         
-        {/* Logo: Always render, use CSS to hide on mobile if SidebarTrigger is shown. Or adjust margins. */}
-        {/* Forcing visibility with md:block and hiding with mobile specific class if needed */}
-        <div className={cn("hidden md:block", isMobile ? "ml-0" : "")}> {/* Adjusted: if mobile trigger is shown, logo might need less margin or be hidden */}
+        <div className={cn("hidden md:flex items-center", isMobile ? "ml-0" : "")}>
          <Logo className="py-0 px-0" />
         </div>
         
         <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
-          <SearchDialog />
-          <ThemeToggle />
+          <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+            <SearchDialog />
+          </motion.div>
+          <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+           <ThemeToggle />
+          </motion.div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

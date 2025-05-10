@@ -3,8 +3,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Skeleton } from "@/components/ui/skeleton";
-import { siteConfig } from '@/config/site.config'; // Import siteConfig
+import { siteConfig } from '@/config/site.config'; 
+import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -13,33 +15,28 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('[HomePage] Initializing redirect sequence...');
     async function fetchFirstPathAndRedirect() {
       try {
         const res = await fetch('/api/first-doc-path');
         if (!res.ok) {
           const errorText = await res.text();
-          console.error(`[HomePage] API error: ${res.status}`, errorText);
-          throw new Error(`Failed to fetch first doc path, status: ${res.status}`);
+          throw new Error(`Failed to fetch first doc path, status: ${res.status} - ${errorText}`);
         }
         const data = await res.json();
         
-        if (data.path && data.path !== '/') { // Ensure path is not just root
-          console.log(`[HomePage] API returned path: ${data.path}`);
+        if (data.path && data.path !== '/') { 
           setTargetPath(data.path); 
         } else {
-          // Fallback if API returns no path or just '/'
-          const defaultDocPath = '/docs/introduction'; // Default to introduction
-          console.warn(`[HomePage] API did not return a valid path or returned root, using default ${defaultDocPath}.`);
+          const defaultDocPath = '/docs/introduction'; 
           setTargetPath(defaultDocPath); 
         }
       } catch (e: any) {
-        console.error("[HomePage] Failed to get first doc path, redirecting to default.", e);
         setError(e.message || "Unknown error fetching path.");
-        const defaultDocPath = '/docs/introduction'; // Default to introduction on error
+        const defaultDocPath = '/docs/introduction'; 
         setTargetPath(defaultDocPath); 
       } finally {
-        setLoading(false);
+        // Add a small delay to allow animation to be visible
+        setTimeout(() => setLoading(false), 500); 
       }
     }
     fetchFirstPathAndRedirect();
@@ -48,38 +45,85 @@ export default function HomePage() {
 
   useEffect(() => {
     if (targetPath && !loading) { 
-      console.log(`[HomePage] Attempting to redirect to: ${targetPath}`);
       router.replace(targetPath);
     }
   }, [targetPath, router, loading]);
+  
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut", staggerChildren: 0.1 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3, ease: "easeIn" } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  };
+
 
   if (loading) { 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4 bg-background">
-        <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-20 w-20 mb-4 animate-pulse" data-ai-hint="toothless dragon" />
-        <Skeleton className="h-12 w-3/4 max-w-md" />
-        <Skeleton className="h-8 w-1/2 max-w-sm" />
-        <p className="text-lg text-muted-foreground">Loading {siteConfig.name}...</p>
-      </div>
+      <motion.div 
+        className="flex flex-col items-center justify-center min-h-screen p-4 space-y-6 bg-background text-foreground"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        <motion.img 
+          src={siteConfig.assets.logo} 
+          alt={`${siteConfig.name} Logo`} 
+          className="h-24 w-24 mb-4 rounded-full shadow-lg" 
+          data-ai-hint="toothless dragon"
+          variants={itemVariants}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1, transition: { type: "spring", stiffness: 260, damping: 20, delay: 0.1 } }}
+        />
+        <motion.div variants={itemVariants}>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </motion.div>
+        <motion.p variants={itemVariants} className="text-xl font-medium text-muted-foreground">
+          Loading {siteConfig.name}...
+        </motion.p>
+      </motion.div>
     );
   }
 
   if (error) {
      return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center bg-background">
-        <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-16 w-16 mb-4" data-ai-hint="toothless dragon" />
-        <h1 className="text-2xl font-bold text-destructive mb-4">Redirection Error</h1>
-        <p className="text-muted-foreground mb-2">Could not determine the initial documentation page.</p>
-        <p className="text-sm text-destructive-foreground bg-destructive p-2 rounded-md max-w-md">{error}</p>
-        <p className="mt-4 text-muted-foreground">Redirecting to a default page shortly...</p>
-      </div>
+      <motion.div 
+        className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-background text-foreground"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.img 
+            src={siteConfig.assets.logo} 
+            alt={`${siteConfig.name} Logo`} 
+            className="h-20 w-20 mb-6 rounded-full shadow-md" 
+            data-ai-hint="toothless dragon" 
+            variants={itemVariants}
+        />
+        <motion.h1 variants={itemVariants} className="text-3xl font-bold text-destructive mb-4">Redirection Error</motion.h1>
+        <motion.p variants={itemVariants} className="text-muted-foreground mb-3 max-w-md">
+            Oops! We couldn&apos;t determine the initial documentation page due to an error.
+        </motion.p>
+        <motion.div variants={itemVariants} className="text-sm text-destructive-foreground bg-destructive/80 p-3 rounded-md shadow max-w-md mb-6">
+            {error}
+        </motion.div>
+        <motion.p variants={itemVariants} className="mt-4 text-muted-foreground animate-pulse">
+            Attempting to redirect you to a default page shortly...
+        </motion.p>
+      </motion.div>
     );
   }
 
+  // This state is very brief, mainly to allow the redirect to happen.
+  // A simple loading indicator might be better than a full page if redirect is quick.
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
-      <img src={siteConfig.assets.logo} alt={`${siteConfig.name} Logo`} className="h-20 w-20 mb-4" data-ai-hint="toothless dragon" />
-      <p className="text-lg text-muted-foreground">Preparing to redirect you to {siteConfig.name}...</p>
+      <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <p className="mt-4 text-lg text-muted-foreground">Preparing redirect...</p>
     </div>
   ); 
 }

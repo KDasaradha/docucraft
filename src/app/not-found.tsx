@@ -1,80 +1,96 @@
+// src/app/not-found.tsx
+"use client"
 
-import { getDocumentContent } from '@/lib/docs';
-import MarkdownRenderer from '@/components/docs/MarkdownRenderer';
+import { useEffect, useState } from 'react';
 import { siteConfig } from '@/config/site.config';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Home, AlertTriangle } from 'lucide-react';
 import AppHeader from '@/components/layout/AppHeader';
 import AppFooter from '@/components/layout/AppFooter';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+import MarkdownRenderer from '@/components/docs/MarkdownRenderer';
 
+// Placeholder for custom 404 content - in a real app, this might be fetched
+const defaultNotFoundContent = `
+# 🚧 404 - Page Not Found 🚧
 
-// This is a basic structure. Styling needs to be applied.
-export default async function NotFound() {
-  let content = `
-# 404 - Page Not Found
+It seems you've taken a wrong turn, or perhaps this page has wandered off into the digital wilderness.
 
-We're sorry, but the page you were looking for could not be found.
-You can try heading back to the homepage.
-  `;
-  let docTitle = "Page Not Found";
+## What happened?
 
-  try {
-    // The slug for custom_404.md would be ['custom_404'] relative to src/content/
-    // However, getDocumentContent expects slugs relative to src/content/docs/
-    // So we place custom_404.md in src/content/ and read it directly or adjust getDocumentContent.
-    // For simplicity, let's assume custom_404.md is meant to be at src/content/docs/custom_404.md
-    // If it's truly in src/content/, we'd need a separate reader or adjust getDocumentContent's base path.
+*   The page you were looking for might have been moved or deleted.
+*   You might have typed the URL incorrectly.
+*   There might be a broken link.
 
-    // For this implementation, we'll assume the file is at 'src/content/custom_404.md'
-    // and read it directly without using getDocumentContent for simplicity,
-    // as getDocumentContent is tailored for the 'docs' subdirectory.
-    
-    // A more robust solution might involve:
-    // 1. Placing custom_404.md in src/content/docs/ so getDocumentContent can find it.
-    // 2. Modifying getDocumentContent to accept a base directory parameter.
-    // 3. Reading it directly (less ideal as it bypasses frontmatter parsing logic in getDocumentContent).
+## What can you do?
 
-    // Let's try to use getDocumentContent by providing a slug that points to custom_404.md if it were in docs.
-    // This is a bit of a workaround.
-    const notFoundDocSlug = siteConfig.error_pages['404_page'].replace(/\.md$/, '');
-    const doc = await getDocumentContent([notFoundDocSlug]);
+*   **Double-check the URL** for any typos.
+*   Go back to the [**Homepage**](/).
+*   Use the **search bar** at the top to find what you're looking for.
+*   If you believe this page should exist, please [let us know](mailto:${siteConfig.social.find(s => s.name === 'Email')?.link || 'support@example.com'}).
 
+We apologize for the inconvenience!
+`;
 
-    if (doc) {
-      content = doc.content;
-      docTitle = doc.title;
-    } else {
-        console.warn(`[NotFoundPage] Custom 404 markdown file "${siteConfig.error_pages['404_page']}" not found or failed to load. Using default content.`);
+export default function NotFound() {
+  const [customContent, setCustomContent] = useState<string | null>(null);
+  const [docTitle, setDocTitle] = useState<string>("Page Not Found");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCustom404() {
+      setIsLoading(true);
+      const custom404Path = siteConfig.error_pages['404_page'];
+      if (custom404Path) {
+        setCustomContent(defaultNotFoundContent); 
+        setDocTitle("Page Not Found - Custom Content Placeholder");
+      } else {
+        setCustomContent(defaultNotFoundContent);
+        setDocTitle("Page Not Found");
+      }
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error loading custom 404 page content:", error);
-  }
+    
+    loadCustom404();
+  }, []);
 
   return (
-    <SidebarProvider defaultOpen={true}> {/* For header/footer consistency */}
-        <div className="flex flex-col min-h-screen">
-            <AppHeader /> {/* Assuming AppHeader doesn't need navigation items */}
-            <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 pt-[var(--header-height)] text-center">
-                <main className="container max-w-3xl">
-                    <MarkdownRenderer content={content} />
-                    <div className="mt-8">
-                        <Button asChild variant="default">
-                            <Link href="/">
-                                <Home className="mr-2 h-4 w-4" />
-                                Go to Homepage
-                            </Link>
-                        </Button>
-                    </div>
-                </main>
+    <SidebarProvider defaultOpen={true} collapsible="resizable" initialSidebarWidth="16rem"> 
+      <div className="flex flex-col min-h-screen bg-background">
+        <AppHeader /> 
+        <div 
+          className="flex flex-1 flex-col items-center justify-center px-4 py-12 pt-[calc(var(--header-height)+2rem)] text-center"
+        >
+          {isLoading ? (
+            <div className="container max-w-3xl space-y-6">
+              <Skeleton className="h-12 w-3/4 mx-auto" />
+              <Skeleton className="h-6 w-1/2 mx-auto" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-10 w-36 mx-auto" />
             </div>
-            <AppFooter />
+          ) : (
+            <>
+              <div className="mb-8">
+                 <AlertTriangle className="h-16 w-16 text-destructive mx-auto" />
+              </div>
+              <main className="container max-w-3xl">
+                {customContent && <MarkdownRenderer content={customContent} />}
+                <div className="mt-12">
+                  <Button asChild variant="default" size="lg">
+                    <Link href="/">
+                      <Home className="mr-2 h-5 w-5" />
+                      Go to Homepage
+                    </Link>
+                  </Button>
+                </div>
+              </main>
+            </>
+          )}
         </div>
+        <AppFooter />
+      </div>
     </SidebarProvider>
   );
 }
-
-export const metadata = {
-  title: `Page Not Found | ${siteConfig.name}`,
-};

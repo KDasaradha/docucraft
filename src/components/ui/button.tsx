@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -18,6 +19,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        sidebar: "bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground", // New variant
+        sidebarAccent: "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/90", // New variant for active/hover state
+        ghostSidebar: "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground", // New variant
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -40,14 +44,39 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : motion.button;
+
+    // Framer Motion props
+    const motionProps = asChild ? {} : {
+      whileHover: { scale: 1.03, transition: { type: "spring", stiffness: 400, damping: 10 } },
+      whileTap: { scale: 0.97 },
+      initial: { opacity: 0, y: 5 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.2, ease: "easeOut" }
+    };
+    
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
+      <motion.button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        {...motionProps}
         {...props}
-      />
+      >
+        {children}
+      </motion.button>
     )
   }
 )

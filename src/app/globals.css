@@ -7,14 +7,20 @@
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  @apply transition-colors duration-500 ease-in-out; /* Smooth theme transition */
 }
+
+html {
+  scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+}
+
 
 @layer base {
   :root {
     --background: 220 20% 99%; /* Extremely light, almost white, cool gray - Main page background */
     --foreground: 220 15% 20%; /* Dark cool gray */
 
-    --header-background: 220 20% 97%; /* Softer light gray for header (using a slightly off-white, similar to muted but could be distinct) */
+    --header-background: 220 20% 97%; /* Softer light gray for header */
     --header-foreground: 220 15% 20%;
 
     --muted: 220 15% 96%; 
@@ -67,9 +73,6 @@ body {
     --sidebar-width-max: 24rem;    /* Maximum resizable sidebar width */
     --sidebar-width-icon: 3.5rem;  /* Collapsed sidebar width (icon only) */
     
-    /* --sidebar-width is dynamically set by JS for resizable sidebar when expanded */
-    /* --current-sidebar-width is dynamically set by JS for main content margin adjustment */
-    /* It will be 0 for mobile, var(--sidebar-width-icon) for collapsed desktop, and var(--sidebar-width) for expanded desktop */
   }
 
   .dark {
@@ -134,7 +137,7 @@ body {
   /* Markdown Content Styling */
   .markdown-content {
     @apply prose prose-slate dark:prose-invert max-w-none 
-           prose-headings:font-semibold 
+           prose-headings:font-semibold prose-headings:tracking-tight 
            prose-a:text-primary hover:prose-a:text-primary/80 
            prose-code:font-mono prose-code:before:content-[''] prose-code:after:content-[''] 
            ;
@@ -148,7 +151,7 @@ body {
   }
 
   .markdown-content h1:not(:first-child) { 
-    @apply text-3xl lg:text-4xl font-bold mt-8 mb-6 pb-2 border-b;
+    @apply text-3xl lg:text-4xl font-bold mt-10 mb-6 pb-2 border-b; /* Increased top margin for spacing */
   }
   .markdown-content h2 {
     @apply text-2xl lg:text-3xl font-semibold mt-8 mb-4 pb-2 border-b;
@@ -172,10 +175,10 @@ body {
     @apply mb-1;
   }
   .markdown-content blockquote {
-    @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground bg-muted/20 py-2 rounded-r-md; /* Added subtle background */
   }
   .markdown-content table {
-    @apply w-full my-6 border-collapse border border-border text-base;
+    @apply w-full my-6 border-collapse border border-border text-base shadow-sm rounded-md overflow-hidden; /* Added shadow and rounded corners */
   }
   .markdown-content th, .markdown-content td {
     @apply border border-border px-4 py-2 text-left;
@@ -185,7 +188,7 @@ body {
   }
 
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-md;
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg; /* Increased shadow */
     background-color: #272822 !important; 
   }
   
@@ -256,4 +259,9 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.7);
+}
+
+/* Ensure smooth transitions for theme changes */
+html, body {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
