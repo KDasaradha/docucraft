@@ -3,16 +3,26 @@ title: Contact
 description: Placeholder content for Contact.
 order: 3
 ---
+# 📬 Contact Us
 
-# Contact Us
+We’d love to hear from you! Whether you have feedback, questions, feature suggestions, or just want to say hello — feel free to reach out through any of the following channels:
 
-We’d love to hear from you! Reach out to us through any of the following channels:
+---
 
-📧 **Email**: support@example.com  
-🌐 **Website**: [www.example.com](https://www.example.com)  
-🐦 **Twitter**: [@example](https://twitter.com/example)  
-💬 **Discord**: [Join our community](https://discord.gg/example)
+## 📡 Connect With Us
 
-For support or questions, please open an issue in our [GitHub repository](https://github.com/example/repository).
+- 📧 **Email**: [support@example.com](mailto:support@example.com)  
+- 🌐 **Website**: [www.example.com](https://www.example.com)  
+- 🐦 **Twitter**: [@example](https://twitter.com/example)  
+- 💬 **Discord**: [Join our Community](https://discord.gg/example)
 
-We look forward to connecting with you! 😊
+---
+
+## 🛠️ Need Help or Found a Bug?
+
+Please open an issue in our official [GitHub Repository](https://github.com/example/repository).  
+We actively monitor issues and aim to respond promptly.
+
+---
+
+We appreciate your support and interest in **DocuCraft**. Let's build something great together! 🚀
