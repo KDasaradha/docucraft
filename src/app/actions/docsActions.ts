@@ -1,4 +1,3 @@
-
 'use server';
 
 import fs from 'fs/promises';
@@ -11,6 +10,7 @@ interface SaveResult {
   success: boolean;
   error?: string;
   updatedTitle?: string; 
+  revalidatedSlug?: string; // Added to return the slug used for revalidation
 }
 
 export async function saveDocumentContent(
@@ -39,7 +39,9 @@ export async function saveDocumentContent(
     let slugForRevalidation: string;
     if (relativeToDocsPath.endsWith('index.md') || relativeToDocsPath.endsWith('_index.md')) {
       slugForRevalidation = path.dirname(relativeToDocsPath);
-      if (slugForRevalidation === '.') slugForRevalidation = ''; 
+      if (slugForRevalidation === '.' || slugForRevalidation === 'docs') { // Handle root index.md
+        slugForRevalidation = ''; 
+      }
     } else {
       slugForRevalidation = relativeToDocsPath.replace(/\.md$/, '');
     }
@@ -47,14 +49,15 @@ export async function saveDocumentContent(
     const revalidationUrlPath = slugForRevalidation ? `/docs/${slugForRevalidation}` : '/docs';
     
     revalidatePath(revalidationUrlPath);
-    if ((relativeToDocsPath.endsWith('index.md') || relativeToDocsPath.endsWith('_index.md')) && slugForRevalidation !== '') {
-      revalidatePath(`/docs/${slugForRevalidation.replace(/\/$/, '')}`);
+    // If it's an index file within a subdirectory, revalidate the directory path itself without /index
+    if ((relativeToDocsPath.endsWith('index.md') || relativeToDocsPath.endsWith('_index.md')) && slugForRevalidation !== '' && slugForRevalidation !== 'docs') {
+       revalidatePath(`/docs/${slugForRevalidation.replace(/\/$/, '')}`);
     }
-    revalidatePath('/');
+    revalidatePath('/'); 
     revalidatePath('/api/first-doc-path');
 
 
-    return { success: true, updatedTitle: frontmatter.title };
+    return { success: true, updatedTitle: frontmatter.title, revalidatedSlug: slugForRevalidation };
   } catch (e: any) {
     console.error('Error saving document content:', e);
     return { success: false, error: e.message || 'Failed to save document.' };
@@ -87,3 +90,4 @@ export async function summarizeCurrentDocument(markdownContent: string): Promise
     return { success: false, error: e.message || 'An unexpected error occurred while summarizing.' };
   }
 }
+

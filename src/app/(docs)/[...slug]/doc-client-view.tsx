@@ -38,14 +38,13 @@ type DocClientViewProps = {
 // In-memory user database
 const users = [
   { username: 'admin', password: 'password', role: 'admin' as const },
-  { username: 'editor', password: 'password', role: 'editor' as const },
-  { username: 'viewer', password: 'password', role: 'viewer' as const },
+  { username: 'editor', password: 'password', role: 'viewer' as const },
 ];
 
 export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(isEditing);
   const [editableContent, setEditableContent] = useState(initialDoc.content);
   const [isSaving, startSaveTransition] = useTransition();
   const { toast } = useToast();
@@ -133,10 +132,6 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const handleSave = async (isDraft: boolean = false) => {
     if (!doc || !canEdit) return;
 
-    // The saveDocumentContent action itself does not rely on params.slug from the client view for saving the file.
-    // It uses doc.filePath. Revalidation paths are also derived from filePath.
-    // We will proceed with the save and handle redirection carefully.
-
     startSaveTransition(async () => {
       const result = await saveDocumentContent(doc.filePath, editableContent);
       if (result.success) {
@@ -146,21 +141,25 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        // Redirect logic: Check params.slug validity here for client-side navigation.
-        // The revalidation in saveDocumentContent uses the filePath to determine revalidation paths.
-        if (params && Array.isArray(params.slug) && params.slug.length > 0) {
+        // Primary redirection logic using revalidatedSlug from server action
+        if (result.revalidatedSlug !== undefined) {
+          const targetPath = result.revalidatedSlug === '' ? '/docs' : `/docs/${result.revalidatedSlug}`;
+          router.push(targetPath);
+        } else if (params && Array.isArray(params.slug) && params.slug.length > 0) {
+          // Secondary fallback: use client-side params.slug if revalidatedSlug is missing (should not happen ideally)
+          console.warn('DocClientView: handleSave - revalidatedSlug missing from action result, falling back to params.slug. Params:', params);
           const slugPath = params.slug.join('/');
           router.push(`/docs/${slugPath}`);
         } else {
-          // Log a warning if params.slug is not as expected, then redirect to a fallback.
-          console.warn('DocClientView: handleSave - params.slug is invalid or empty. Redirecting to /docs. Params:', params);
+          // Absolute fallback if both revalidatedSlug and params.slug are problematic
           toast({
             title: 'Save Successful, Navigation Issue',
             description: 'Document saved, but there was an issue with page parameters for client-side redirect. Redirecting to documentation home.',
             variant: 'default', 
             duration: 7000,
           });
-          router.push('/docs'); // Fallback redirect
+          console.error('DocClientView: handleSave - revalidatedSlug missing AND params.slug invalid. Defaulting to /docs. Params:', params);
+          router.push('/docs'); 
         }
         router.refresh(); 
       } else {
@@ -202,7 +201,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     
     const feedbackInput = {
       documentTitle: doc.title,
-      documentPath: `/docs/${params.slug ? params.slug.join('/') : 'unknown'}`, 
+      documentPath: `/docs/${params && Array.isArray(params.slug) && params.slug.length > 0 ? params.slug.join('/') : 'unknown'}`, 
       isHelpful: wasHelpful,
       timestamp: new Date().toISOString(),
     };
