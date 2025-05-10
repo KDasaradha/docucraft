@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // Added AnimatePresence
 import { siteConfig } from '@/config/site.config';
 import { cn } from '@/lib/utils';
 import { BookMarked } from 'lucide-react'; 
@@ -62,4 +62,3 @@ export function Logo({ collapsed, className }: { collapsed?: boolean; className?
     </motion.div>
   );
 }
-
