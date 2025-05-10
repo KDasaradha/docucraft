@@ -16,7 +16,7 @@ import {
   useSidebar,
   SidebarMenuSkeleton,
   SheetClose, // From ui/sidebar which re-exports Radix's SheetClose
-  RadixSheetTitle as SheetTitle, // From ui/sidebar which re-exports Radix's SheetTitle
+  SheetTitle, // Import SheetTitle directly as it's exported from sidebar.tsx
 } from '@/components/ui/sidebar';
 import { SheetContent as MobileSheetContent } from "@/components/ui/sheet"; // Actual SheetContent for mobile
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { ExternalLink, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 interface AppSidebarClientProps {
@@ -131,6 +131,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             className={cn(subSectionHeaderStyling)}
             hasSubItems={hasSubItems}
             isOpen={isOpen}
+            level={level}
           >
             {itemTitleContent}
           </SidebarMenuButton>
@@ -146,6 +147,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
         className={cn(subSectionHeaderStyling)}
         hasSubItems={hasSubItems}
         isOpen={isOpen}
+        level={level}
       >
         {itemTitleContent}
       </SidebarMenuButton>
@@ -183,6 +185,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             tooltip={isCollapsed ? item.title : undefined}
             isActive={isDirectlyActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
+            level={level}
           >
             {itemTitleContent}
           </SidebarMenuButton>
@@ -193,7 +196,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
 
 export default function AppSidebarClient({ navigationItems }: AppSidebarClientProps) {
-  const { state: sidebarState, isMobile, setOpenMobile } = useSidebar();
+  const { state: sidebarState, isMobile, setOpenMobile, isResizing } = useSidebar();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -238,12 +241,19 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
 
   const sidebarStructure = (
     <>
-      <SidebarHeader className={cn(isCollapsed && "justify-center")}>
+      <SidebarHeader className={cn(isCollapsed && "justify-center", isResizing && "!cursor-ew-resize")}>
         {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>}
         <Logo collapsed={isCollapsed} className={isCollapsed ? "" : "ml-1"} />
-        {/* Close button is handled by RadixSheetContent now if isMobile */}
+        {isMobile && (
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close menu</span>
+            </Button>
+          </SheetClose>
+        )}
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className={cn(isResizing && "!cursor-ew-resize")}>
         {isLoading && !isMobile ? (
           <div className="p-2 space-y-0.5">
             {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed} />)}
@@ -264,7 +274,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
      // This should match the desktop collapsed skeleton to avoid layout shifts if it defaults to desktop first
     return (
       <aside className={cn(
-        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-40",
+        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-30", // z-30 so it's below header
         "w-[var(--sidebar-width-icon)]" // Default to collapsed for SSR
       )}>
          <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center justify-center")}>
@@ -282,7 +292,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
 
   if (isMobile) {
     return (
-      <MobileSheetContent side="left" className="p-0 flex flex-col w-[var(--sidebar-width)]">
+      <MobileSheetContent side="left" className={cn("p-0 flex flex-col w-[var(--sidebar-width)]", isResizing && "!cursor-ew-resize")}>
         {sidebarStructure}
       </MobileSheetContent>
     );
@@ -290,7 +300,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   
   // Desktop view
   return (
-    <DesktopSidebar variant="sidebar">
+    <DesktopSidebar variant="sidebar" className={cn(isResizing && "!cursor-ew-resize")}>
       {sidebarStructure}
     </DesktopSidebar>
   );
