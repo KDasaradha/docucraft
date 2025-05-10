@@ -15,8 +15,10 @@ import {
   SidebarMenuSub,
   useSidebar,
   SidebarMenuSkeleton,
+  SheetClose,
+  SheetTitle, 
 } from '@/components/ui/sidebar';
-import { SheetContent as MobileSheetContent, SheetTitle, SheetClose } from "@/components/ui/sheet"; 
+import { SheetContent as MobileSheetContent } from "@/components/ui/sheet"; 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
@@ -51,18 +53,19 @@ const subMenuVariants = {
   closed: { height: 0, opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } }
 };
 
+// Moved normalizePath to module scope
+const normalizePath = (p: string): string => {
+  let normalized = p.replace(/\/(index|_index)$/, '');
+  if (normalized.endsWith('/') && normalized !== '/docs') { // Avoid stripping final slash from /docs/
+    normalized = normalized.slice(0, -1);
+  }
+  return normalized || '/docs'; // Ensure /docs is returned for root index paths
+};
+
 
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isCollapsed, currentPath, onLinkClick, initialOpen = false }) => {
   const [isOpen, setIsOpen] = useState(initialOpen);
   
-  const normalizePath = (p: string) => {
-    let normalized = p.replace(/\/(index|_index)$/, '');
-    if (normalized !== '/docs' && normalized.endsWith('/')) { 
-      normalized = normalized.slice(0, -1);
-    }
-    return normalized || '/docs'; 
-  };
-
   const normalizedItemHref = item.href ? normalizePath(item.href) : null;
   const normalizedCurrentPath = normalizePath(currentPath);
 
@@ -144,6 +147,8 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       isActive={itemIsActive && !subSectionHeaderStyling} 
       className={cn(subSectionHeaderStyling)}
       level={level}
+      hasSubItems={hasSubItems}
+      isOpen={isOpen}
     >
       {itemTitleContent}
     </SidebarMenuButton>
@@ -182,13 +187,13 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             >
               {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={`${subItem.href || subItem.title}-${index}-${level + 1}-${item.isSection}`}
+                  key={subItem.href ? `${subItem.href}-${index}` : `${subItem.title}-${index}`} // Ensure unique key
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
                   currentPath={currentPath}
                   onLinkClick={onLinkClick}
-                  initialOpen={isActiveAncestor} 
+                  initialOpen={subItem.href && currentPath.startsWith(normalizePath(subItem.href))} 
                 />
               ))}
             </SidebarMenuSub>
@@ -201,7 +206,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
 
 export default function AppSidebarClient({ navigationItems }: AppSidebarClientProps) {
-  const { state: sidebarState, isMobile, setOpenMobile, isResizing } = useSidebar();
+  const { isMobile, setOpenMobile, isResizing, state: sidebarState } = useSidebar();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -226,10 +231,10 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const isCollapsed = !isMobile && sidebarState === "collapsed";
   
   const sidebarMenuContent = (
-    <SidebarMenu> 
+    <SidebarMenu className="p-2"> 
       {navigationItems.map((item, index) => (
         <RecursiveNavItem
-          key={`${item.href || item.title}-${index}-level0-${item.isSection}`}
+          key={item.href ? `${item.href}-${index}` : `${item.title}-${index}`} // Ensure unique key
           item={item}
           level={0}
           isCollapsed={isCollapsed}
@@ -241,14 +246,6 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     </SidebarMenu>
   );
   
-  const normalizePath = (p: string) => {
-    let normalized = p.replace(/\/(index|_index)$/, '');
-    if (normalized !== '/docs' && normalized.endsWith('/')) {
-      normalized = normalized.slice(0, -1);
-    }
-    return normalized || '/docs';
-  };
-
   const sidebarStructure = (
     <>
       <SidebarHeader className={cn(isCollapsed && "justify-center", isResizing && "!cursor-ew-resize")}>
@@ -262,7 +259,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           </SheetClose>
         )}
       </SidebarHeader>
-      <SidebarContent className={cn(isResizing && "!cursor-ew-resize")}>
+      <SidebarContent className={cn("flex-1 overflow-y-auto", isResizing && "!cursor-ew-resize")}>
         {isLoading ? ( 
           <div className="p-2 space-y-0.5">
             {[...Array(8)].map((_, i) => <SidebarMenuSkeleton key={i} showText={!isCollapsed || isMobile} />)}
@@ -271,24 +268,10 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           sidebarMenuContent
         )}
       </SidebarContent>
-      {!isMobile && useSidebar().collapsible === 'resizable' && (
-        <div 
-          onMouseDown={useSidebar().handleMouseDownOnResizeHandle}
-          className={cn(
-            "absolute top-0 right-[-2px] h-full w-1.5 cursor-ew-resize group-hover/sidebar-wrapper:bg-sidebar-ring/30 active:bg-sidebar-ring/50 z-10 transition-colors duration-150 ease-in-out",
-            isResizing && "bg-sidebar-ring/50",
-            isCollapsed && "hidden" // Hide resize handle when fully collapsed by resizer
-          )}
-          title="Resize sidebar"
-          aria-label="Resize sidebar"
-        >
-            <GripVertical className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground opacity-0 group-hover/sidebar-wrapper:opacity-70 group-data-[state=resizing]/sidebar-wrapper:opacity-70 transition-opacity"/>
-        </div>
-      )}
     </>
   );
 
-  if (isMobile === undefined) { // Still determining mobile state, render a placeholder for desktop
+  if (isMobile === undefined) {
     return (
       <aside className={cn(
         "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-30",
@@ -307,11 +290,13 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   }
   
   return (
-    <DesktopSidebar variant="sidebar" collapsible={useSidebar().collapsible}>
-      {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>}
+    <DesktopSidebar variant="sidebar" className={cn("fixed top-[var(--header-height)] bottom-0 left-0 z-30", isMobile && "hidden")}>
+      {/* SheetTitle needs to be inside SheetContent or SheetHeader for Radix UI accessibility checks */}
+      {isMobile && <SheetTitle className="sr-only">Main Menu</SheetTitle>} 
       {sidebarStructure}
     </DesktopSidebar>
   );
 }
     
+
 
