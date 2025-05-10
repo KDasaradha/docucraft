@@ -5,7 +5,7 @@
 import * as React from "react"
 import { createContext, useContext, useState, useEffect, useMemo, useCallback, forwardRef, useRef } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X, Menu, type LucideIcon, GripVertical } from "lucide-react" 
+import { X, Menu, type LucideIcon, GripVertical, ChevronDown, ChevronRight } from "lucide-react"; // Added ChevronDown and ChevronRight
 import { cn } from "@/lib/utils"
 // Slot is not used here anymore based on previous fix.
 import * as DialogPrimitive from "@radix-ui/react-dialog"
@@ -16,9 +16,18 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { ScrollArea } from "@/components/ui/scroll-area"
 // Import the specific components needed from sheet.tsx
 import {
-  SheetTitle as RadixSheetTitleOriginal,     // Alias to make it clear it's from Radix/Sheet
-  SheetDescription as RadixSheetDescriptionOriginal // Alias
+  Sheet as RadixSheetRoot, // Alias for clarity
+  SheetTrigger as RadixSheetTriggerOriginal, // Alias for clarity
+  SheetClose as RadixSheetCloseOriginal, // Alias for clarity
+  SheetPortal as RadixSheetPortal, // Alias for clarity
+  SheetOverlay as RadixSheetOverlay, // Alias for clarity
+  SheetContent as RadixSheetContentOriginal, // Alias for clarity
+  SheetHeader as RadixSheetHeader, // Alias for clarity
+  SheetTitle as RadixSheetTitleOriginal, // Alias for clarity
+  SheetDescription as RadixSheetDescriptionOriginal, // Alias for clarity
+  SheetFooter as RadixSheetFooter // Alias for clarity
 } from "@/components/ui/sheet";
+
 
 // --- Sidebar Context ---
 type SidebarState = "expanded" | "collapsed" | "offcanvas"
@@ -220,13 +229,10 @@ export function SidebarProvider({
   };
 
   if (isMobileView === undefined) { // SSR or before hydration
-    // Render a placeholder or minimal structure for SSR
-    // This structure should match what the client will initially render for desktop
     return (
       <SidebarContext.Provider value={contextValue}>
         <TooltipProvider delayDuration={0}>
            <div className="group/sidebar-wrapper flex h-full w-full" data-state="collapsed">
-             {/* SSR Desktop Placeholder */}
              <div
                 className="hidden md:block flex-shrink-0 transition-all duration-200 ease-in-out w-[var(--sidebar-width-icon)]"
                 aria-hidden="true"
@@ -239,18 +245,17 @@ export function SidebarProvider({
   }
 
   if (isMobileView) {
-    // On mobile, SidebarProvider itself acts as the Radix Sheet Root
+    // On mobile, RadixSheetRoot wraps the context provider and children
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+      <RadixSheetRoot open={openMobile} onOpenChange={setOpenMobile}>
         <SidebarContext.Provider value={contextValue}>
           <TooltipProvider delayDuration={0}>
-            {/* This div might not be strictly necessary on mobile but helps maintain structure for children */}
             <div className="group/sidebar-wrapper flex h-full w-full" data-state="offcanvas">
               {children}
             </div>
           </TooltipProvider>
         </SidebarContext.Provider>
-      </Sheet>
+      </RadixSheetRoot>
     );
   }
 
@@ -263,8 +268,7 @@ export function SidebarProvider({
           data-state={state}
            style={{ ['--current-sidebar-width' as string]: state === 'collapsed' ? `${iconWidthPx}px` : `${sidebarWidth}px` }}
         >
-           {/* Placeholder div for desktop fixed sidebar space */}
-           {collapsible !== "offcanvas" && ( // This check was correct
+           {collapsible !== "offcanvas" && ( 
              <div
                 className={cn(
                   "hidden md:block flex-shrink-0",
@@ -283,87 +287,16 @@ export function SidebarProvider({
 
 // --- Sidebar Components ---
 
-const Sheet = DialogPrimitive.Root; // This is DialogPrimitive.Root
-const RadixSheetTriggerOriginal = DialogPrimitive.Trigger; // Alias for clarity
-const SheetCloseOriginal = DialogPrimitive.Close; // This is Radix DialogPrimitive.Close
-const SheetPortal = DialogPrimitive.Portal;
-
-const SheetOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    className={cn(
-      "fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    )}
-    {...props}
-    ref={ref}
-  />
-))
-SheetOverlay.displayName = DialogPrimitive.Overlay.displayName
-
-const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-sidebar text-sidebar-foreground shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
-  {
-    variants: {
-      side: {
-        left: "inset-y-0 left-0 h-full w-[var(--sidebar-width)] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
-      },
-    },
-    defaultVariants: {
-      side: "left",
-    },
-  }
-)
-
-interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, VariantProps<typeof sheetVariants> {}
-
-const SheetContentForMobile = React.forwardRef< // Renamed to avoid conflict if Sidebar exports SheetContent
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  SheetContentProps
->(({ side = "left", className, children, ...props }, ref) => {
-  const { defaultWidthPx } = useSidebar(); // Get width from context
-  return (
-    <SheetPortal>
-      <SheetOverlay />
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(sheetVariants({ side }), className)}
-        style={{ width: `${defaultWidthPx}px` }} // Apply width
-        onOpenAutoFocus={(e) => e.preventDefault()} 
-        {...props}
-      >
-        {children}
-      </DialogPrimitive.Content>
-    </SheetPortal>
-  );
-});
-SheetContentForMobile.displayName = "SheetContentForMobile"
-
-
-const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
-)
-SheetHeader.displayName = "SheetHeader"
-
-const SheetFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
-    )}
-    {...props}
-  />
-)
-SheetFooter.displayName = "SheetFooter"
-
-// Re-exporting RadixSheetTitleOriginal as SheetTitle
-const SheetTitle = RadixSheetTitleOriginal; 
-const SheetDescription = RadixSheetDescriptionOriginal;
+// Using original Radix components for Sheet parts within Sidebar logic
+const Sheet = RadixSheetRoot; // This is DialogPrimitive.Root
+const SheetTriggerForSidebar = RadixSheetTriggerOriginal; // Alias for clarity, used by SidebarTrigger
+const SheetCloseForSidebar = RadixSheetCloseOriginal; // This is Radix DialogPrimitive.Close, re-exported
+const SheetPortalForSidebar = RadixSheetPortal;
+const SheetOverlayForSidebar = RadixSheetOverlay;
+const SheetContentForMobileSidebar = RadixSheetContentOriginal; // Explicit name for mobile sidebar content
+const SheetHeaderForMobileSidebar = RadixSheetHeader;
+const SheetTitleForMobileSidebar = RadixSheetTitleOriginal; // Original Radix SheetTitle
+const SheetFooterForMobileSidebar = RadixSheetFooter;
 
 
 const sidebarVariants = cva(
@@ -393,7 +326,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
   const { 
     isMobile, 
     state, collapsible: contextCollapsible, sidebarWidth, 
-    setIsResizing, isResizing: contextIsResizing, iconWidthPx
+    setIsResizing, isResizing: contextIsResizing, iconWidthPx, defaultWidthPx
   } = useSidebar()
   
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -403,13 +336,20 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
   }, [state, contextCollapsible, isMobile, setIsResizing]);
 
   if (isMobile) {
+    // For mobile, Sidebar effectively becomes the SheetContent
     return (
-        <SheetContentForMobile side="left" className={cn("p-0 flex flex-col", className)} {...props}>
+        <SheetContentForMobileSidebar 
+            side="left" 
+            className={cn("p-0 flex flex-col", className)} 
+            style={{ width: `${defaultWidthPx}px` }} // Use defaultWidthPx for mobile sheet
+            {...props}
+        >
           {children}
-        </SheetContentForMobile>
+        </SheetContentForMobileSidebar>
     );
   }
 
+  // Desktop <aside> element
   return (
     <aside
       ref={ref}
@@ -449,8 +389,9 @@ export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
          return null; 
     }
     
+    // This RadixSheetTrigger is the actual button that opens the mobile sidebar
     return (
-      <RadixSheetTriggerOriginal asChild>
+      <SheetTriggerForSidebar asChild>
         <Button
           ref={ref}
           variant="ghost"
@@ -462,7 +403,7 @@ export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
         >
           <Menu />
         </Button>
-      </RadixSheetTriggerOriginal>
+      </SheetTriggerForSidebar>
     );
   }
 );
@@ -472,7 +413,7 @@ const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
  ({ className, children, ...props }, ref) => {
     const { isResizing, state } = useSidebar();
     return (
-      <div
+      <RadixSheetHeader // Using Radix SheetHeader for mobile semantic structure
         ref={ref}
         className={cn(
           "flex h-[var(--header-height)] items-center border-b border-sidebar-border p-3",
@@ -483,7 +424,7 @@ const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
         {...props}
       >
         {children}
-      </div>
+      </RadixSheetHeader>
     );
   }
 );
@@ -552,8 +493,8 @@ interface SidebarMenuButtonProps extends ButtonProps {
   asChild?: boolean
   tooltip?: React.ReactNode 
   level?: number
-  hasSubItems?: boolean
-  isOpen?: boolean 
+  hasSubItems?: boolean // For styling and arrow indicator logic
+  isOpen?: boolean // To control arrow direction
 }
 
 const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
@@ -593,7 +534,7 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         asChild={asChild}
         {...props}
       >
-        {asChild ? children : content} 
+        {asChild && React.isValidElement(children) ? children : content} 
       </Button>
     );
 
@@ -602,20 +543,31 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              ref={ref} 
-              variant={isActive ? "sidebarAccent" : "ghostSidebar"}
-              className={cn("h-9 w-full justify-center", className)} 
-              asChild={asChild} 
-              {...props} 
-            >
-               {asChild ? children : ( 
-                <>
+            {/* When asChild is true, TooltipTrigger expects a single valid React child */}
+             {asChild && React.isValidElement(children) ? (
+                React.cloneElement(children as React.ReactElement<any>, {
+                  // Ensure the child passed to Button also gets these props if it's a custom component
+                  // For simple DOM elements or ShadCN Button, this might not be strictly necessary
+                  // but good for robustness with custom asChild components.
+                  className: cn(
+                    (children as React.ReactElement<any>).props.className,
+                    "h-9 w-full justify-center",
+                    className
+                  ),
+                  variant: isActive ? "sidebarAccent" : "ghostSidebar"
+                })
+             ) : (
+                <Button
+                  ref={ref} 
+                  variant={isActive ? "sidebarAccent" : "ghostSidebar"}
+                  className={cn("h-9 w-full justify-center", className)} 
+                  // asChild={asChild} // asChild is handled by TooltipTrigger if button is direct child
+                  {...props} 
+                >
                   {Icon && <Icon className="size-5 shrink-0" />}
                   <span className="sr-only">{tooltip}</span>
-                </>
-              )}
-            </Button>
+                </Button>
+             )}
           </TooltipTrigger>
           <TooltipContent side="right" align="center" sideOffset={10}>
             {tooltip}
@@ -665,7 +617,10 @@ const SidebarMenuSkeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
     const [skeletonTextWidth, setSkeletonTextWidth] = useState('75%'); 
 
     useEffect(() => {
-      setSkeletonTextWidth(`${Math.floor(Math.random() * (85 - 55 + 1)) + 55}%`);
+      // This check ensures Math.random is only called on the client side
+      if (typeof window !== 'undefined') {
+        setSkeletonTextWidth(`${Math.floor(Math.random() * (85 - 55 + 1)) + 55}%`);
+      }
     }, []);
 
 
@@ -680,9 +635,15 @@ const SidebarMenuSkeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
         )}
         {...props}
       >
-        {showIcon && (
+        {showIcon && !isActuallyCollapsed && (
            <Skeleton
             className={cn((isActuallyCollapsed && !isMobile) ? "size-5" : "size-4", "rounded-md bg-sidebar-foreground/10")} 
+            data-sidebar="menu-skeleton-icon"
+          />
+        )}
+         {showIcon && isActuallyCollapsed && (
+           <Skeleton
+            className="size-5 rounded-md bg-sidebar-foreground/10"
             data-sidebar="menu-skeleton-icon"
           />
         )}
@@ -710,6 +671,8 @@ export {
   SidebarMenuButton,
   SidebarMenuSub,
   SidebarMenuSkeleton,
-  SheetCloseOriginal as SheetClose, 
+  SheetCloseForSidebar as SheetClose, // Re-export the aliased SheetClose
+  SheetTitleForMobileSidebar as SheetTitle // Re-export RadixSheetTitle as SheetTitle
 }
   
+
