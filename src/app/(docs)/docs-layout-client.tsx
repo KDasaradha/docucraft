@@ -1,7 +1,7 @@
 // src/app/(docs)/docs-layout-client.tsx
 "use client"; 
 
-import type { ReactNode } from 'react';
+import * as React from 'react'; // Added import for React
 import { useEffect, useRef, useState } from 'react';
 import AppHeader from '@/components/layout/AppHeader';
 import AppSidebarClient from '@/components/layout/AppSidebarClient';
@@ -19,7 +19,7 @@ if (typeof window !== "undefined") {
 }
 
 interface DocsLayoutClientProps {
-  children: ReactNode;
+  children: React.ReactNode;
   navigationItems: NavItem[];
 }
 
