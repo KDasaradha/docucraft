@@ -56,8 +56,8 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-  const [usernameInput, setUsernameInput] = useState(''); // Renamed to avoid conflict with global username
-  const [passwordInput, setPasswordInput] = useState(''); // Renamed to avoid conflict
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
 
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summaryResult, setSummaryResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
