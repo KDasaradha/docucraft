@@ -12,7 +12,7 @@ export default async function DocsLayout({ children }: { children: ReactNode }) 
   const navigationItems = await getNavigation();
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={true} initialSidebarWidth="16rem">
       <div className="flex flex-col min-h-screen bg-background">
         <AppHeader />
         <div className="flex flex-1 overflow-hidden pt-[var(--header-height)]">
@@ -21,15 +21,16 @@ export default async function DocsLayout({ children }: { children: ReactNode }) 
           <ScrollArea
             className={cn(
               "flex-1 transition-all duration-200 ease-in-out",
-              // The sidebar's internal placeholder div now handles the left margin.
-              // The following classes are effectively managed by the peer group selectors in sidebar.tsx
-              // "md:ml-[var(--sidebar-width)]",
-              // "group-data-[state=collapsed]/sidebar-wrapper:md:ml-[var(--sidebar-width-icon)]"
+              // The placeholder div inside SidebarProvider now correctly handles the left margin.
+              // No specific ml-* classes needed here if the placeholder is set up correctly.
             )}
-            // style={{
-            //   // This is now controlled by the sibling div's width (the placeholder from Sidebar component)
-            //   // marginLeft: 'var(--current-sidebar-width, var(--sidebar-width))'
-            // } as React.CSSProperties}
+            style={{
+              // This style ensures the main content area respects the current sidebar width.
+              // The --current-sidebar-width is dynamically updated by SidebarProvider.
+              // For mobile, when sidebar is offcanvas, the placeholder div itself will be hidden,
+              // so this margin effectively becomes 0.
+              marginLeft: 'var(--current-sidebar-width, var(--sidebar-width-default))'
+            } as React.CSSProperties}
           >
             <main className="container mx-auto max-w-5xl px-4 sm:px-6 py-8 lg:px-8 lg:py-12">
               {children}
