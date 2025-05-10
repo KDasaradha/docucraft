@@ -38,13 +38,14 @@ type DocClientViewProps = {
 // In-memory user database
 const users = [
   { username: 'admin', password: 'password', role: 'admin' as const },
-  { username: 'editor', password: 'password', role: 'viewer' as const },
+  { username: 'editor', password: 'password', role: 'editor' as const },
+  { username: 'viewer', password: 'password', role: 'viewer' as const },
 ];
 
 export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false);
-  const [isEditing, setIsEditing] = useState(isEditing);
+  const [isEditing, setIsEditing] = useState(false); // Initialize with false
   const [editableContent, setEditableContent] = useState(initialDoc.content);
   const [isSaving, startSaveTransition] = useTransition();
   const { toast } = useToast();
@@ -141,25 +142,22 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        // Primary redirection logic using revalidatedSlug from server action
         if (result.revalidatedSlug !== undefined) {
           const targetPath = result.revalidatedSlug === '' ? '/docs' : `/docs/${result.revalidatedSlug}`;
           router.push(targetPath);
-        } else if (params && Array.isArray(params.slug) && params.slug.length > 0) {
-          // Secondary fallback: use client-side params.slug if revalidatedSlug is missing (should not happen ideally)
-          console.warn('DocClientView: handleSave - revalidatedSlug missing from action result, falling back to params.slug. Params:', params);
+        } else if (params && params.slug && Array.isArray(params.slug) && params.slug.length > 0) {
           const slugPath = params.slug.join('/');
           router.push(`/docs/${slugPath}`);
         } else {
-          // Absolute fallback if both revalidatedSlug and params.slug are problematic
           toast({
-            title: 'Save Successful, Navigation Issue',
-            description: 'Document saved, but there was an issue with page parameters for client-side redirect. Redirecting to documentation home.',
+            title: 'Save Successful, Navigation Warning',
+            description: 'Document saved, but client-side parameters for redirect were not fully available. Revalidating current view.',
             variant: 'default', 
             duration: 7000,
           });
-          console.error('DocClientView: handleSave - revalidatedSlug missing AND params.slug invalid. Defaulting to /docs. Params:', params);
-          router.push('/docs'); 
+           // Fallback to refreshing the current page if slug info isn't robust
+           // This situation should ideally be rare with server-driven revalidatedSlug
+           console.warn('DocClientView: handleSave - revalidatedSlug and params.slug were insufficient for a precise redirect. Refreshing current path.');
         }
         router.refresh(); 
       } else {
@@ -201,7 +199,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     
     const feedbackInput = {
       documentTitle: doc.title,
-      documentPath: `/docs/${params && Array.isArray(params.slug) && params.slug.length > 0 ? params.slug.join('/') : 'unknown'}`, 
+      documentPath: `/docs/${params && params.slug && Array.isArray(params.slug) && params.slug.length > 0 ? params.slug.join('/') : 'unknown'}`, 
       isHelpful: wasHelpful,
       timestamp: new Date().toISOString(),
     };
@@ -434,4 +432,3 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
     </article>
   );
 }
-
