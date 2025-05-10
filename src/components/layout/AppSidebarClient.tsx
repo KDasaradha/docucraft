@@ -5,7 +5,6 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  // Sidebar component is now mainly for desktop <aside>
   Sidebar as DesktopSidebar, 
   SidebarHeader,
   SidebarContent,
@@ -24,7 +23,7 @@ import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronRight, X } from 'lucide-react'; // Added X for close button
 import React, { useState, useEffect } from 'react';
 
 interface AppSidebarClientProps {
@@ -34,9 +33,9 @@ interface AppSidebarClientProps {
 interface RecursiveNavItemProps {
   item: NavItem;
   level: number;
-  isCollapsed: boolean; // For desktop collapsed state
+  isCollapsed: boolean;
   currentPath: string;
-  onLinkClick: () => void; // For mobile sheet close
+  onLinkClick: () => void;
 }
 
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isCollapsed, currentPath, onLinkClick }) => {
@@ -87,11 +86,8 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       e.stopPropagation();
       setIsOpen(!isOpen);
     } else if (hasSubItems && isFolderLink) { 
-      // Allow navigation for folder links but also toggle submenu
       setIsOpen(!isOpen); 
     }
-    // If it's a direct link without sub-items, or a folder link, let navigation proceed.
-    // onLinkClick will handle closing mobile sheet.
     if(!hasSubItems || isFolderLink) {
       onLinkClick();
     }
@@ -107,7 +103,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       {item.href && item.href.startsWith('http') && !isCollapsed && (
         <ExternalLink className="ml-1 h-3.5 w-3.5 text-muted-foreground shrink-0" />
       )}
-      {hasSubItems && (!isCollapsed || useSidebar().isMobile ) && ( // Show chevrons on mobile expanded too
+      {hasSubItems && (!isCollapsed || useSidebar().isMobile ) && (
         isOpen ? <ChevronDown className="ml-1 h-4 w-4 shrink-0" /> : <ChevronRight className="ml-1 h-4 w-4 shrink-0" />
       )}
     </>
@@ -127,7 +123,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
             onClick={handleToggleOrNavigate}
             tooltip={isCollapsed ? item.title : undefined}
             aria-expanded={isOpen}
-            isActive={itemIsActive && !subSectionHeaderStyling}
+            isActive={itemIsActive && !subSectionHeaderStyling} // Apply isActive only if not just a subsection header
             className={cn(subSectionHeaderStyling)}
             hasSubItems={hasSubItems}
             isOpen={isOpen}
@@ -158,11 +154,11 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     return (
       <SidebarMenuItem>
         {isFolderLink && !(item.href && item.href.startsWith('#')) ? renderButtonAsLink : renderButtonDirectly}
-        {(!isCollapsed || useSidebar().isMobile) && isOpen && ( // Show sub-menu on mobile if open
+        {(!isCollapsed || useSidebar().isMobile) && isOpen && (
           <SidebarMenuSub>
             {item.items?.map((subItem, index) => (
               <RecursiveNavItem
-                key={`${subItem.href || subItem.title}-${index}`} // Ensure unique key
+                key={`${subItem.href || subItem.title}-${index}-${level + 1}`} // More unique key
                 item={subItem}
                 level={level + 1}
                 isCollapsed={isCollapsed}
@@ -176,12 +172,11 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     );
   }
 
-  // No sub-items
   return (
     <SidebarMenuItem>
       <Link {...commonLinkProps} passHref legacyBehavior>
         <SidebarMenuButton
-            onClick={onLinkClick} // Only closes sheet on mobile
+            onClick={onLinkClick}
             tooltip={isCollapsed ? item.title : undefined}
             isActive={isDirectlyActive && !subSectionHeaderStyling}
             className={cn(subSectionHeaderStyling)}
@@ -201,18 +196,14 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This effect ensures that isMobile from useSidebar context is settled before rendering
-    // and helps mitigate hydration mismatches for mobile/desktop specific rendering.
-    if (typeof isMobile === 'boolean') { // Check if isMobile is determined
+    if (typeof isMobile === 'boolean') {
       if (navigationItems && navigationItems.length > 0) {
         setIsLoading(false);
       } else {
-        // Simulate loading if navigationItems are fetched async later, or just set to false
-        const timer = setTimeout(() => setIsLoading(false), 50); // Short delay for perceived loading
+        const timer = setTimeout(() => setIsLoading(false), 50); 
         return () => clearTimeout(timer);
       }
     }
-    // If isMobile is undefined, keep isLoading true until it's resolved.
   }, [navigationItems, isMobile]);
 
 
@@ -228,7 +219,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     <SidebarMenu className="p-2">
       {navigationItems.map((item, index) => (
         <RecursiveNavItem
-          key={`${item.href || item.title}-${index}`} // Ensure unique key
+          key={`${item.href || item.title}-${index}-level0`} // Ensure unique key for top-level items
           item={item}
           level={0}
           isCollapsed={isCollapsed}
@@ -270,12 +261,10 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   );
 
   if (typeof isMobile === 'undefined' || (isLoading && isMobile === undefined)) {
-     // Render a consistent skeleton for SSR and initial client render before isMobile is known
-     // This should match the desktop collapsed skeleton to avoid layout shifts if it defaults to desktop first
     return (
       <aside className={cn(
-        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200 ease-in-out fixed top-[var(--header-height)] bottom-0 left-0 z-30", // z-30 so it's below header
-        "w-[var(--sidebar-width-icon)]" // Default to collapsed for SSR
+        "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-30", // Removed transition, width set by var
+        "w-[var(--sidebar-width-icon)]"
       )}>
          <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center justify-center")}>
           <Logo collapsed={true} />
@@ -298,10 +287,10 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
     );
   }
   
-  // Desktop view
   return (
-    <DesktopSidebar variant="sidebar" className={cn(isResizing && "!cursor-ew-resize")}>
+    <DesktopSidebar variant="sidebar" className={cn("fixed top-[var(--header-height)] bottom-0 left-0 z-30", isResizing && "!cursor-ew-resize")}>
       {sidebarStructure}
     </DesktopSidebar>
   );
 }
+    
