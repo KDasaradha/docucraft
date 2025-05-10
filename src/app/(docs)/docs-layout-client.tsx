@@ -1,98 +1,150 @@
-// src/app/(docs)/docs-layout-client.tsx
-"use client"; 
+// src/components/ui/sheet.tsx
+"use client"
 
-import * as React from 'react'; // Added import for React
-import { useEffect, useRef, useState } from 'react';
-import AppHeader from '@/components/layout/AppHeader';
-import AppSidebarClient from '@/components/layout/AppSidebarClient';
-import AppFooter from '@/components/layout/AppFooter';
-import { type NavItem } from '@/lib/docs'; 
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { cn } from '@/lib/utils';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { AnimatePresence, motion } from 'framer-motion';
+import * as React from "react"
+import * as SheetPrimitive from "@radix-ui/react-dialog"
+import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { cn } from "@/lib/utils"
 
-interface DocsLayoutClientProps {
-  children: React.ReactNode;
-  navigationItems: NavItem[];
-}
+const Sheet = SheetPrimitive.Root
 
-export default function DocsLayoutClient({ children, navigationItems }: DocsLayoutClientProps) {
-  const mainContentRef = useRef<HTMLDivElement>(null);
-  const [currentPath, setCurrentPath] = useState('');
+const SheetTrigger = SheetPrimitive.Trigger
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentPath(window.location.pathname);
-    }
-  }, [children]); // Update path when children change
+const SheetClose = SheetPrimitive.Close
 
-  useEffect(() => {
-    if (mainContentRef.current) {
-      gsap.fromTo(
-        mainContentRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.2 }
-      );
-    }
-  }, [children]); // Re-run animation when children change (page navigation)
-  
-  return (
-    <SidebarProvider 
-      defaultOpen={true} 
-      collapsible="resizable"
-      initialSidebarWidth="16rem"
+const SheetPortal = SheetPrimitive.Portal
+
+const SheetOverlay = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+))
+SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
+
+const sheetVariants = cva(
+  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  {
+    variants: {
+      side: {
+        top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        bottom:
+          "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+        right:
+          "inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+      },
+    },
+    defaultVariants: {
+      side: "right",
+    },
+  }
+)
+
+interface SheetContentProps
+  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+    VariantProps<typeof sheetVariants> {}
+
+const SheetContent = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Content>,
+  SheetContentProps
+>(({ side = "right", className, children, ...props }, ref) => (
+  <SheetPortal>
+    <SheetOverlay />
+    <SheetPrimitive.Content
+      ref={ref}
+      className={cn(sheetVariants({ side }), className)}
+      onOpenAutoFocus={(e) => e.preventDefault()}
+      {...props}
     >
-      <div className="flex flex-col min-h-screen bg-background">
-        <AppHeader />
-        <div className="flex flex-1 overflow-hidden pt-[var(--header-height)]">
-          {navigationItems.length > 0 ? (
-             <AppSidebarClient navigationItems={navigationItems} />
-          ) : (
-            <aside className={cn(
-                "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-30",
-                "w-[var(--sidebar-width-default)] transition-all duration-300 ease-in-out" // Ensure default width var is used
-              )}
-              style={{width: 'var(--sidebar-width-default)'}} // Fallback style
-            >
-               <div className="h-[var(--header-height)] flex items-center justify-center p-3 border-b border-sidebar-border">
-                  <div className="w-24 h-6 bg-muted rounded animate-pulse"></div>
-                </div>
-                <ScrollArea className="flex-1 p-2 space-y-1">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="h-9 w-full rounded-md bg-muted animate-pulse mb-1"></div>
-                  ))}
-                </ScrollArea>
-            </aside>
-          )}
-          
-          <ScrollArea
-            className="flex-1 transition-all duration-300 ease-in-out md:ml-[var(--current-sidebar-width,var(--sidebar-width-default))]"
-            id="main-content-scroll-area"
-          >
-            <motion.main 
-              ref={mainContentRef}
-              className="container mx-auto max-w-5xl px-4 sm:px-6 py-8 lg:px-8 lg:py-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              key={currentPath} 
-            >
-              <AnimatePresence mode="wait"> 
-                {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, { key: currentPath }) : children}
-              </AnimatePresence>
-            </motion.main>
-            <AppFooter />
-          </ScrollArea>
-        </div>
-      </div>
-    </SidebarProvider>
-  );
+      {children}
+      {/* Re-added the close button for standalone SheetContent usage */}
+      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </SheetPrimitive.Close>
+    </SheetPrimitive.Content>
+  </SheetPortal>
+))
+SheetContent.displayName = SheetPrimitive.Content.displayName
+
+const SheetHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-2 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+SheetHeader.displayName = "SheetHeader"
+
+const SheetFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+SheetFooter.displayName = "SheetFooter"
+
+const SheetTitle = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold text-foreground", className)}
+    {...props}
+  />
+))
+SheetTitle.displayName = SheetPrimitive.Title.displayName
+
+const SheetDescription = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <SheetPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+SheetDescription.displayName = SheetPrimitive.Description.displayName
+
+export {
+  Sheet,
+  SheetPortal,
+  SheetOverlay,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
 }
+```
+  </content>
+  </change>
+  <change>
+    <file>src/app/(docs)/docs-layout-client.tsx</file>
+    <description>This file is no longer needed as its logic has been integrated into src/app/(docs)/layout.tsx and src/components/layout/AppSidebarClient.tsx for better separation of concerns and to manage sidebar responsiveness correctly.</description>
+    <content
