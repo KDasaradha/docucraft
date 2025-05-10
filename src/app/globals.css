@@ -11,11 +11,11 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Very light gray */
+    --background: 220 20% 99%; /* Extremely light, almost white, cool gray */
     --foreground: 220 15% 20%; /* Dark cool gray */
 
-    --muted: 220 15% 94%; /* Slightly darker light gray */
-    --muted-foreground: 220 10% 45%; /* Muted version of foreground */
+    --muted: 220 15% 96%; /* Slightly darker light gray for muted elements */
+    --muted-foreground: 220 10% 45%; 
 
     --popover: 0 0% 100%; /* White */
     --popover-foreground: 220 15% 20%;
@@ -23,22 +23,22 @@ body {
     --card: 0 0% 100%; /* White */
     --card-foreground: 220 15% 20%;
 
-    --border: 220 10% 88%; /* Light gray border */
-    --input: 220 10% 92%; /* Lighter gray for input backgrounds */
+    --border: 220 10% 90%; /* Light gray border, slightly adjusted */
+    --input: 220 10% 95%; /* Lighter gray for input, slightly adjusted */
 
-    --primary: 180 100% 25%; /* Teal */
-    --primary-foreground: 0 0% 100%; /* White for text on teal buttons */
+    --primary: 180 100% 25%; 
+    --primary-foreground: 0 0% 100%; 
 
-    --secondary: 180 25% 90%; /* Light teal-ish gray */
-    --secondary-foreground: 180 100% 20%; /* Darker Teal for text on secondary */
+    --secondary: 180 25% 90%; 
+    --secondary-foreground: 180 100% 20%; 
 
-    --accent: 180 100% 25%; /* Teal - for links, highlights */
-    --accent-foreground: 0 0% 100%; /* White text on accent */
+    --accent: 180 100% 25%; 
+    --accent-foreground: 0 0% 100%; 
 
-    --destructive: 0 72% 51%; /* Default red */
+    --destructive: 0 72% 51%; 
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 180 80% 40%; /* Teal for focus rings, slightly lighter */
+    --ring: 180 80% 40%; 
 
     --radius: 0.5rem;
 
@@ -49,23 +49,24 @@ body {
     --chart-5: 27 87% 67%;
     
     /* Sidebar specific vars */
-    --sidebar-background: 220 15% 96%; /* Slightly different light gray for sidebar */
-    --sidebar-foreground: 220 15% 25%;
-    --sidebar-primary: 180 100% 25%; /* Teal */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 180 30% 88%; /* Lighter teal for hover/active */
-    --sidebar-accent-foreground: 180 100% 20%;
-    --sidebar-border: 220 10% 85%;
-    --sidebar-ring: 180 80% 40%;
+    --sidebar-background: hsl(220 15% 97%); /* Slightly different light gray for sidebar - direct HSL */
+    --sidebar-foreground: hsl(220 15% 25%);
+    --sidebar-primary: hsl(180 100% 25%); 
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(180 30% 88%); 
+    --sidebar-accent-foreground: hsl(180 100% 20%);
+    --sidebar-border: hsl(220 10% 88%); /* Adjusted to match general border */
+    --sidebar-ring: hsl(180 80% 40%);
 
-    --header-height: 4rem; /* Define header height for calc() */
-    --sidebar-width: 16rem; /* Default expanded sidebar width */
+    --header-height: 4rem; 
+    --sidebar-width-default: 16rem; /* Default expanded sidebar width */
     --sidebar-width-icon: 3.5rem; /* Collapsed sidebar width (icon only) */
+    --sidebar-width: var(--sidebar-width-default); /* Current expanded width, can be overridden by JS */
   }
 
   .dark {
-    --background: 220 15% 10%; /* Very dark cool gray */
-    --foreground: 220 10% 90%; /* Light cool gray */
+    --background: 220 15% 10%; 
+    --foreground: 220 10% 90%; 
 
     --muted: 220 15% 15%;
     --muted-foreground: 220 10% 65%;
@@ -79,29 +80,29 @@ body {
     --border: 220 10% 20%;
     --input: 220 10% 18%;
 
-    --primary: 180 70% 50%; /* Brighter Teal for dark mode */
-    --primary-foreground: 220 15% 10%; /* Dark for text on bright teal buttons */
+    --primary: 180 70% 50%; 
+    --primary-foreground: 220 15% 10%; 
 
-    --secondary: 220 15% 25%; /* Darker teal-ish gray */
-    --secondary-foreground: 180 70% 70%; /* Lighter Teal for text on secondary */
+    --secondary: 220 15% 25%; 
+    --secondary-foreground: 180 70% 70%; 
 
-    --accent: 180 70% 50%; /* Brighter Teal */
+    --accent: 180 70% 50%; 
     --accent-foreground: 220 15% 10%;
 
     --destructive: 0 63% 40%;
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 180 70% 60%; /* Brighter teal for focus rings */
+    --ring: 180 70% 60%; 
 
     /* Sidebar specific vars */
-    --sidebar-background: 220 15% 12%;
-    --sidebar-foreground: 220 10% 85%;
-    --sidebar-primary: 180 70% 50%;
-    --sidebar-primary-foreground: 220 15% 10%;
-    --sidebar-accent: 220 15% 20%;
-    --sidebar-accent-foreground: 180 70% 70%;
-    --sidebar-border: 220 10% 25%;
-    --sidebar-ring: 180 70% 60%;
+    --sidebar-background: hsl(220 15% 12%);
+    --sidebar-foreground: hsl(220 10% 85%);
+    --sidebar-primary: hsl(180 70% 50%);
+    --sidebar-primary-foreground: hsl(220 15% 10%);
+    --sidebar-accent: hsl(220 15% 20%);
+    --sidebar-accent-foreground: hsl(180 70% 70%);
+    --sidebar-border: hsl(220 10% 25%);
+    --sidebar-ring: hsl(180 70% 60%);
   }
 }
 
@@ -125,22 +126,17 @@ body {
            prose-headings:font-semibold 
            prose-a:text-primary hover:prose-a:text-primary/80 
            prose-code:font-mono prose-code:before:content-[''] prose-code:after:content-[''] 
-           /* Inline code styling is handled by the more specific selector below or by Tailwind prose defaults */
-           /* prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-sm */
            ;
   }
 
-  /* Specific styling for inline code elements NOT inside a <pre> block */
   .markdown-content :where(code):not(:where(pre > *)) {
     @apply bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono;
-    /* Ensure before/after content (backticks) from prose are also reset if needed */
     &::before, &::after {
         content: "" !important;
     }
   }
 
-
-  .markdown-content h1:not(:first-child) { /* Avoid double margin if page already has a header */
+  .markdown-content h1:not(:first-child) { 
     @apply text-3xl lg:text-4xl font-bold mt-8 mb-6 pb-2 border-b;
   }
   .markdown-content h2 {
@@ -177,63 +173,57 @@ body {
     @apply bg-muted font-semibold;
   }
 
-  /* Code block styling with Prism.js */
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-md; /* my-6 for margin top/bottom */
-    background-color: #272822 !important; /* Okaidia background, important to override prose */
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-md;
+    background-color: #272822 !important; 
   }
   
-  /* Ensure code inside pre also uses a mono font, and remove default browser styling */
   .markdown-content pre[class*="language-"] code[class*="language-"] {
-    @apply font-mono text-sm bg-transparent p-0; /* Reset padding/bg for code inside pre */
-    color: #f8f8f2 !important; /* Okaidia default text color */
+    @apply font-mono text-sm bg-transparent p-0; 
+    color: #f8f8f2 !important; 
     text-shadow: none !important;
   }
 
-  /* Line numbers styling */
   .markdown-content .line-numbers .line-numbers-rows {
-    @apply border-r border-slate-700 pr-3 pt-4 pb-4 pl-3 text-xs; /* Adjust border and padding */
-    left: -3.8em; /* Default from prism, adjust if needed */
+    @apply border-r border-slate-700 pr-3 pt-4 pb-4 pl-3 text-xs; 
+    left: -3.8em; 
   }
   .markdown-content .line-numbers-rows > span::before {
-    color: #999 !important; /* Color for line numbers */
-    @apply text-slate-600; /* Ensure this applies in dark mode too, or adjust */
+    color: #999 !important; 
+    @apply text-slate-600; 
   }
   
-  /* Adjusting some Prism Okaidia colors slightly for better contrast if needed */
   .token.comment, .token.prolog, .token.doctype, .token.cdata {
-    color: #8292a2 !important; /* Lighter comment for dark bg */
+    color: #8292a2 !important; 
   }
   .token.punctuation {
-    color: #f8f8f2 !important; /* Default text color */
+    color: #f8f8f2 !important; 
   }
   .token.namespace {
     opacity: .7 !important;
   }
   .token.property, .token.tag, .token.constant, .token.symbol, .token.deleted {
-    color: #f92672 !important; /* Pink */
+    color: #f92672 !important; 
   }
   .token.boolean, .token.number {
-    color: #ae81ff !important; /* Purple */
+    color: #ae81ff !important; 
   }
   .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted {
-    color: #a6e22e !important; /* Green */
+    color: #a6e22e !important; 
   }
   .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string, .token.variable {
-    color: #f8f8f2 !important; /* Default text color */
+    color: #f8f8f2 !important; 
   }
   .token.atrule, .token.attr-value, .token.function, .token.class-name {
-    color: #e6db74 !important; /* Yellow */
+    color: #e6db74 !important; 
   }
   .token.keyword {
-    color: #66d9ef !important; /* Cyan */
+    color: #66d9ef !important; 
   }
   .token.regex, .token.important {
-    color: #fd971f !important; /* Orange */
+    color: #fd971f !important; 
   }
 
-  /* Prose specific small fixes for inline code if still needed */
-  /* This should be covered by .markdown-content :where(code):not(:where(pre > *)) */
   .prose :where(code):not(:where([class~="not-prose"] *))::before,
   .prose :where(code):not(:where([class~="not-prose"] *))::after {
     content: "" !important; 

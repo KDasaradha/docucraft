@@ -1,34 +1,28 @@
+// src/components/ui/sidebar.tsx
 "use client"
 
 import * as React from "react"
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, forwardRef } from "react"
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, forwardRef, useRef } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X, Menu, type LucideIcon, ChevronDown, ChevronRight } from "lucide-react"
+import { X, Menu, type LucideIcon, ChevronDown, ChevronRight, GripVertical } from "lucide-react" 
 import { cn } from "@/lib/utils"
-// Slot is not directly used in this file's exports after Button logic moved to Button component
-// import { Slot } from "@radix-ui/react-slot"; 
+import { Slot } from "@radix-ui/react-slot"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { ScrollArea } from "@/components/ui/scroll-area"
-// Import the actual Radix UI components from ui/sheet.tsx to avoid re-implementing them here
-import {
-  Sheet as RadixSheet,
-  SheetTrigger as RadixSheetTrigger, // This is DialogPrimitive.Trigger
-  SheetClose,
-  SheetContent as RadixSheetContent, // This is DialogPrimitive.Content wrapped with portal & overlay
-  SheetHeader as RadixSheetHeader, // This is a div with styling
-  SheetTitle as RadixSheetTitle,   // This is DialogPrimitive.Title
-  SheetDescription as RadixSheetDescription, // This is DialogPrimitive.Description
-  SheetFooter as RadixSheetFooter    // This is a div with styling
-} from "@/components/ui/sheet";
+import { Sheet as RadixSheet, SheetTrigger as RadixSheetTrigger, SheetClose as RadixSheetClose, SheetContent as RadixSheetContent, SheetHeader as RadixSheetHeader, SheetTitle as RadixSheetTitle, SheetDescription as RadixSheetDescription, SheetFooter as RadixSheetFooter } from "@/components/ui/sheet";
 
 
 // --- Sidebar Context ---
 type SidebarState = "expanded" | "collapsed" | "offcanvas"
 type CollapsibleType = "icon" | "button" | "offcanvas"
+
+const DEFAULT_EXPANDED_WIDTH_REM = 16; // 16rem
+const MIN_SIDEBAR_WIDTH_PX = 192; // 12rem (12 * 16px)
+const MAX_SIDEBAR_WIDTH_PX = 384; // 24rem (24 * 16px)
 
 interface SidebarContextProps {
   collapsible: CollapsibleType
@@ -37,6 +31,9 @@ interface SidebarContextProps {
   openMobile: boolean
   setOpenMobile: React.Dispatch<React.SetStateAction<boolean>>
   toggleSidebar: () => void
+  sidebarWidth: number // width in pixels
+  setSidebarWidth: (width: number) => void
+  isResizing: boolean
 }
 
 const SidebarContext = createContext<SidebarContextProps | undefined>(undefined)
@@ -53,21 +50,45 @@ interface SidebarProviderProps {
   children: React.ReactNode
   defaultOpen?: boolean
   collapsible?: CollapsibleType
+  initialSidebarWidth?: string // e.g., "16rem"
 }
 
 export function SidebarProvider({
   children,
   defaultOpen = true,
   collapsible: initialCollapsible = "icon",
+  initialSidebarWidth = `${DEFAULT_EXPANDED_WIDTH_REM}rem`, 
 }: SidebarProviderProps) {
-  const isMobileView = useIsMobile() // This hook handles client-side check
+  const isMobileView = useIsMobile()
   const [openMobile, setOpenMobile] = useState(false)
   const [isCollapsedInternal, setIsCollapsedInternal] = useState(!defaultOpen)
+  const [isResizing, setIsResizing] = useState(false);
+
+  const [sidebarWidth, setSidebarWidthState] = useState(() => {
+    if (typeof window !== "undefined") {
+      const storedWidth = localStorage.getItem("sidebarWidth");
+      if (storedWidth) return parseInt(storedWidth, 10);
+    }
+    // Convert initialSidebarWidth (e.g., "16rem") to pixels
+    if (typeof window !== "undefined" && initialSidebarWidth.endsWith("rem")) {
+      return parseFloat(initialSidebarWidth) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+    return DEFAULT_EXPANDED_WIDTH_REM * 16; // Fallback to default in pixels
+  });
+
+  const setSidebarWidth = useCallback((newWidth: number) => {
+    const clampedWidth = Math.max(MIN_SIDEBAR_WIDTH_PX, Math.min(newWidth, MAX_SIDEBAR_WIDTH_PX));
+    setSidebarWidthState(clampedWidth);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarWidth", clampedWidth.toString());
+    }
+  }, []);
+
 
   const collapsible = isMobileView ? "offcanvas" : initialCollapsible
 
   const state = useMemo<SidebarState>(() => {
-    if (isMobileView) return "offcanvas" // On mobile, it's always conceptually "offcanvas"
+    if (isMobileView) return "offcanvas"
     return isCollapsedInternal ? "collapsed" : "expanded"
   }, [isMobileView, isCollapsedInternal])
 
@@ -80,91 +101,202 @@ export function SidebarProvider({
   }, [isMobileView])
 
   useEffect(() => {
-    // If view changes from mobile to desktop and mobile sidebar was open, close it.
-    if (!isMobileView && openMobile) {
-      setOpenMobile(false)
+    if (!isMobileView) {
+      setOpenMobile(false) 
     }
-  }, [isMobileView, openMobile])
+  }, [isMobileView])
 
-  const contextValue = {
-    collapsible,
-    state,
-    isMobile: isMobileView, // Pass the resolved mobile state
-    openMobile,
-    setOpenMobile,
-    toggleSidebar,
-  };
 
-  const sidebarWidthVar = state === 'collapsed' && !isMobileView && collapsible !== 'offcanvas'
-    ? 'var(--sidebar-width-icon)'
-    : 'var(--sidebar-width)'
-  const currentSidebarWidthVar = openMobile && isMobileView ? 'var(--sidebar-width)' : sidebarWidthVar;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
+      if (state === 'expanded' && !isMobileView) {
+        root.style.setProperty('--sidebar-width', `${sidebarWidth}px`);
+      } else if (state === 'collapsed' && !isMobileView) {
+        root.style.setProperty('--sidebar-width', 'var(--sidebar-width-icon)');
+      } else { // offcanvas or mobile
+        root.style.setProperty('--sidebar-width', `${DEFAULT_EXPANDED_WIDTH_REM}rem`); // default for mobile sheet
+      }
+    }
+  }, [sidebarWidth, state, isMobileView]);
 
-  const providerContent = (
-    <TooltipProvider delayDuration={0}>
-      <div
-        className="group/sidebar-wrapper flex h-full w-full"
-        data-state={state}
-        style={{ ['--current-sidebar-width' as string]: currentSidebarWidthVar }}
-      >
-        {/* Desktop placeholder for fixed sidebar width */}
-        {!isMobileView && collapsible !== "offcanvas" && (
-          <div
-            className={cn(
-              "hidden md:block flex-shrink-0 transition-all duration-200 ease-in-out",
-              state === 'collapsed' ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]"
-            )}
-            aria-hidden="true"
-          />
-        )}
-        {children}
-      </div>
-    </TooltipProvider>
-  );
+  const currentAppliedWidth = useMemo(() => {
+    if (isMobileView && openMobile) return `${DEFAULT_EXPANDED_WIDTH_REM * 16}px`; // Width of mobile sheet
+    if (isMobileView && !openMobile) return "0px"; // No sidebar visible
+    if (state === 'collapsed') return "var(--sidebar-width-icon)";
+    return `${sidebarWidth}px`;
+  }, [isMobileView, openMobile, state, sidebarWidth]);
 
-  if (isMobileView === undefined) {
-    // Prevent rendering on server or during first client render before useIsMobile resolves
-    // This helps avoid hydration mismatches related to mobile-specific layout.
-    // Render children directly or a minimal placeholder if necessary.
-    // For now, let's provide the context but potentially delay RadixSheet rendering.
-    return (
-        <SidebarContext.Provider value={{ ...contextValue, isMobile: false /* sensible default for SSR */ }}>
-            {providerContent}
-        </SidebarContext.Provider>
-    );
-  }
-  
 
-  if (isMobileView) {
-    return (
-      <SidebarContext.Provider value={contextValue}>
-        <RadixSheet open={openMobile} onOpenChange={setOpenMobile}>
-          {/* The SidebarTrigger will be part of these children (via AppHeader) */}
-          {/* The SheetContent will also be part of these children (via AppSidebarClient rendering it) */}
-          {providerContent}
-        </RadixSheet>
-      </SidebarContext.Provider>
-    );
-  }
-
-  // Desktop view
   return (
-    <SidebarContext.Provider value={contextValue}>
-      {providerContent}
+    <SidebarContext.Provider
+      value={{
+        collapsible,
+        state,
+        isMobile: isMobileView,
+        openMobile,
+        setOpenMobile,
+        toggleSidebar,
+        sidebarWidth,
+        setSidebarWidth,
+        isResizing
+      }}
+    >
+      <TooltipProvider delayDuration={0}>
+        <div 
+          className="group/sidebar-wrapper flex h-full w-full" 
+          data-state={state}
+          style={{
+            ['--current-sidebar-width' as string]: currentAppliedWidth
+          }}
+        >
+           {!isMobileView && collapsible !== "offcanvas" && (
+             <div
+                className={cn(
+                  "hidden md:block flex-shrink-0 transition-width duration-200 ease-in-out",
+                   isResizing ? "!transition-none" : "", // Disable transition during resize
+                  state === 'collapsed' ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]"
+                )}
+                aria-hidden="true"
+             />
+           )}
+          {children}
+        </div>
+      </TooltipProvider>
     </SidebarContext.Provider>
-  );
+  )
 }
 
 
-// SidebarTrigger uses RadixSheetTrigger from ui/sheet.tsx
+const SheetTrigger = DialogPrimitive.Trigger
+const SheetClose = RadixSheetClose; 
+
+
+const sidebarVariants = cva(
+  "flex flex-col transition-width duration-200 ease-in-out group fixed top-[var(--header-height)] bottom-0 left-0 z-40",
+  {
+    variants: {
+      variant: {
+        default: "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
+        sidebar: "bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-md",
+      },
+      isResizing: {
+        true: "!transition-none cursor-col-resize",
+        false: "",
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      isResizing: false,
+    },
+  }
+)
+
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof sidebarVariants> {
+  collapsible?: CollapsibleType 
+}
+
+const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
+  ({ className, variant, collapsible, children, ...props }, ref) => {
+  const { isMobile, openMobile, setOpenMobile, state, collapsible: contextCollapsible, sidebarWidth, setSidebarWidth: setContextSidebarWidth, isResizing: contextIsResizing } = useSidebar()
+  const effectiveCollapsible = collapsible || contextCollapsible;
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [localIsResizing, setLocalIsResizing] = useState(false);
+
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setLocalIsResizing(true);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [setLocalIsResizing]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!localIsResizing || !sidebarRef.current) return;
+      let newWidth = e.clientX - sidebarRef.current.getBoundingClientRect().left;
+      // Ensure clientX is used relative to the viewport, not just any element.
+      // If sidebar is fixed, clientX directly gives the width from the left edge of viewport.
+      newWidth = e.clientX; 
+      setContextSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      if (localIsResizing) {
+        setLocalIsResizing(false);
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+      }
+    };
+
+    if (localIsResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default'; // Reset cursor on cleanup
+      document.body.style.userSelect = 'auto'; // Reset userSelect on cleanup
+    };
+  }, [localIsResizing, setContextSidebarWidth]);
+
+
+  if (isMobile) {
+    return (
+      <RadixSheet open={openMobile} onOpenChange={setOpenMobile}>
+        <SheetTrigger asChild>
+           {/* This div is a valid single child for Slot. The actual trigger button is in AppHeader. */}
+          <div />
+        </SheetTrigger>
+        <RadixSheetContent side="left" className={cn("p-0 flex flex-col", className)} {...props}>
+          {children}
+        </RadixSheetContent>
+      </RadixSheet>
+    )
+  }
+
+  // Desktop view:
+  return (
+    <aside
+      ref={sidebarRef} // Use the ref here
+      className={cn(sidebarVariants({ variant, isResizing: localIsResizing || contextIsResizing }), 
+        state === 'collapsed' ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]",
+        className
+      )}
+      data-state={state} 
+      {...props}
+    >
+      {children}
+      {state === 'expanded' && effectiveCollapsible !== 'offcanvas' && (
+        <div
+          onMouseDown={handleMouseDown}
+          className={cn(
+            "absolute top-0 right-0 h-full w-2 cursor-col-resize hover:bg-primary/20 active:bg-primary/30",
+            "transition-colors duration-150 ease-in-out",
+            (localIsResizing || contextIsResizing) && "bg-primary/30"
+          )}
+          title="Resize sidebar"
+        >
+            <GripVertical className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity"/>
+        </div>
+      )}
+    </aside>
+  )
+})
+Sidebar.displayName = "Sidebar"
+
+
 export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const { toggleSidebar, isMobile } = useSidebar();
-    
-    // Ensure isMobile is defined and true before rendering
+    const { toggleSidebar, isMobile } = useSidebar()
     if (typeof isMobile !== 'boolean' || !isMobile) {
-      return null;
+         // Return a placeholder or null for SSR or when isMobile is not determined to avoid hydration mismatch
+         return <Button ref={ref} variant="ghost" size="icon" className="opacity-0 pointer-events-none md:hidden" aria-hidden="true" {...props}><Menu /></Button>;
     }
+    if (!isMobile) return null; // Don't render on desktop
+
 
     return (
       <RadixSheetTrigger asChild>
@@ -174,82 +306,25 @@ export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
           size="icon"
           onClick={toggleSidebar}
           aria-label="Toggle sidebar"
-          className="md:hidden" // Ensure it's only for mobile-like views
+          className="md:hidden" 
           {...props}
         >
           <Menu />
         </Button>
       </RadixSheetTrigger>
-    );
-  }
-);
-SidebarTrigger.displayName = "SidebarTrigger";
-
-
-const sidebarVariantsCva = cva(
-  "flex flex-col transition-all duration-200 ease-in-out group fixed top-[var(--header-height)] bottom-0 left-0 z-40",
-  {
-    variants: {
-      variant: {
-        default: "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
-        sidebar: "bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-md",
-      },
-      collapsibleType: {
-        icon: "data-[state=collapsed]:w-[var(--sidebar-width-icon)] data-[state=expanded]:w-[var(--sidebar-width)]",
-        button: "data-[state=collapsed]:w-[var(--sidebar-width-icon)] data-[state=expanded]:w-[var(--sidebar-width)]",
-        offcanvas: "w-[var(--sidebar-width)]", // Should not apply to fixed desktop sidebar
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
+    )
   }
 )
-
-interface SidebarProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof sidebarVariantsCva> {}
-
-
-// Sidebar component is now primarily for desktop view (<aside>)
-// For mobile, AppSidebarClient will use RadixSheetContent directly.
-const Sidebar = forwardRef<HTMLElement, SidebarProps>(
-  ({ className, variant, children, ...props }, ref) => {
-    const { state, collapsible: contextCollapsible, isMobile } = useSidebar();
-
-    if (isMobile) {
-      // On mobile, this component's content is rendered inside RadixSheetContent by AppSidebarClient.
-      // So, this Sidebar component shouldn't render <aside> or SheetContent itself.
-      // It should just provide its children to AppSidebarClient.
-      // For this direct usage, we assume it's NOT mobile or AppSidebarClient handles it.
-      // If AppSidebarClient renders <Sidebar> on mobile, that needs to be changed.
-      // Let's assume AppSidebarClient uses RadixSheetContent directly on mobile.
-      // Thus, if <Sidebar> is used, it's for desktop.
-      return null; // Or handle differently if <Sidebar> can be used on mobile as content wrapper
-    }
-
-    // Desktop view:
-    return (
-      <aside
-        ref={ref}
-        className={cn(sidebarVariantsCva({ variant, collapsibleType: contextCollapsible, className }))}
-        data-state={state}
-        {...props}
-      >
-        {children}
-      </aside>
-    );
-  }
-);
-Sidebar.displayName = "Sidebar";
-
+SidebarTrigger.displayName = "SidebarTrigger"
 
 const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => {
+ ({ className, children, ...props }, ref) => {
     const { isMobile } = useSidebar();
     return (
-      <div
+      <SheetHeader // Use SheetHeader from Radix UI sheet for proper structure if it's a sheet
         ref={ref}
         className={cn(
-          "flex h-[var(--header-height)] items-center border-b border-sidebar-border p-3 justify-between",
+          "flex h-[var(--header-height)] items-center border-b border-sidebar-border p-3",
           "group-data-[state=collapsed]/sidebar:justify-center group-data-[state=expanded]/sidebar:justify-between",
           className
         )}
@@ -258,18 +333,18 @@ const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
         {isMobile && <RadixSheetTitle className="sr-only">Main Menu</RadixSheetTitle>}
         {children}
         {isMobile && (
-          <SheetClose asChild>
+          <RadixSheetClose asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <X className="h-4 w-4" />
               <span className="sr-only">Close menu</span>
             </Button>
-          </SheetClose>
+          </RadixSheetClose>
         )}
-      </div>
+      </SheetHeader>
     );
   }
 );
-SidebarHeader.displayName = "SidebarHeader";
+SidebarHeader.displayName = "SidebarHeader"
 
 
 const SidebarContent = forwardRef<
@@ -294,30 +369,33 @@ const SidebarFooter = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
     />
   )
 )
-SidebarFooter.displayName = "SidebarFooter";
+SidebarFooter.displayName = "SidebarFooter"
 
 
 const SidebarMenu = forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
   ({ className, ...props }, ref) => (
     <ul
       ref={ref}
-      className={cn("space-y-0.5 py-2", className)}
+      className={cn("space-y-0.5 py-2", 
+        "group-data-[state=expanded]/sidebar:px-2", // Add padding only when expanded
+        "group-data-[state=collapsed]/sidebar:px-1"  // Minimal padding when collapsed
+      )}
       {...props}
     />
   )
 )
-SidebarMenu.displayName = "SidebarMenu";
+SidebarMenu.displayName = "SidebarMenu"
 
 const SidebarMenuItem = forwardRef<HTMLLIElement, React.HTMLAttributes<HTMLLIElement>>(
   ({ className, ...props }, ref) => (
     <li
       ref={ref}
-      className={cn("", className)}
+      className={cn("", className)} 
       {...props}
     />
   )
 )
-SidebarMenuItem.displayName = "SidebarMenuItem";
+SidebarMenuItem.displayName = "SidebarMenuItem"
 
 interface SidebarMenuButtonProps extends ButtonProps {
   icon?: LucideIcon
@@ -326,8 +404,8 @@ interface SidebarMenuButtonProps extends ButtonProps {
   asChild?: boolean
   tooltip?: React.ReactNode
   level?: number
-  hasSubItems?: boolean // Added to manage chevron display
-  isOpen?: boolean      // Added to manage chevron state
+  hasSubItems?: boolean 
+  isOpen?: boolean      
 }
 
 const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
@@ -335,8 +413,8 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
     { className, icon: Icon, label, isActive, asChild, tooltip, level = 0, children, hasSubItems, isOpen, ...props },
     ref
   ) => {
-    const { state: sidebarState, isMobile, collapsible: contextCollapsible } = useSidebar();
-    const isCollapsed = !isMobile && sidebarState === "collapsed" && contextCollapsible !== "offcanvas";
+    const { state: sidebarState, isMobile, collapsible } = useSidebar()
+    const isCollapsed = !isMobile && sidebarState === "collapsed" && collapsible !== "offcanvas";
 
     const content = (
       <>
@@ -344,28 +422,25 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         <span
           className={cn(
             "truncate flex-grow text-left",
-            isCollapsed && "hidden",
+            isCollapsed && "hidden", 
           )}
         >
           {children || label}
         </span>
-        {hasSubItems && !isCollapsed && !isMobile && ( // Don't show chevron on mobile if handled by native sheet closing
-           isOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
-        )}
-         {hasSubItems && isMobile && ( // For mobile, chevron can be useful if submenus are part of the sheet content
-           isOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+         {hasSubItems && !isCollapsed && ( 
+           isOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />
         )}
       </>
-    );
+    )
 
-    const buttonElement = (
+    const button = (
       <Button
         ref={ref}
         variant={isActive ? "sidebarAccent" : "ghostSidebar"}
         className={cn(
           "h-auto min-h-[2.25rem] w-full justify-start items-center gap-2.5 text-sm px-3 py-2",
           isCollapsed && "justify-center px-0",
-          `pl-${isCollapsed ? 3 : (3 + (level * 1.5))}`,
+          `pl-${isCollapsed ? 3 : (3 + (level * 1.5))}`, // Dynamic padding based on level
           className
         )}
         asChild={asChild}
@@ -373,23 +448,23 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
       >
         {asChild ? children : content}
       </Button>
-    );
+    )
 
 
     if (isCollapsed && tooltip) {
       return (
         <Tooltip>
-          <TooltipTrigger asChild>{buttonElement}</TooltipTrigger>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
           <TooltipContent side="right" align="center" sideOffset={10}>
             {tooltip}
           </TooltipContent>
         </Tooltip>
       )
     }
-    return buttonElement;
+    return button
   }
 )
-SidebarMenuButton.displayName = "SidebarMenuButton";
+SidebarMenuButton.displayName = "SidebarMenuButton"
 
 
 const SidebarMenuSub = forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
@@ -397,16 +472,18 @@ const SidebarMenuSub = forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLULi
     const { state, isMobile } = useSidebar();
     const isCollapsed = !isMobile && state === "collapsed";
 
-    if (isCollapsed && !isMobile) return null; // Hide sub-menu when collapsed on desktop
+    if (isCollapsed && !isMobile) return null; 
 
     return (
       <ul
         ref={ref}
         className={cn(
-          "ml-0 space-y-0.5 group-data-[state=collapsed]/sidebar:hidden pl-3 border-l border-sidebar-border/50 my-1",
-          isMobile && "pl-3 border-l border-sidebar-border/50 my-1", // Ensure styling on mobile too
+          "ml-0 space-y-0.5 group-data-[state=collapsed]/sidebar:hidden pl-[calc(var(--sidebar-indent-base)_/_2)] border-l border-sidebar-border/50 my-1",
+           "[&_ul]:pl-[calc(var(--sidebar-indent-base)_/_2)]", // Nested sub-menus also get indent
+          isMobile && "pl-[calc(var(--sidebar-indent-base)_/_2)] border-l border-sidebar-border/50 my-1", 
           className
         )}
+        style={{ ['--sidebar-indent-base' as string]: '1rem' }} // Base indent, adjust as needed
         {...props}
       />
     );
@@ -416,52 +493,60 @@ SidebarMenuSub.displayName = "SidebarMenuSub";
 
 
 const SidebarMenuSkeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { showIcon?: boolean, showText?: boolean }>(
-  ({ className, showIcon = true, showText = true, ...props }, ref) => {
-    const { state: sidebarStateHook, isMobile: isMobileHook, collapsible: collapsibleHook } = useSidebar();
-    const isCollapsed = !isMobileHook && sidebarStateHook === "collapsed" && collapsibleHook !== "offcanvas";
+  ({ className, showIcon: propShowIcon, showText: propShowText, ...props }, ref) => {
+    const { state, isMobile, collapsible } = useSidebar(); 
+    const isCollapsed = !isMobile && state === "collapsed" && collapsible !== "offcanvas";
     
-    const [skeletonTextWidth, setSkeletonTextWidth] = useState('75%');
+    const [skeletonTextWidth, setSkeletonTextWidth] = useState('75%'); 
+
+    const showIcon = propShowIcon === undefined ? true : propShowIcon;
+    const showText = propShowText === undefined ? true : propShowText;
+
 
     useEffect(() => {
       setSkeletonTextWidth(`${Math.floor(Math.random() * (85 - 55 + 1)) + 55}%`);
     }, []);
 
-    const actualShowIcon = showIcon;
-    const actualShowText = showText && !isCollapsed;
 
     return (
       <div
         ref={ref}
         data-sidebar="menu-skeleton"
         className={cn(
-          "h-9 w-full rounded-md flex items-center gap-2.5 px-2.5",
-          isCollapsed && "justify-center",
+          "h-9 w-full rounded-md flex items-center gap-2.5", 
+          isCollapsed ? "justify-center px-1" : "px-2.5", // Adjusted padding for collapsed
           className
         )}
         {...props}
       >
-        {actualShowIcon && (
+        {showIcon && !isCollapsed && ( 
            <Skeleton
-            className={cn("rounded-md bg-sidebar-foreground/10", isCollapsed ? "size-5" : "size-4")}
+            className="size-4 rounded-md bg-sidebar-foreground/10"
             data-sidebar="menu-skeleton-icon"
           />
         )}
-        {actualShowText && (
+         {showIcon && isCollapsed && ( 
+           <Skeleton
+            className="size-5 rounded-md bg-sidebar-foreground/10" 
+            data-sidebar="menu-skeleton-icon"
+          />
+        )}
+        {showText && !isCollapsed && ( 
           <Skeleton
             className="h-4 flex-1 max-w-[var(--skeleton-width,75%)] rounded-sm bg-sidebar-foreground/10"
             data-sidebar="menu-skeleton-text"
-            style={{['--skeleton-width' as string]: skeletonTextWidth }}
+            style={{['--skeleton-width' as string]: skeletonTextWidth }} 
           />
         )}
       </div>
     )
   }
 )
-SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton";
+SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton"
 
 
 export {
-  Sidebar, // This is the <aside> for desktop
+  Sidebar,
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
@@ -470,8 +555,5 @@ export {
   SidebarMenuButton,
   SidebarMenuSub,
   SidebarMenuSkeleton,
-  // Radix specific sheet components are used internally by SidebarProvider or AppSidebarClient
-  // Re-exporting them if they are needed externally from here
-  RadixSheetTitle, 
-  SheetClose, 
+  RadixSheetClose, 
 }
