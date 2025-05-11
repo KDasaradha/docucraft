@@ -21,7 +21,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Main Comprehensive Guide", // Differentiating from user's "FastAPI > Guides"
-    path: "/docs/guides/comprehensive-fastapi-guide",
+    // path: "/docs/guides/comprehensive-fastapi-guide",
     order: 3,
     isSection: true,
     children: [
