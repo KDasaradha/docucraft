@@ -17,8 +17,8 @@ html {
 
 @layer base {
   :root {
-    --background: 220 20% 99%; /* Extremely light, almost white, cool gray - Main page background */
-    --foreground: 220 15% 20%; /* Dark cool gray */
+    --background: 220 20% 99%; /* Main page background - Very light gray */
+    --foreground: 220 15% 20%; /* Dark cool gray for text */
 
     --header-background: 220 20% 97%; /* Softer light gray for header */
     --header-foreground: 220 15% 20%;
@@ -35,19 +35,19 @@ html {
     --border: 220 10% 90%; 
     --input: 220 10% 95%; 
 
-    --primary: 180 100% 25%; 
-    --primary-foreground: 0 0% 100%; 
+    --primary: 180 100% 25%; /* Teal */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 180 25% 90%; 
-    --secondary-foreground: 180 100% 20%; 
+    --secondary: 180 25% 90%; /* Light teal/cyan */
+    --secondary-foreground: 180 100% 20%; /* Darker teal/cyan */
 
-    --accent: 180 100% 25%; 
-    --accent-foreground: 0 0% 100%; 
+    --accent: 180 100% 25%; /* Teal - same as primary for strong accent */
+    --accent-foreground: 0 0% 100%; /* White */
 
-    --destructive: 0 72% 51%; 
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* Light gray/white for destructive text */
 
-    --ring: 180 80% 40%; 
+    --ring: 180 80% 40%; /* Teal for focus rings */
 
     --radius: 0.5rem;
 
@@ -94,19 +94,19 @@ html {
     --border: 220 10% 20%;
     --input: 220 10% 18%;
 
-    --primary: 180 70% 50%; 
-    --primary-foreground: 220 15% 10%; 
+    --primary: 180 70% 50%; /* Brighter Teal for dark mode */
+    --primary-foreground: 220 15% 10%; /* Darker text on primary */
 
     --secondary: 220 15% 25%; 
-    --secondary-foreground: 180 70% 70%; 
+    --secondary-foreground: 180 70% 70%; /* Lighter teal/cyan text */
 
-    --accent: 180 70% 50%; 
-    --accent-foreground: 220 15% 10%;
+    --accent: 180 70% 50%; /* Brighter Teal for dark mode */
+    --accent-foreground: 220 15% 10%; /* Darker text on accent */
 
-    --destructive: 0 63% 40%;
+    --destructive: 0 63% 40%; /* Darker Red */
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 180 70% 60%; 
+    --ring: 180 70% 60%; /* Brighter Teal for focus rings */
 
     /* Sidebar specific vars */
     --sidebar-background: hsl(220 15% 12%);
@@ -175,20 +175,27 @@ html {
     @apply mb-1;
   }
   .markdown-content blockquote {
-    @apply border-l-4 border-primary pl-4 italic text-muted-foreground bg-muted/20 py-2 rounded-r-md; /* Added subtle background */
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground bg-muted/20 py-2 rounded-r-md shadow-sm; /* Added subtle background and shadow */
   }
   .markdown-content table {
-    @apply w-full my-6 border-collapse border border-border text-base shadow-sm rounded-md overflow-hidden; /* Added shadow and rounded corners */
+    @apply w-full my-6 border-collapse border border-border text-base shadow-lg rounded-lg overflow-hidden; /* Increased shadow and rounded corners */
   }
   .markdown-content th, .markdown-content td {
-    @apply border border-border px-4 py-2 text-left;
+    @apply border border-border px-4 py-3 text-left transition-colors duration-150; /* Added transition and increased padding */
   }
   .markdown-content th {
-    @apply bg-muted font-semibold;
+    @apply bg-muted/70 font-semibold border-b-2 border-primary/50; /* More distinct header, bottom border */
+  }
+  .markdown-content tr:nth-child(even) {
+    @apply bg-muted/30; /* Zebra striping for even rows */
+  }
+  .markdown-content tr:hover td { /* Hover effect for table rows */
+    @apply bg-accent/10;
   }
 
+
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg; /* Increased shadow */
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-xl; /* Increased shadow further */
     background-color: #272822 !important; 
   }
   
@@ -246,19 +253,20 @@ html {
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px; /* Slightly wider */
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background) / 0.5);
+  background: hsl(var(--background) / 0.3); /* Softer track */
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted-foreground) / 0.6); /* More visible thumb */
   border-radius: 10px;
+  border: 2px solid hsl(var(--background) / 0.3); /* Border around thumb */
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.7);
+  background: hsl(var(--muted-foreground) / 0.8);
 }
 
 /* Ensure smooth transitions for theme changes */

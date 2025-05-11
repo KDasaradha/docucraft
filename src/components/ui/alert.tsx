@@ -9,9 +9,9 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground border-border shadow-sm", // Added shadow
+        default: "bg-background text-foreground border-border shadow-sm hover:shadow-md transition-shadow", 
         destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive shadow-md shadow-destructive/30", // Added destructive shadow
+          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive shadow-md shadow-destructive/30 hover:shadow-lg transition-shadow", 
       },
     },
     defaultVariants: {
@@ -33,7 +33,12 @@ const Alert = React.forwardRef<
     transition={{ duration: 0.3, ease: "easeOut" }}
     {...props}
   >
-    {children}
+    <div className="flex items-start"> {/* Wrapper to align icon and text content */}
+      {React.Children.toArray(children).find(child => React.isValidElement(child) && typeof child.type !== 'string' && (child.type as any).displayName !== 'AlertTitle' && (child.type as any).displayName !== 'AlertDescription')}
+      <div className="ml-4 flex-1"> {/* Margin for icon spacing if an icon is the first child */}
+        {React.Children.toArray(children).filter(child => !(React.isValidElement(child) && typeof child.type !== 'string' && (child.type as any).displayName !== 'AlertTitle' && (child.type as any).displayName !== 'AlertDescription'))}
+      </div>
+    </div>
   </motion.div>
 ))
 Alert.displayName = "Alert"

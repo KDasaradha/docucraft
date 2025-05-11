@@ -8,7 +8,7 @@ import { saveDocumentContent, summarizeCurrentDocument } from '@/app/actions/doc
 import { submitFeedback } from '@/app/actions/feedbackActions';
 import { useToast } from '@/hooks/use-toast';
 import { type DocResult } from '@/lib/docs';
-import { Loader2, Edit3, XCircle, Save, Eye, ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, FileTextIcon, MessageSquareQuote } from 'lucide-react';
+import { Loader2, Edit3, XCircle, Save, Eye, ArrowLeft, ArrowRight, ThumbsUp, ThumbsDown, FileTextIcon, MessageSquareQuote, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import MarkdownRenderer from '@/components/docs/MarkdownRenderer';
@@ -45,7 +45,7 @@ const users = [
 export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: DocClientViewProps) {
   const [doc, setDoc] = useState<DocResult | null>(initialDoc);
   const [isLoadingDoc, setIsLoadingDoc] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Initialize with false
+  const [isEditing, setIsEditing] = useState(false); 
   const [editableContent, setEditableContent] = useState(initialDoc.content);
   const [isSaving, startSaveTransition] = useTransition();
   const { toast } = useToast();
@@ -132,7 +132,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
 
   const handleSave = async (isDraft: boolean = false) => {
     if (!doc || !canEdit) return;
-
+  
     startSaveTransition(async () => {
       const result = await saveDocumentContent(doc.filePath, editableContent);
       if (result.success) {
@@ -142,23 +142,17 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         });
         setIsEditing(false);
         
-        if (result.revalidatedSlug !== undefined) {
-          const targetPath = result.revalidatedSlug === '' ? '/docs' : `/docs/${result.revalidatedSlug}`;
-          router.push(targetPath);
+        let targetPath = '/docs'; // Default fallback
+        if (result.revalidatedSlug !== undefined && result.revalidatedSlug !== null) {
+          targetPath = result.revalidatedSlug === '' ? '/docs' : `/docs/${result.revalidatedSlug}`;
         } else if (params && params.slug && Array.isArray(params.slug) && params.slug.length > 0) {
           const slugPath = params.slug.join('/');
-          router.push(`/docs/${slugPath}`);
+          targetPath = `/docs/${slugPath}`;
         } else {
-          toast({
-            title: 'Save Successful, Navigation Warning',
-            description: 'Document saved, but client-side parameters for redirect were not fully available. Revalidating current view.',
-            variant: 'default', 
-            duration: 7000,
-          });
-           // Fallback to refreshing the current page if slug info isn't robust
-           // This situation should ideally be rare with server-driven revalidatedSlug
-           console.warn('DocClientView: handleSave - revalidatedSlug and params.slug were insufficient for a precise redirect. Refreshing current path.');
+           console.warn('DocClientView: handleSave - revalidatedSlug and params.slug were insufficient for a precise redirect. Defaulting to /docs. Params:', params, 'Result:', result);
         }
+        
+        router.push(targetPath);
         router.refresh(); 
       } else {
         toast({
@@ -197,9 +191,13 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
   const handleFeedback = async (wasHelpful: boolean) => {
     if (!doc || feedbackSubmitted) return;
     
+    const currentSlugPath = (params && params.slug && Array.isArray(params.slug) && params.slug.length > 0)
+      ? params.slug.join('/')
+      : (doc.filePath.includes('/') ? doc.filePath.substring(doc.filePath.lastIndexOf('/') + 1).replace('.md', '') : doc.filePath.replace('.md',''));
+
     const feedbackInput = {
       documentTitle: doc.title,
-      documentPath: `/docs/${params && params.slug && Array.isArray(params.slug) && params.slug.length > 0 ? params.slug.join('/') : 'unknown'}`, 
+      documentPath: `/docs/${currentSlugPath || 'unknown-path'}`, 
       isHelpful: wasHelpful,
       timestamp: new Date().toISOString(),
     };
@@ -209,6 +207,8 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
       toast({
         title: 'Feedback Submitted',
         description: result.message,
+        // Potentially add an icon here if useToast supported it
+        // icon: <CheckCircle className="h-5 w-5 text-green-500" /> 
       });
       setFeedbackSubmitted(wasHelpful ? 'helpful' : 'unhelpful');
     } else {
@@ -216,6 +216,7 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
         title: 'Feedback Error',
         description: result.message,
         variant: 'destructive',
+        // icon: <XCircle className="h-5 w-5 text-destructive-foreground" />
       });
     }
   };
@@ -407,19 +408,25 @@ export default function DocClientView({ initialDoc, params, prevDoc, nextDoc }: 
           </DialogHeader>
           <div className="py-4 max-h-[60vh] overflow-y-auto">
             {isSummarizing && (
-              <div className="flex items-center justify-center space-x-2 text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin" />
-                <span>Generating summary...</span>
-              </div>
+              <Alert>
+                <Loader2 className="h-5 w-5 text-primary" />
+                <AlertTitle>Generating Summary</AlertTitle>
+                <AlertDescription>
+                  Please wait while the AI processes the document...
+                </AlertDescription>
+              </Alert>
             )}
             {summaryResult && summaryResult.type === 'success' && (
-              <Alert>
+              <Alert variant="default">
+                 <CheckCircle className="h-5 w-5 text-green-500" />
+                <AlertTitle>Summary Ready</AlertTitle>
                 <AlertDescription>{summaryResult.message}</AlertDescription>
               </Alert>
             )}
             {summaryResult && summaryResult.type === 'error' && (
               <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
+                <XCircle className="h-5 w-5" />
+                <AlertTitle>Summarization Error</AlertTitle>
                 <AlertDescription>{summaryResult.message}</AlertDescription>
               </Alert>
             )}
