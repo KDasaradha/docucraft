@@ -17,10 +17,10 @@ html {
 
 @layer base {
   :root {
-    --background: 220 20% 99%; /* Main page background - Very light gray */
+    --background: 220 20% 97%; /* Softer light gray for main page background */
     --foreground: 220 15% 20%; /* Dark cool gray for text */
 
-    --header-background: 220 20% 97%; /* Softer light gray for header */
+    --header-background: 220 20% 98.5%; /* Even lighter gray for header to differentiate */
     --header-foreground: 220 15% 20%;
 
     --muted: 220 15% 96%; 
@@ -58,13 +58,13 @@ html {
     --chart-5: 27 87% 67%;
     
     /* Sidebar specific vars */
-    --sidebar-background: hsl(220 15% 97%); 
+    --sidebar-background: hsl(220 15% 98%); /* Slightly adjusted for differentiation */
     --sidebar-foreground: hsl(220 15% 25%);
     --sidebar-primary: hsl(180 100% 25%); 
     --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(180 30% 88%); 
+    --sidebar-accent: hsl(180 30% 90%); /* Lighter accent */
     --sidebar-accent-foreground: hsl(180 100% 20%);
-    --sidebar-border: hsl(220 10% 88%); 
+    --sidebar-border: hsl(220 10% 90%); /* Slightly adjusted */
     --sidebar-ring: hsl(180 80% 40%);
 
     --header-height: 4rem; 
@@ -79,7 +79,7 @@ html {
     --background: 220 15% 10%; 
     --foreground: 220 10% 90%; 
 
-    --header-background: 220 15% 8%; /* Darker header background */
+    --header-background: 220 15% 8%; 
     --header-foreground: 220 10% 90%;
 
     --muted: 220 15% 15%;
@@ -94,19 +94,19 @@ html {
     --border: 220 10% 20%;
     --input: 220 10% 18%;
 
-    --primary: 180 70% 50%; /* Brighter Teal for dark mode */
-    --primary-foreground: 220 15% 10%; /* Darker text on primary */
+    --primary: 180 70% 50%; 
+    --primary-foreground: 220 15% 10%; 
 
     --secondary: 220 15% 25%; 
-    --secondary-foreground: 180 70% 70%; /* Lighter teal/cyan text */
+    --secondary-foreground: 180 70% 70%; 
 
-    --accent: 180 70% 50%; /* Brighter Teal for dark mode */
-    --accent-foreground: 220 15% 10%; /* Darker text on accent */
+    --accent: 180 70% 50%; 
+    --accent-foreground: 220 15% 10%; 
 
-    --destructive: 0 63% 40%; /* Darker Red */
+    --destructive: 0 63% 40%; 
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 180 70% 60%; /* Brighter Teal for focus rings */
+    --ring: 180 70% 60%; 
 
     /* Sidebar specific vars */
     --sidebar-background: hsl(220 15% 12%);
@@ -151,7 +151,7 @@ html {
   }
 
   .markdown-content h1:not(:first-child) { 
-    @apply text-3xl lg:text-4xl font-bold mt-10 mb-6 pb-2 border-b; /* Increased top margin for spacing */
+    @apply text-3xl lg:text-4xl font-bold mt-10 mb-6 pb-2 border-b; 
   }
   .markdown-content h2 {
     @apply text-2xl lg:text-3xl font-semibold mt-8 mb-4 pb-2 border-b;
@@ -175,27 +175,27 @@ html {
     @apply mb-1;
   }
   .markdown-content blockquote {
-    @apply border-l-4 border-primary pl-4 italic text-muted-foreground bg-muted/20 py-2 rounded-r-md shadow-sm; /* Added subtle background and shadow */
+    @apply border-l-4 border-primary/70 pl-4 italic text-muted-foreground bg-muted/30 py-2 rounded-r-md shadow-sm; /* Adjusted primary border opacity */
   }
   .markdown-content table {
-    @apply w-full my-6 border-collapse border border-border text-base shadow-lg rounded-lg overflow-hidden; /* Increased shadow and rounded corners */
+    @apply w-full my-6 border-collapse border border-border text-base shadow-md rounded-lg overflow-hidden; /* Slightly reduced shadow */
   }
   .markdown-content th, .markdown-content td {
-    @apply border border-border px-4 py-3 text-left transition-colors duration-150; /* Added transition and increased padding */
+    @apply border border-border px-4 py-3 text-left transition-colors duration-150; 
   }
   .markdown-content th {
-    @apply bg-muted/70 font-semibold border-b-2 border-primary/50; /* More distinct header, bottom border */
+    @apply bg-muted/60 font-semibold border-b-2 border-primary/40; /* Slightly adjusted opacity */
   }
   .markdown-content tr:nth-child(even) {
-    @apply bg-muted/30; /* Zebra striping for even rows */
+    @apply bg-muted/20; /* Softer zebra striping */
   }
-  .markdown-content tr:hover td { /* Hover effect for table rows */
-    @apply bg-accent/10;
+  .markdown-content tr:hover td { 
+    @apply bg-accent/5; /* More subtle hover */
   }
 
 
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-xl; /* Increased shadow further */
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg; 
     background-color: #272822 !important; 
   }
   
@@ -249,24 +249,33 @@ html {
   .prose :where(code):not(:where([class~="not-prose"] *))::after {
     content: "" !important; 
   }
+
+  /* Sidebar Header Specifics for tagline */
+  .sidebar-header-tagline {
+    @apply text-xs text-sidebar-foreground/70 mt-1 ml-1 truncate group-data-[state=collapsed]/sidebar-wrapper:hidden;
+  }
+  .sidebar-header-logo-container {
+    @apply flex flex-col; /* Ensure Logo and tagline stack vertically */
+  }
+
 }
 
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 10px; /* Slightly wider */
-  height: 10px;
+  width: 8px; /* Slightly narrower */
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background) / 0.3); /* Softer track */
+  background: hsl(var(--background) / 0.2); /* Even softer track */
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.6); /* More visible thumb */
+  background: hsl(var(--muted-foreground) / 0.5); /* Slightly less visible thumb */
   border-radius: 10px;
-  border: 2px solid hsl(var(--background) / 0.3); /* Border around thumb */
+  border: 1.5px solid hsl(var(--background) / 0.2); /* Adjusted border */
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.8);
+  background: hsl(var(--muted-foreground) / 0.7);
 }
 
 /* Ensure smooth transitions for theme changes */

@@ -1,7 +1,7 @@
 // src/components/layout/AppSidebarClient.tsx
 "use client";
 
-import type { ReactNode } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -14,16 +14,14 @@ import {
   SidebarMenuSub,
   useSidebar,
   SidebarMenuSkeleton,
-  SheetClose, // From ui/sidebar which re-exports Radix's SheetClose
-} from '@/components/ui/sidebar';
-import { SheetContent as MobileSheetContent, SheetTitle } from "@/components/ui/sheet"; // Actual SheetContent and SheetTitle for mobile
+} from '@/components/ui/sidebar'; // Corrected import path
+import { SheetContent as MobileSheetContent, SheetClose, SheetTitle } from "@/components/ui/sheet"; // Actual SheetContent and SheetTitle for mobile
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/Logo';
 import type { NavItem } from '@/lib/docs'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { ExternalLink, ChevronDown, ChevronRight, X } from 'lucide-react'; 
-import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -52,16 +50,15 @@ const subMenuVariants = {
 };
 
 const normalizePath = (p: string | undefined): string => {
-  if (!p) return '#'; // Handle undefined href gracefully
+  if (!p) return '#';
   let normalized = p.replace(/\/(index|_index)(\.mdx?)?$/, '');
   if (normalized.endsWith('/') && normalized.length > 1 && normalized !== '/docs/') { 
     normalized = normalized.slice(0, -1);
   }
-   // Ensure /docs/index or /docs/_index becomes /docs
-  if (normalized === '/docs/index' || normalized === '/docs/_index') {
+  if (normalized === '/docs/index' || normalized === '/docs/_index' || normalized === '/docs') {
     return '/docs';
   }
-  return normalized || '/docs'; // Default to /docs if path becomes empty (e.g. from /docs/ only)
+  return normalized || '/docs';
 };
 
 
@@ -69,14 +66,11 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   const [isOpen, setIsOpen] = useState(initialOpen);
   const { isMobile } = useSidebar();
   
-  const normalizedItemHref = item.href ? normalizePath(item.href) : '#'; // Use '#' if href is undefined
+  const normalizedItemHref = item.href ? normalizePath(item.href) : '#';
   const normalizedCurrentPath = normalizePath(currentPath);
 
   const isDirectlyActive = normalizedItemHref === normalizedCurrentPath && normalizedItemHref !== '#';
   
-  // An item is an active ancestor if the current path starts with its href, 
-  // AND the href is not just a section link (which would be '#')
-  // AND the item actually has children.
   const isActiveAncestor = 
     normalizedItemHref !== '#' &&
     normalizedCurrentPath.startsWith(normalizedItemHref + '/') && 
@@ -85,47 +79,30 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
   const itemIsActive = isDirectlyActive || isActiveAncestor;
 
   useEffect(() => {
-    // Automatically open sections if they are an ancestor of the current path
     if (isActiveAncestor && !isOpen) {
       setIsOpen(true);
     }
-  }, [isActiveAncestor, isOpen]);
+  }, [isActiveAncestor, isOpen, currentPath, item.href]); // Added dependencies
 
 
   const hasSubItems = item.items && item.items.length > 0;
-  // A link is a folder link if it has an href, is not external, not an anchor, and not a section header meant only for grouping
   const isFolderLink = item.href && !item.href.startsWith('http') && !item.href.startsWith('#') && !item.isExternal;
-
   const isPureSectionHeader = item.isSection && level === 0 && !hasSubItems && (!item.href || item.href === '#');
   const isSubSectionHeader = item.isSection && level > 0 && !isFolderLink && !hasSubItems;
 
-
-  if (isPureSectionHeader || isSubSectionHeader) {
-    return (
-      <motion.div 
-        variants={menuItemVariants}
-        className={cn(
-          "px-3 pt-5 pb-1 text-xs font-semibold text-sidebar-foreground/70 tracking-wider uppercase select-none truncate",
-          isSubSectionHeader && "pt-3 text-sidebar-foreground/60",
-          isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2" // Adjusted for better visibility of single letter
-        )}
-      >
-        {isCollapsed && !isMobile && item.title.substring(0,1).toUpperCase()}
-        {(!isCollapsed || isMobile) && item.title}
-      </motion.div>
-    );
-  }
-  
   const handleToggleOrNavigate = (e: React.MouseEvent) => {
-    if (hasSubItems && (!item.href || item.href === '#' || item.isSection && !isFolderLink) ) { // Toggle if it's a section header without a direct link or has sub-items
+    if (hasSubItems) {
       setIsOpen(!isOpen);
-       if (item.isSection && !isFolderLink && item.href === '#') { // Prevent navigation for pure section headers
-         e.preventDefault();
-         e.stopPropagation();
-       }
+      // If it's a section header that also acts as a link, allow navigation
+      if (isFolderLink || (item.isSection && item.href && item.href !== '#')) {
+        // Navigation will happen via Link component, so just toggle state
+      } else if (item.isSection && (!item.href || item.href === '#')) {
+        // Prevent navigation for pure section headers that only toggle
+        e.preventDefault();
+        e.stopPropagation();
+      }
     }
-     // Allow navigation if it's a folder link or has no sub-items,
-     // and it's not a pure section header that was just toggled.
+    // Allow link click to proceed if it's a navigable link
     if (item.href && item.href !== '#') {
         onLinkClick();
     }
@@ -163,10 +140,10 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     <SidebarMenuButton
       onClick={handleToggleOrNavigate}
       tooltip={isCollapsed && !isMobile ? item.title : undefined}
-      aria-expanded={isOpen}
+      aria-expanded={hasSubItems ? isOpen : undefined}
       isActive={itemIsActive} 
       level={level}
-      className={cn(isCollapsed && !isMobile && "justify-center")}
+      className={cn(isCollapsed && !isMobile && "justify-center", "group")} // Added group for chevron
       hasSubItems={hasSubItems}
       isOpen={isOpen}
     >
@@ -174,11 +151,33 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
     </SidebarMenuButton>
   );
 
-  // If item.href is '#' or undefined, it's a non-navigable header or a section toggle
   const isNavigable = item.href && item.href !== '#';
 
+  if (isPureSectionHeader || isSubSectionHeader) {
+    return (
+      <motion.div 
+        variants={menuItemVariants}
+        className={cn(
+          "px-3 pt-5 pb-1 text-xs font-semibold text-sidebar-foreground/70 tracking-wider uppercase select-none truncate",
+          isSubSectionHeader && "pt-3 text-sidebar-foreground/60",
+          isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2"
+        )}
+        onClick={hasSubItems ? handleToggleOrNavigate : undefined} // Allow toggle for section headers with children
+        role={hasSubItems ? "button" : "heading"}
+        aria-level={level + 2}
+        tabIndex={hasSubItems ? 0 : undefined}
+        onKeyDown={hasSubItems ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleOrNavigate(e as any); } : undefined}
+      >
+        {isCollapsed && !isMobile && item.title.substring(0,1).toUpperCase()}
+        {(!isCollapsed || isMobile) && item.title}
+        {/* Removed chevron from here as it's part of itemTitleContent in SidebarMenuButton */}
+      </motion.div>
+    );
+  }
+
+
   return (
-    <motion.li variants={menuItemVariants} className="list-none">
+    <motion.li variants={menuItemVariants} className="list-none" layout="position">
       {isNavigable ? (
         <Link href={item.href!} {...commonLinkProps} passHref legacyBehavior>
             {React.cloneElement(buttonContent as React.ReactElement, { 'aria-current': isDirectlyActive ? 'page' : undefined })}
@@ -189,10 +188,10 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
       {(!isCollapsed || isMobile) && hasSubItems && (
         <AnimatePresence initial={false}>
           {isOpen && (
-            <SidebarMenuSub as={motion.ul} variants={subMenuVariants} initial="closed" animate="open" exit="closed">
+            <SidebarMenuSub as={motion.ul} variants={subMenuVariants} initial="closed" animate="open" exit="closed" layout>
               {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
-                  key={`${subItem.href || subItem.title}-${index}`} 
+                  key={`${subItem.href || subItem.title}-${index}-${level}`} 
                   item={subItem}
                   level={level + 1}
                   isCollapsed={isCollapsed}
@@ -211,7 +210,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({ item, level, isColl
 
 
 export default function AppSidebarClient({ navigationItems }: AppSidebarClientProps) {
-  const { isMobile, openMobile, setOpenMobile, isResizing, state: sidebarStateHook, collapsible: collapsibleTypeHook, defaultOpen: contextDefaultOpen, initialCollapsible: contextInitialCollapsible } = useSidebar();
+  const { isMobile, openMobile, setOpenMobile, state: sidebarStateHook, collapsible: collapsibleTypeHook, defaultOpen: contextDefaultOpen, initialCollapsible: contextInitialCollapsible } = useSidebar();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -228,7 +227,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const isCollapsed = !isMobile && sidebarStateHook === "collapsed";
   
   const sidebarMenuContent = (
-    <SidebarMenu className={cn(isCollapsed && "px-1.5")}> 
+    <SidebarMenu className={cn("p-2", isCollapsed && "px-1.5")}> 
       {navigationItems.map((item, index) => (
         <RecursiveNavItem
           key={`${item.href || item.title}-${item.order}-${index}`} 
@@ -237,7 +236,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           isCollapsed={isCollapsed}
           currentPath={pathname}
           onLinkClick={handleLinkClick}
-          initialOpen={item.href && pathname.startsWith(normalizePath(item.href))}
+          initialOpen={item.href ? pathname.startsWith(normalizePath(item.href)) : false}
         />
       ))}
     </SidebarMenu>
@@ -252,7 +251,14 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   const sidebarStructure = (
     <>
       <SidebarHeader className={cn(isMobile && "justify-between", "p-3 border-b border-sidebar-border flex items-center")}>
-        <Logo collapsed={isCollapsed && !isMobile} className={cn(isCollapsed && !isMobile ? "" : "ml-1", "transition-all duration-300")} />
+         <div className="flex flex-col">
+          <Logo collapsed={isCollapsed && !isMobile} className={cn(isCollapsed && !isMobile ? "" : "ml-1", "transition-all duration-300")} />
+          {(!isCollapsed || isMobile) && (
+            <p className="text-xs text-sidebar-foreground/70 mt-1 ml-1 truncate">
+              Your Catchy Tagline Here
+            </p>
+          )}
+        </div>
         {isMobile && (
           <SheetClose asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -262,25 +268,27 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
           </SheetClose>
         )}
       </SidebarHeader>
-      <SidebarContent className={cn("flex-1", isResizing && "!cursor-ew-resize")}>
-        <ScrollArea className="h-full"> {/* Ensure ScrollArea takes full height of SidebarContent */}
+      <SidebarContent className="flex-1">
           {isLoading ? sidebarSkeleton : sidebarMenuContent}
-        </ScrollArea>
       </SidebarContent>
     </>
   );
 
   if (isLoading) { 
-    // Use context values for initialCollapsible and defaultOpen
     const initialCollapsibleFromContext = contextInitialCollapsible;
     const defaultOpenFromContext = contextDefaultOpen;
     return (
       <aside className={cn(
         "hidden md:flex flex-col border-r bg-sidebar text-sidebar-foreground fixed top-[var(--header-height)] bottom-0 left-0 z-30",
-        initialCollapsibleFromContext === 'icon' && !defaultOpenFromContext ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width)]" 
+        initialCollapsibleFromContext === 'icon' && !defaultOpenFromContext ? "w-[var(--sidebar-width-icon)]" : "w-[var(--sidebar-width-default)]" 
       )}>
          <SidebarHeader className={cn("p-3 border-b border-sidebar-border flex items-center", initialCollapsibleFromContext === 'icon' && !defaultOpenFromContext && "justify-center")}>
           <Logo collapsed={initialCollapsibleFromContext === 'icon' && !defaultOpenFromContext} />
+           {(!(initialCollapsibleFromContext === 'icon' && !defaultOpenFromContext)) && (
+            <p className="text-xs text-sidebar-foreground/70 mt-1 ml-1 truncate">
+              Your Catchy Tagline Here
+            </p>
+          )}
         </SidebarHeader>
         <ScrollArea className="flex-1">
           {sidebarSkeleton}
@@ -291,7 +299,7 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   
   if (isMobile) {
     return (
-        <MobileSheetContent side="left" className={cn("p-0 flex flex-col w-[var(--sidebar-width)]")}>
+        <MobileSheetContent side="left" className={cn("p-0 flex flex-col w-[var(--sidebar-width-default)]")}>
          <SheetTitle className="sr-only">Main Menu</SheetTitle> 
           {sidebarStructure}
         </MobileSheetContent>
@@ -301,10 +309,8 @@ export default function AppSidebarClient({ navigationItems }: AppSidebarClientPr
   return (
     <DesktopSidebar 
       className={cn("fixed top-[var(--header-height)] bottom-0 left-0 z-30")}
-      collapsibleType={collapsibleTypeHook} 
     >
       {sidebarStructure}
     </DesktopSidebar>
   );
 }
-
