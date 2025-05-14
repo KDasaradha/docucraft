@@ -786,7 +786,20 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Advanced Security Protocols", path: "/spd/docs/advanced_securtiy_protocols.md", order: 5 },
       { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack.md", order: 6 },
     ],
-  }
+  },
+  {
+    title: "Software Product Architecture",
+    order: 18,
+    isSection: true,
+    children: [
+      { title: "Stage 1", path: "/docs/spa/stage1", order: 1 },
+      { title: "Stage 2", path: "/docs/spa/stage2", order: 2 },
+      { title: "Stage 3", path: "/docs/spa/stage3", order: 3 },
+      { title: "Stage 4", path: "/docs/spa/stage4", order: 4 },
+      { title: "Stage 5", path: "/docs/spa/stage5", order: 5 },
+      { title: "Stage 6", path: "/docs/spa/stage6", order: 6 },
+    ],
+  },
   // New sections start from order 20
   {
     title: "Getting Started (New)",
