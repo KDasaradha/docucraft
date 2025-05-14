@@ -23,6 +23,10 @@ export const navigationConfig: NavConfigItem[] = [
     title: "Main Comprehensive Guide", // Differentiating from user's "FastAPI > Guides"
     // path: "/docs/guides/comprehensive-fastapi-guide",
     order: 3,
+  },
+  {
+    title: "Comprehensive Guide", // Differentiating from user's "FastAPI > Guides"
+    order: 4,
     isSection: true,
     children: [
       {
@@ -614,7 +618,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "General Guides", // Differentiating from Main Comprehensive Guide
-    order: 4,
+    order: 5,
     isSection: true,
     children: [
       {
@@ -631,7 +635,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Python Language",
-    order: 5,
+    order: 6,
     isSection: true,
     children: [
       { title: "Basic Python", path: "/docs/python/basic", order: 1 },
@@ -643,7 +647,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "FastAPI Framework", // Differentiating from user's new "FastAPI" section
-    order: 6,
+    order: 7,
     isSection: true,
     children: [
       { title: "Introduction to FastAPI", path: "/docs/fastapi/introduction", order: 1, isSection: true },
@@ -657,7 +661,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "SQLAlchemy ORM",
-    order: 7,
+    order: 8,
     isSection: true,
     children: [
       { title: "Introduction to SQLAlchemy", path: "/docs/sqlalchemy/introduction", order: 1, isSection: true },
@@ -675,7 +679,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Pydantic Library",
-    order: 8,
+    order: 9,
     isSection: true,
     children: [
       { title: "Basic Pydantic", path: "/docs/pydantic/basic", order: 1 },
@@ -688,7 +692,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "PostgreSQL Database",
-    order: 9,
+    order: 10,
     isSection: true,
     children: [
       { title: "Basic PostgreSQL", path: "/docs/postgresql/basic", order: 1 },
@@ -700,7 +704,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "MongoDB Database",
-    order: 10,
+    order: 11,
     isSection: true,
     children: [
       { title: "Basic MongoDB", path: "/docs/mongodb/basic", order: 1 },
@@ -712,7 +716,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "JavaScript Language",
-    order: 11,
+    order: 12,
     isSection: true,
     children: [
       { title: "Basic JavaScript", path: "/docs/javascript/basic", order: 1 },
@@ -724,7 +728,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "React Framework",
-    order: 12,
+    order: 13,
     isSection: true,
     children: [
       { title: "Basic React", path: "/docs/react/basic", order: 1 },
@@ -736,7 +740,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Next.js Framework",
-    order: 13,
+    order: 14,
     isSection: true,
     children: [
       { title: "Basic Next.js", path: "/docs/nextjs/basic", order: 1 },
@@ -748,7 +752,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "HTML Markup",
-    order: 14,
+    order: 15,
     isSection: true,
     children: [
       { title: "Basic HTML", path: "/docs/html/basic", order: 1 },
@@ -760,7 +764,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "CSS Styling",
-    order: 15,
+    order: 16,
     isSection: true,
     children: [
       { title: "Basic CSS", path: "/docs/css/basic", order: 1 },
@@ -770,6 +774,19 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "CSS Hidden Gems", path: "/docs/css/hidden-gems", order: 5 },
     ],
   },
+  {
+    title: "Software Product Documentation",
+    order: 17,
+    isSection: true,
+    children: [
+      { title: "Backend Documentation", path: "/docs/spd/backend", order: 1 },
+      { title: "Frontend Documentation", path: "/docs/spd/frontend", order: 2 },
+      { title: "Database Documentation", path: "/docs/spd/database", order: 3 },
+      { title: "Additional Documentation", path: "/docs/spd/additional", order: 4 },
+      { title: "Advanced Security Protocols", path: "/spd/docs/advanced_securtiy_protocols.md", order: 5 },
+      { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack.md", order: 6 },
+    ],
+  }
   // New sections start from order 20
   {
     title: "Getting Started (New)",
