@@ -76,26 +76,27 @@ export default function AppHeader() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
     >
-      <div className="container flex h-full items-center max-w-full px-4 sm:px-6 lg:px-8">
-        
-        <div className="md:hidden mr-2"> 
-           {isMobile && (
-             <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-               <SidebarTrigger />
-             </motion.div>
-           )}
+      <div className="container flex h-full items-center justify-between max-w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-4">
+          <div className="md:hidden mr-2"> 
+            {isMobile && (
+              <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+                <SidebarTrigger />
+              </motion.div>
+            )}
+          </div>
+          
+          <div className={cn("flex items-center", isMobile ? "ml-0" : "")}>
+            <Logo className="py-0 px-0" />
+          </div>
         </div>
         
-        <div className={cn("hidden md:flex items-center", isMobile ? "ml-0" : "")}>
-         <Logo className="py-0 px-0" />
-        </div>
-        
-        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
+        <div className="flex items-center gap-3">
           <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
             <SearchDialog />
           </motion.div>
           <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-           <ThemeToggle />
+            <ThemeToggle />
           </motion.div>
         </div>
       </div>

@@ -117,7 +117,13 @@ export function SearchDialog() {
               className="p-3 border rounded-md shadow-sm bg-card hover:shadow-lg transition-shadow duration-200 cursor-pointer hover:border-primary"
               variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
               whileHover={{ scale: 1.02, transition: { duration: 0.15 } }}
-              onClick={() => { /* Potentially navigate to the doc, needs link parsing logic */ setIsOpen(false); }}
+              onClick={() => {
+                const match = result.match(/\[.*?\]\((.*?)\)/);
+                if (match && match[1]) {
+                  window.location.href = match[1];
+                  setIsOpen(false);
+                }
+              }}
             >
               <div className="flex items-start space-x-3">
                 <FileText className="h-4 w-4 mt-1 text-primary shrink-0" />

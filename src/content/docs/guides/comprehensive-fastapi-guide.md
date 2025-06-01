@@ -1,5 +1,5 @@
 ---
-title: Comprehensive FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide
+title: Comprehensive Programming Guide
 ---
 
 # Comprehensive FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide
