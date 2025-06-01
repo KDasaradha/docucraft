@@ -1,4 +1,3 @@
-
 export interface NavConfigItem {
   title: string;
   path?: string;
@@ -11,21 +10,21 @@ export interface NavConfigItem {
 export const navigationConfig: NavConfigItem[] = [
   {
     title: "Home",
-    path: "/docs/index", // Assuming index.md is the root for /docs/
-    order: 1,
+    path: "/docs/index",
+    order: 1
   },
   {
-    title: "About DevDocs++", // Changed title to be more specific if 'About' is a new section later
+    title: "About DevDocs++",
     path: "/docs/about",
-    order: 2,
+    order: 2
   },
   {
-    title: "Main Comprehensive Guide", // Differentiating from user's "FastAPI > Guides"
-    // path: "/docs/guides/comprehensive-fastapi-guide",
-    order: 3,
+    title: "Main Comprehensive Guide",
+    path: "/docs/guides/comprehensive-fastapi-guide",
+    order: 3
   },
   {
-    title: "Comprehensive Guide", // Differentiating from user's "FastAPI > Guides"
+    title: "Comprehensive Guide",
     order: 4,
     isSection: true,
     children: [
@@ -613,25 +612,16 @@ export const navigationConfig: NavConfigItem[] = [
         title: "25.1 Static Type Checking for Pydantic",
         path: "/docs/pydantic/type-checking/static-analysis",
         order: 112,
-      },
-    ],
+      },    ]
   },
   {
-    title: "General Guides", // Differentiating from Main Comprehensive Guide
+    title: "General Guides",
     order: 5,
     isSection: true,
     children: [
-      {
-        title: "Getting Started with DevDocs++", // More specific title
-        path: "/docs/getting-started", // Path relative to /docs/
-        order: 1,
-      },
-      {
-        title: "Advanced Topics in DevDocs++",
-        path: "/docs/guides/advanced-topics",
-        order: 2,
-      },
-    ],
+      { title: "Getting Started with DevDocs++", path: "/docs/getting-started", order: 1 },
+      { title: "Advanced Topics in DevDocs++", path: "/docs/guides/advanced-topics", order: 2 }
+    ]
   },
   {
     title: "Python Language",
@@ -642,11 +632,11 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate Python", path: "/docs/python/intermediate", order: 2 },
       { title: "Advanced Python", path: "/docs/python/advanced", order: 3 },
       { title: "Pro Python", path: "/docs/python/pro", order: 4 },
-      { title: "Python Hidden Gems", path: "/docs/python/hidden-gems", order: 5 },
-    ],
+      { title: "Python Hidden Gems", path: "/docs/python/hidden-gems", order: 5 }
+    ]
   },
   {
-    title: "FastAPI Framework", // Differentiating from user's new "FastAPI" section
+    title: "FastAPI Framework",
     order: 7,
     isSection: true,
     children: [
@@ -656,8 +646,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "FastAPI Pro-Level Features", path: "/docs/fastapi-pro", order: 4, isSection: true },
       { title: "FastAPI Performance & Optimization", path: "/docs/fastapi/performance", order: 5, isSection: true },
       { title: "FastAPI Security", path: "/docs/fastapi/security", order: 6, isSection: true },
-      { title: "FastAPI Hidden Gems", path: "/docs/fastapi/hidden-gems", order: 7 },
-    ],
+      { title: "FastAPI Hidden Gems", path: "/docs/fastapi/hidden-gems", order: 7 }
+    ]
   },
   {
     title: "SQLAlchemy ORM",
@@ -674,8 +664,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Async SQLAlchemy", path: "/docs/sqlalchemy/async", order: 8, isSection: true },
       { title: "SQLAlchemy Migrations", path: "/docs/sqlalchemy/migrations", order: 9, isSection: true },
       { title: "SQLAlchemy Best Practices", path: "/docs/sqlalchemy/best-practices", order: 10, isSection: true },
-      { title: "SQLAlchemy Hidden Gems", path: "/docs/sqlalchemy/hidden-gems", order: 11 },
-    ],
+      { title: "SQLAlchemy Hidden Gems", path: "/docs/sqlalchemy/hidden-gems", order: 11 }
+    ]
   },
   {
     title: "Pydantic Library",
@@ -687,8 +677,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Pydantic Advanced Features", path: "/docs/pydantic/advanced-features", order: 3, isSection: true },
       { title: "Pro Pydantic", path: "/docs/pydantic/pro", order: 4 },
       { title: "Pydantic Type Checking", path: "/docs/pydantic/type-checking", order: 5, isSection: true },
-      { title: "Pydantic Hidden Gems", path: "/docs/pydantic/hidden-gems", order: 6 },
-    ],
+      { title: "Pydantic Hidden Gems", path: "/docs/pydantic/hidden-gems", order: 6 }
+    ]
   },
   {
     title: "PostgreSQL Database",
@@ -699,8 +689,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate PostgreSQL", path: "/docs/postgresql/intermediate", order: 2 },
       { title: "Advanced PostgreSQL", path: "/docs/postgresql/advanced", order: 3 },
       { title: "Pro PostgreSQL", path: "/docs/postgresql/pro", order: 4 },
-      { title: "PostgreSQL Hidden Gems", path: "/docs/postgresql/hidden-gems", order: 5 },
-    ],
+      { title: "PostgreSQL Hidden Gems", path: "/docs/postgresql/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "MongoDB Database",
@@ -711,8 +701,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate MongoDB", path: "/docs/mongodb/intermediate", order: 2 },
       { title: "Advanced MongoDB", path: "/docs/mongodb/advanced", order: 3 },
       { title: "Pro MongoDB", path: "/docs/mongodb/pro", order: 4 },
-      { title: "MongoDB Hidden Gems", path: "/docs/mongodb/hidden-gems", order: 5 },
-    ],
+      { title: "MongoDB Hidden Gems", path: "/docs/mongodb/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "JavaScript Language",
@@ -723,8 +713,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate JavaScript", path: "/docs/javascript/intermediate", order: 2 },
       { title: "Advanced JavaScript", path: "/docs/javascript/advanced", order: 3 },
       { title: "Pro JavaScript", path: "/docs/javascript/pro", order: 4 },
-      { title: "JavaScript Hidden Gems", path: "/docs/javascript/hidden-gems", order: 5 },
-    ],
+      { title: "JavaScript Hidden Gems", path: "/docs/javascript/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "React Framework",
@@ -735,8 +725,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate React", path: "/docs/react/intermediate", order: 2 },
       { title: "Advanced React", path: "/docs/react/advanced", order: 3 },
       { title: "Pro React", path: "/docs/react/pro", order: 4 },
-      { title: "React Hidden Gems", path: "/docs/react/hidden-gems", order: 5 },
-    ],
+      { title: "React Hidden Gems", path: "/docs/react/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "Next.js Framework",
@@ -747,8 +737,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate Next.js", path: "/docs/nextjs/intermediate", order: 2 },
       { title: "Advanced Next.js", path: "/docs/nextjs/advanced", order: 3 },
       { title: "Pro Next.js", path: "/docs/nextjs/pro", order: 4 },
-      { title: "Next.js Hidden Gems", path: "/docs/nextjs/hidden-gems", order: 5 },
-    ],
+      { title: "Next.js Hidden Gems", path: "/docs/nextjs/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "HTML Markup",
@@ -759,8 +749,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate HTML", path: "/docs/html/intermediate", order: 2 },
       { title: "Advanced HTML", path: "/docs/html/advanced", order: 3 },
       { title: "Pro HTML", path: "/docs/html/pro", order: 4 },
-      { title: "HTML Hidden Gems", path: "/docs/html/hidden-gems", order: 5 },
-    ],
+      { title: "HTML Hidden Gems", path: "/docs/html/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "CSS Styling",
@@ -771,8 +761,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Intermediate CSS", path: "/docs/css/intermediate", order: 2 },
       { title: "Advanced CSS", path: "/docs/css/advanced", order: 3 },
       { title: "Pro CSS", path: "/docs/css/pro", order: 4 },
-      { title: "CSS Hidden Gems", path: "/docs/css/hidden-gems", order: 5 },
-    ],
+      { title: "CSS Hidden Gems", path: "/docs/css/hidden-gems", order: 5 }
+    ]
   },
   {
     title: "Software Product Documentation",
@@ -784,8 +774,8 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Database Documentation", path: "/docs/spd/database", order: 3 },
       { title: "Additional Documentation", path: "/docs/spd/additional", order: 4 },
       { title: "Advanced Security Protocols", path: "/spd/docs/advanced_securtiy_protocols.md", order: 5 },
-      { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack.md", order: 6 },
-    ],
+      { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack.md", order: 6 }
+    ]
   },
   {
     title: "Software Product Architecture",
@@ -797,55 +787,26 @@ export const navigationConfig: NavConfigItem[] = [
       { title: "Stage 3", path: "/docs/spa/stage3", order: 3 },
       { title: "Stage 4", path: "/docs/spa/stage4", order: 4 },
       { title: "Stage 5", path: "/docs/spa/stage5", order: 5 },
-      { title: "Stage 6", path: "/docs/spa/stage6", order: 6 },
-    ],
+      { title: "Stage 6", path: "/docs/spa/stage6", order: 6 }
+    ]
   },
-  // New sections start from order 20
   {
     title: "Getting Started (New)",
     order: 20,
     isSection: true,
     children: [
-      {
-        title: "Introduction",
-        path: "/docs/old_docs/overview/getting-started",
-        order: 1
-      },
-      {
-        title: "FastAPI Guidelines",
-        path: "/docs/old_docs/overview/fastapi-guide-info",
-        order: 2
-      },
-      {
-        title: "HTML Indian Flag",
-        path: "/docs/old_docs/overview/html_indian_flag",
-        order: 3
-      },
-      {
-        title: "HTTP Status Codes",
-        path: "/docs/old_docs/overview/http_status_codes",
-        order: 4
-      },
+      { title: "Introduction", path: "/docs/old_docs/overview/getting-started", order: 1 },
+      { title: "FastAPI Guidelines", path: "/docs/old_docs/overview/fastapi-guide-info", order: 2 },
+      { title: "HTML Indian Flag", path: "/docs/old_docs/overview/html_indian_flag", order: 3 },
+      { title: "HTTP Status Codes", path: "/docs/old_docs/overview/http_status_codes", order: 4 },
       {
         title: "Skills",
         order: 5,
         isSection: true,
         children: [
-          {
-            title: "General Skill Set",
-            path: "/docs/old_docs/skill_set",
-            order: 1
-          },
-          {
-            title: "Backend Skills",
-            path: "/docs/old_docs/backend_skills_set",
-            order: 2
-          },
-          {
-            title: "AI Tools",
-            path: "/docs/old_docs/ai_tools",
-            order: 3
-          }
+          { title: "General Skill Set", path: "/docs/old_docs/skill_set", order: 1 },
+          { title: "Backend Skills", path: "/docs/old_docs/backend_skills_set", order: 2 },
+          { title: "AI Tools", path: "/docs/old_docs/ai_tools", order: 3 }
         ]
       }
     ]
@@ -860,26 +821,10 @@ export const navigationConfig: NavConfigItem[] = [
         order: 1,
         isSection: true,
         children: [
-          {
-            title: "Basics",
-            path: "/docs/old_docs/tutorials/python_tut",
-            order: 1
-          },
-          {
-            title: "Data Analysis",
-            path: "/docs/old_docs/tutorials/python_data_analyst_tut",
-            order: 2
-          },
-          {
-            title: "Tools",
-            path: "/docs/old_docs/tutorials/python_tools",
-            order: 3
-          },
-          {
-            title: "Testing",
-            path: "/docs/old_docs/tutorials/python_testing",
-            order: 4
-          }
+          { title: "Basics", path: "/docs/old_docs/tutorials/python_tut", order: 1 },
+          { title: "Data Analysis", path: "/docs/old_docs/tutorials/python_data_analyst_tut", order: 2 },
+          { title: "Tools", path: "/docs/old_docs/tutorials/python_tools", order: 3 },
+          { title: "Testing", path: "/docs/old_docs/tutorials/python_testing", order: 4 }
         ]
       },
       {
@@ -887,68 +832,25 @@ export const navigationConfig: NavConfigItem[] = [
         order: 2,
         isSection: true,
         children: [
-          {
-            title: "Functions & Classes",
-            path: "/docs/old_docs/core_python/function_class",
-            order: 1
-          },
-          {
-            title: "Decorators",
-            path: "/docs/old_docs/core_python/decorators",
-            order: 2
-          },
-          {
-            title: "Error Handling",
-            path: "/docs/old_docs/core_python/error_handling",
-            order: 3
-          },
-          {
-            title: "Data Structures",
-            path: "/docs/old_docs/core_python/advanced_data_structures",
-            order: 4
-          },
-          {
-            title: "Object-Oriented Programming",
-            path: "/docs/old_docs/core_python/oops",
-            order: 5
-          }
+          { title: "Functions & Classes", path: "/docs/old_docs/core_python/function_class", order: 1 },
+          { title: "Decorators", path: "/docs/old_docs/core_python/decorators", order: 2 },
+          { title: "Error Handling", path: "/docs/old_docs/core_python/error_handling", order: 3 },
+          { title: "Data Structures", path: "/docs/old_docs/core_python/advanced_data_structures", order: 4 },
+          { title: "Object-Oriented Programming", path: "/docs/old_docs/core_python/oops", order: 5 },
+          { title: "Code Optimization", path: "/docs/old_docs/core_python/code_optimization", order: 6 }
         ]
       },
-      {
-        title: "Web Development",
-        path: "/docs/old_docs/tutorials/web_tut",
-        order: 3
-      },
-      {
-        title: "AWS Tutorials",
-        path: "/docs/old_docs/tutorials/aws_tut",
-        order: 4
-      },
-      {
-        title: "DevSecOps Tutorials",
-        path: "/docs/old_docs/tutorials/devsecops_tut",
-        order: 5
-      },
+      { title: "Web Development", path: "/docs/old_docs/tutorials/web_tut", order: 3 },
+      { title: "AWS Tutorials", path: "/docs/old_docs/tutorials/aws_tut", order: 4 },
+      { title: "DevSecOps Tutorials", path: "/docs/old_docs/tutorials/devsecops_tut", order: 5 },
       {
         title: "Containerization Tutorials",
         order: 6,
         isSection: true,
         children: [
-          {
-            title: "Docker & Kubernetes Roadmap",
-            path: "/docs/old_docs/tutorials/docker_kubernetes_roadmap",
-            order: 1
-          },
-          {
-            title: "Docker",
-            path: "/docs/old_docs/tutorials/docker_tut",
-            order: 2
-          },
-          {
-            title: "Kubernetes",
-            path: "/docs/old_docs/tutorials/kubernetes_tut",
-            order: 3
-          }
+          { title: "Docker & Kubernetes Roadmap", path: "/docs/old_docs/tutorials/docker_kubernetes_roadmap", order: 1 },
+          { title: "Docker", path: "/docs/old_docs/tutorials/docker_tut", order: 2 },
+          { title: "Kubernetes", path: "/docs/old_docs/tutorials/kubernetes_tut", order: 3 }
         ]
       },
       {
@@ -956,28 +858,12 @@ export const navigationConfig: NavConfigItem[] = [
         order: 7,
         isSection: true,
         children: [
-          {
-            title: "Git Roadmap",
-            path: "/docs/old_docs/tutorials/git_roadmap",
-            order: 1
-          },
-          {
-            title: "Git Tutorial",
-            path: "/docs/old_docs/tutorials/git_tut",
-            order: 2
-          }
+          { title: "Git Roadmap", path: "/docs/old_docs/tutorials/git_roadmap", order: 1 },
+          { title: "Git Tutorial", path: "/docs/old_docs/tutorials/git_tut", order: 2 }
         ]
       },
-      {
-        title: "Trending Technologies",
-        path: "/docs/old_docs/tutorials/trending_tech_stack",
-        order: 8
-      },
-      {
-        title: "Contributing Guidelines",
-        path: "/docs/old_docs/tutorials/contributing",
-        order: 9
-      }
+      { title: "Trending Technologies", path: "/docs/old_docs/tutorials/trending_tech_stack", order: 8 },
+      { title: "Contributing Guidelines", path: "/docs/old_docs/tutorials/contributing", order: 9 }
     ]
   },
   {
@@ -990,79 +876,170 @@ export const navigationConfig: NavConfigItem[] = [
         order: 1,
         isSection: true,
         children: [
+          { title: "Introduction to APIs", path: "/docs/old_docs/intro/api", order: 1 },
+          { title: "API Types", path: "/docs/old_docs/intro/api_types", order: 2 },
+          { title: "REST API", path: "/docs/old_docs/intro/rest_api", order: 3 },
+          { title: "FastAPI Introduction", path: "/docs/old_docs/intro/fastapi_intro", order: 4 },
+          { title: "FastAPI Topics", path: "/docs/old_docs/fastapi_guide_topics", order: 5 }
+        ]
+      },
+      {
+        title: "Examples",
+        order: 2,
+        isSection: true,
+        children: [
+          { title: "Basic Application", path: "/docs/old_docs/examples/basic_fastapi", order: 1 },
+          { title: "In-Memory Database", path: "/docs/old_docs/examples/in_memory_db", order: 2 },
+          { title: "Raw SQL Database", path: "/docs/old_docs/examples/db_raw_sql", order: 3 },
+          { title: "Boilerplate Reduction", path: "/docs/old_docs/examples/reduce_boilerplate", order: 4 }
+        ]
+      },
+      {
+        title: "Database",
+        order: 3,
+        isSection: true,
+        children: [
+          { title: "SQLAlchemy Introduction", path: "/docs/old_docs/database/sqlalchemy_intro", order: 1 },
+          { title: "FastAPI with SQLAlchemy", path: "/docs/old_docs/database/sqlalchemy_fastapi", order: 2 },
+          { title: "SQLAlchemy Best Practices", path: "/docs/old_docs/database/sqlalchemy_usage", order: 3 },
+          { title: "Pydantic Introduction", path: "/docs/old_docs/database/pydantic_intro", order: 4 },
+          { title: "Pydantic Integration", path: "/docs/old_docs/database/pydantic_sqlalchemy", order: 5 },
+          { title: "Pydantic vs SQLAlchemy", path: "/docs/old_docs/database/pydantic_vs_sqlalchemy", order: 6 }
+        ]
+      },
+      {
+        title: "Async vs Sync",
+        order: 4,
+        isSection: true,
+        children: [
+          { title: "Execution Models", path: "/docs/old_docs/async/sync_vs_async", order: 1 },
+          { title: "Database Connections", path: "/docs/old_docs/async/db_connections", order: 2 },
+          { title: "Engine & Sessions", path: "/docs/old_docs/async/engine_sessions", order: 3 }
+        ]
+      },
+      {
+        title: "Database Queries",
+        order: 5,
+        isSection: true,
+        children: [
+          { title: "Overview", path: "/docs/old_docs/database_queries/queries_overview", order: 1 },
           {
-            title: "Introduction to APIs",
-            path: "/docs/old_docs/intro/api",
-            order: 1
+            title: "Inserts",
+            order: 2,
+            isSection: true,
+            children: [
+              { title: "Single Table", path: "/docs/old_docs/database_queries/insert_single_table", order: 1 },
+              { title: "Two Unrelated Tables", path: "/docs/old_docs/database_queries/insert_two_unrelated", order: 2 },
+              { title: "Two Related Tables", path: "/docs/old_docs/database_queries/insert_two_related", order: 3 },
+              { title: "Multiple Unrelated Tables", path: "/docs/old_docs/database_queries/insert_multiple_unrelated", order: 4 },
+              { title: "Multiple Related Tables", path: "/docs/old_docs/database_queries/insert_multiple_related", order: 5 }
+            ]
           },
           {
-            title: "API Types",
-            path: "/docs/old_docs/intro/api_types",
-            order: 2
-          },
-          {
-            title: "REST API",
-            path: "/docs/old_docs/intro/rest_api",
-            order: 3
-          },
-          {
-            title: "FastAPI Introduction",
-            path: "/docs/old_docs/fastapi_guide_topics",
-            order: 4
+            title: "Fetches",
+            order: 3,
+            isSection: true,
+            children: [
+              { title: "Single Table", path: "/docs/old_docs/fetch_queries/fetch_single_table", order: 1 },
+              { title: "Two Unrelated Tables", path: "/docs/old_docs/fetch_queries/fetch_two_unrelated", order: 2 },
+              { title: "Two Related Tables", path: "/docs/old_docs/fetch_queries/fetch_two_related", order: 3 },
+              { title: "Multiple Unrelated Tables", path: "/docs/old_docs/fetch_queries/fetch_multiple_unrelated", order: 4 },
+              { title: "Multiple Related Tables", path: "/docs/old_docs/fetch_queries/fetch_multiple_related", order: 5 }
+            ]
           }
         ]
       },
       {
         title: "Tables",
-        order: 2,
+        order: 6,
         isSection: true,
         children: [
-          {
-            title: "Table Creation",
-            path: "/docs/old_docs/tables/table_creation",
-            order: 1
-          },
-          {
-            title: "Secure Practices",
-            path: "/docs/old_docs/tables/secure_creation",
-            order: 2
-          }
+          { title: "Table Creation", path: "/docs/old_docs/tables/table_creation", order: 1 },
+          { title: "Secure Practices", path: "/docs/old_docs/tables/secure_creation", order: 2 }
+        ]
+      },
+      {
+        title: "Naming Conventions",
+        order: 7,
+        isSection: true,
+        children: [
+          { title: "Project Structure", path: "/docs/old_docs/naming/project_structure", order: 1 },
+          { title: "API Routes", path: "/docs/old_docs/naming/api_routes", order: 2 },
+          { title: "Python Naming", path: "/docs/old_docs/naming/python_naming", order: 3 }
         ]
       },
       {
         title: "Advanced",
-        order: 3,
+        order: 8,
         isSection: true,
         children: [
-          {
-            title: "Profiling & Memory",
-            path: "/docs/old_docs/advanced/profile_memory",
-            order: 1
-          }
+          { title: "Pydantic Settings", path: "/docs/old_docs/advanced/pydantic_settings", order: 1 },
+          { title: "Request Handling", path: "/docs/old_docs/advanced/request_handling", order: 2 },
+          { title: "Input/Output Management", path: "/docs/old_docs/advanced/input_output", order: 3 },
+          { title: "Performance & Security", path: "/docs/old_docs/advanced/performance_security", order: 4 },
+          { title: "Profiling & Memory", path: "/docs/old_docs/advanced/profile_memory", order: 5 }
         ]
       },
+      {
+        title: "Best Practices",
+        order: 9,
+        isSection: true,
+        children: [
+          { title: "Coding Guidelines", path: "/docs/old_docs/best_practices/fastapi_guidelines", order: 1 },
+          { title: "CRUD Application", path: "/docs/old_docs/best_practices/crud_application", order: 2 },
+          { title: "CRUD Operations", path: "/docs/old_docs/best_practices/sync_vs_async_crud", order: 3 }
+        ]
+      },
+      {
+        title: "Utilities",
+        order: 10,
+        isSection: true,
+        children: [
+          { title: "Essentials", path: "/docs/old_docs/utilities/fastapi_pydantic_sqlalchemy", order: 1 },
+          { title: "Code Snippets", path: "/docs/old_docs/utilities/code_snippets", order: 2 }
+        ]
+      },
+      { title: "Web Servers", path: "/docs/old_docs/web_servers/server_comparison", order: 11 },
+      {
+        title: "WebSockets",
+        order: 12,
+        isSection: true,
+        children: [
+          { title: "Introduction", path: "/docs/old_docs/websockets/websockets_intro", order: 1 },
+          { title: "Implementation", path: "/docs/old_docs/websockets/websockets_integration", order: 2 }
+        ]
+      },
+      {
+        title: "Security",
+        order: 13,
+        isSection: true,
+        children: [
+          { title: "API Security", path: "/docs/old_docs/security/api_security", order: 1 },
+          { title: "FastAPI Security", path: "/docs/old_docs/security/fastapi_security", order: 2 }
+        ]
+      },
+      {
+        title: "Authentication",
+        order: 14,
+        isSection: true,
+        children: [
+          { title: "Methods", path: "/docs/old_docs/auth/auth_methods", order: 1 },
+          { title: "FastAPI Authentication", path: "/docs/old_docs/auth/fastapi_authentication", order: 2 }
+        ]
+      },
+      { title: "Built-in Features", path: "/docs/old_docs/built_in/fastapi_methods", order: 15 },
+      { title: "Additional Features", path: "/docs/old_docs/additional_features/built_in_utilities", order: 16 },
       {
         title: "Deployment",
-        order: 4,
+        order: 17,
         isSection: true,
         children: [
-          {
-            title: "Cloud Deployment",
-            path: "/docs/old_docs/deployment/cloud_deployment",
-            order: 1
-          },
-          {
-            title: "Container Deployment",
-            path: "/docs/old_docs/deployment/container_deployment",
-            order: 2
-          }
+          { title: "Cloud Deployment", path: "/docs/old_docs/deployment/cloud_deployment", order: 1 },
+          { title: "Container Deployment", path: "/docs/old_docs/deployment/container_deployment", order: 2 }
         ]
       },
-      {
-        title: "Frontend Integration",
-        path: "/docs/old_docs/frontend/frontend_integration",
-        order: 5
-      }
+      { title: "Frontend Integration", path: "/docs/old_docs/frontend/frontend_integration", order: 18 },
+      { title: "Advanced SQLAlchemy", path: "/docs/old_docs/advanced_sqlalchemy/advanced_operations", order: 19 }
     ]
   },
   {
@@ -1070,56 +1047,20 @@ export const navigationConfig: NavConfigItem[] = [
     order: 23,
     isSection: true,
     children: [
-      {
-        title: "Functional Testing",
-        path: "/docs/old_docs/pytests_tutorial/functional_pytests",
-        order: 1
-      },
-      {
-        title: "SQLite Sync",
-        path: "/docs/old_docs/pytests_tutorial/sync_fastapi_sqlite",
-        order: 2
-      },
-      {
-        title: "SQLAlchemy Sync",
-        path: "/docs/old_docs/pytests_tutorial/sync_fastapi_sqlalchemy",
-        order: 3
-      },
-      {
-        title: "SQLAlchemy Async",
-        path: "/docs/old_docs/pytests_tutorial/async_fastapi_sqlalchemy",
-        order: 4
-      },
-      {
-        title: "Pytest Commands",
-        path: "/docs/old_docs/pytests_tutorial/pytests_commands",
-        order: 5
-      },
-      {
-        title: "Test Cases",
-        path: "/docs/old_docs/pytests_tutorial/test_cases",
-        order: 6
-      },
-      {
-        title: "HTTP Method Tests",
-        path: "/docs/old_docs/pytests_tutorial/http_method_test_cases",
-        order: 7
-      },
+      { title: "Functional Testing", path: "/docs/old_docs/pytests_tutorial/functional_pytests", order: 1 },
+      { title: "SQLite Sync", path: "/docs/old_docs/pytests_tutorial/sync_fastapi_sqlite", order: 2 },
+      { title: "SQLAlchemy Sync", path: "/docs/old_docs/pytests_tutorial/sync_fastapi_sqlalchemy", order: 3 },
+      { title: "SQLAlchemy Async", path: "/docs/old_docs/pytests_tutorial/async_fastapi_sqlalchemy", order: 4 },
+      { title: "Pytest Commands", path: "/docs/old_docs/pytests_tutorial/pytests_commands", order: 5 },
+      { title: "Test Cases", path: "/docs/old_docs/pytests_tutorial/test_cases", order: 6 },
+      { title: "HTTP Method Tests", path: "/docs/old_docs/pytests_tutorial/http_method_test_cases", order: 7 },
       {
         title: "Implementation Guides",
         order: 8,
         isSection: true,
         children: [
-          {
-            title: "Sync Testing",
-            path: "/docs/old_docs/pytests_tutorial/sync_test_implementation",
-            order: 1
-          },
-          {
-            title: "Async Testing",
-            path: "/docs/old_docs/pytests_tutorial/async_test_implementation",
-            order: 2
-          }
+          { title: "Sync Testing", path: "/docs/old_docs/pytests_tutorial/sync_test_implementation", order: 1 },
+          { title: "Async Testing", path: "/docs/old_docs/pytests_tutorial/async_test_implementation", order: 2 }
         ]
       }
     ]
@@ -1138,9 +1079,13 @@ export const navigationConfig: NavConfigItem[] = [
         order: 5,
         isSection: true,
         children: [
-          { title: "Notes", path: "/docs/old_docs/ci-cd-learn/cicd_notes", order: 1 },
-          { title: "AWS Jenkins Pipeline", path: "/docs/old_docs/ci-cd-learn/aws_jenkins_pipeline", order: 2 },
-          { title: "FastAPI CI/CD Pipeline", path: "/docs/old_docs/ci-cd-learn/fastapi_jenkins_pipeline", order: 3 }
+          { title: "Overview", path: "/docs/old_docs/learning_notes/ci-cd/overview", order: 1 },
+          { title: "Workflow", path: "/docs/old_docs/learning_notes/ci-cd/process", order: 2 },
+          { title: "Tools", path: "/docs/old_docs/learning_notes/ci-cd/tools", order: 3 },
+          { title: "Pros and Cons", path: "/docs/old_docs/learning_notes/ci-cd/pros-cons", order: 4 },
+          { title: "Notes", path: "/docs/old_docs/ci-cd-learn/cicd_notes", order: 5 },
+          { title: "AWS Jenkins Pipeline", path: "/docs/old_docs/ci-cd-learn/aws_jenkins_pipeline", order: 6 },
+          { title: "FastAPI CI/CD Pipeline", path: "/docs/old_docs/ci-cd-learn/fastapi_jenkins_pipeline", order: 7 }
         ]
       },
       {
@@ -1175,7 +1120,8 @@ export const navigationConfig: NavConfigItem[] = [
             order: 2,
             isSection: true,
             children: [
-              { title: "HashiCorp Vault Setup", path: "/docs/old_docs/hcv/vault_setup", order: 1 }
+              { title: "Terraform", path: "/docs/old_docs/devops_old/03-infrastructure/terraform", order: 1 },
+              { title: "HashiCorp Vault Setup", path: "/docs/old_docs/hcv/vault_setup", order: 2 }
             ]
           }
         ]
@@ -1188,7 +1134,36 @@ export const navigationConfig: NavConfigItem[] = [
           { title: "Helm", path: "/docs/old_docs/cloud_native/helm", order: 1 },
           { title: "Istio", path: "/docs/old_docs/cloud_native/istio", order: 2 }
         ]
-      }
+      },
+      {
+        title: "Automation",
+        order: 9,
+        isSection: true,
+        children: [
+          { title: "Jenkins", path: "/docs/old_docs/devops_old/02-automation/jenkins", order: 1 },
+          { title: "GitHub Actions", path: "/docs/old_docs/devops_old/02-automation/github-actions", order: 2 }
+        ]
+      },
+      {
+        title: "Monitoring",
+        order: 10,
+        isSection: true,
+        children: [
+          { title: "ELK Stack", path: "/docs/old_docs/devops_old/04-monitoring/elk-stack", order: 1 },
+          { title: "Ansible", path: "/docs/old_docs/devops_old/04-monitoring/ansible", order: 2 }
+        ]
+      },
+      {
+        title: "Advanced Topics",
+        order: 11,
+        isSection: true,
+        children: [
+          { title: "GitOps with ArgoCD", path: "/docs/old_docs/devops_old/05-advanced/gitops-argocd", order: 1 },
+          { title: "Microservices", path: "/docs/old_docs/devops_old/05-advanced/microservices", order: 2 },
+          { title: "RabbitMQ", path: "/docs/old_docs/devops_old/05-advanced/rabbitmq", order: 3 }
+        ]
+      },
+      { title: "Additional Notes", path: "/docs/old_docs/devops_old/additional-notes", order: 12 }
     ]
   },
   {
@@ -1196,9 +1171,12 @@ export const navigationConfig: NavConfigItem[] = [
     order: 25,
     isSection: true,
     children: [
+      { title: "Overview", path: "/docs/old_docs/learning_notes/devsecops/overview", order: 1 },
+      { title: "Security Practices", path: "/docs/old_docs/learning_notes/devsecops/security-practices", order: 2 },
+      { title: "Tools", path: "/docs/old_docs/learning_notes/devsecops/tools", order: 3 },
       {
         title: "Learning Path",
-        order: 1,
+        order: 4,
         isSection: true,
         children: [
           { title: "Fundamentals (0-3 months)", path: "/docs/old_docs/tech_tutorials/devsecops_tut/fundamentals", order: 1 },
@@ -1330,13 +1308,18 @@ export const navigationConfig: NavConfigItem[] = [
     ]
   },
   {
-    title: "Changelog",
-    path: "/docs/old_docs/changelog",
+    title: "Blog",
+    path: "/docs/old_docs/blog/index",
     order: 28
   },
   {
-    title: "About Project", // Differentiating from top-level About DevDocs++
-    order: 29,
+    title: "Changelog",
+    path: "/docs/old_docs/changelog",
+    order: 29
+  },
+  {
+    title: "About Project",
+    order: 30,
     isSection: true,
     children: [
       { title: "License", path: "/docs/old_docs/about/license", order: 1 },
@@ -1346,10 +1329,36 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Error Page Info",
-    order: 30,
+    order: 31,
     isSection: true,
     children: [
-      { title: "Custom 404 (Old Docs Ref)", path: "/docs/old_docs/custom_404", order: 1 }
+      { title: "Custom 404", path: "/docs/old_docs/custom_404", order: 1 }
+    ]
+  },
+  {
+    title: "Alternative Paradigms",
+    order: 32,
+    isSection: true,
+    children: [
+      { title: "GitOps", path: "/docs/old_docs/learning_notes/alternatives/gitops", order: 1 },
+      { title: "NoOps", path: "/docs/old_docs/learning_notes/alternatives/noops", order: 2 },
+      { title: "Platform Engineering", path: "/docs/old_docs/learning_notes/alternatives/platform-engineering", order: 3 },
+      { title: "MLOps", path: "/docs/old_docs/learning_notes/alternatives/mlops", order: 4 },
+      { title: "DataOps", path: "/docs/old_docs/learning_notes/alternatives/dataops", order: 5 },
+      { title: "FinOps", path: "/docs/old_docs/learning_notes/alternatives/finops", order: 6 }
+    ]
+  },
+  {
+    title: "Additional Concepts",
+    order: 33,
+    isSection: true,
+    children: [
+      { title: "Observability", path: "/docs/old_docs/learning_notes/additional-concepts/observability", order: 1 },
+      { title: "Progressive Delivery", path: "/docs/old_docs/learning_notes/additional-concepts/progressive-delivery", order: 2 },
+      { title: "Value Stream Management", path: "/docs/old_docs/learning_notes/additional-concepts/value-stream-management", order: 3 },
+      { title: "Policy as Code", path: "/docs/old_docs/learning_notes/additional-concepts/policy-as-code", order: 4 },
+      { title: "Chaos Engineering", path: "/docs/old_docs/learning_notes/additional-concepts/chaos-engineering", order: 5 },
+      { title: "Site Reliability Engineering", path: "/docs/old_docs/learning_notes/additional-concepts/sre", order: 6 }
     ]
   }
 ];

@@ -10,6 +10,12 @@ SQLAlchemy is one of the most popular and comprehensive Object Relational Mapper
 
 It allows developers to interact with relational databases using Python objects and methods, abstracting away much of the need to write raw SQL queries. However, it also provides powerful tools to work with SQL directly when needed.
 
+SQLAlchemy is a popular SQL toolkit and Object Relational Mapper (ORM) for Python. It provides a full suite of well-known enterprise-level persistence patterns, designed for efficient and high-performing database access, adapted into a simple and Pythonic domain language.
+
+SQLAlchemy is divided into two main components:
+- **SQLAlchemy Core:** Provides tools for schema definition, SQL expression language, and connection pooling. It allows you to work with SQL more directly.
+- **SQLAlchemy ORM:** Builds upon the Core to provide an object-oriented way to interact with your database, mapping Python classes to database tables and instances of those classes to rows.
+
 ## What is the difference between SQLAlchemy’s ORM and Core layers?
 
 SQLAlchemy is designed with two distinct layers of functionality, which can be used independently or together:

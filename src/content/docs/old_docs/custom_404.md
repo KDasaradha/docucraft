@@ -1,7 +1,5 @@
 ---
-title: Custom 404 (Old Docs Ref)
-description: Placeholder content for Custom 404 (Old Docs Ref).
-order: 1
+title: Custom Error Page
 ---
 
 # 404 - Page Not Found
