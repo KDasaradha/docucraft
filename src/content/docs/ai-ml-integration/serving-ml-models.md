@@ -8,6 +8,15 @@ title: Serving ML Models with FastAPI
 
 FastAPI is a popular choice for serving machine learning (ML) models as APIs due to its high performance (handling concurrent prediction requests efficiently), Pythonic nature (most ML workflows use Python), and automatic data validation/serialization with Pydantic.
 
+FastAPI is an excellent choice for serving machine learning models due to its high performance and ease of use with Pydantic for data validation.
+
+This section covers:
+- Loading pre-trained ML models (e.g., scikit-learn, TensorFlow, PyTorch).
+- Defining input and output schemas with Pydantic.
+- Creating API endpoints for predictions.
+- Handling asynchronous model inference.
+- Best practices for deploying ML models with FastAPI.
+
 **Key Considerations:**
 
 1.  **Model Loading**:
