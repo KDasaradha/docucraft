@@ -31,15 +31,14 @@ const TooltipContent = React.forwardRef<
           "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md",
           className
         )}
-        // Framer Motion props for animation
         asChild // Important for Framer Motion to correctly animate Radix components
+        {...props} // Pass Radix props to the Content component
       >
         <motion.div
           initial={{ opacity: 0, y: 5, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 5, scale: 0.95 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          {...props} // Pass Radix props to the motion.div
         >
           {children}
         </motion.div>

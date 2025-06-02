@@ -1,5 +1,6 @@
 import { siteConfig } from '@/config/site.config';
-import { Github, Mail, Linkedin, Icon as LucideIcon } from 'lucide-react';
+import { Github, Mail, Linkedin } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const iconMap: { [key: string]: LucideIcon } = {

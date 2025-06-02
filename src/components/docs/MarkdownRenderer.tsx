@@ -240,9 +240,10 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         </motion.div>
       );
     },
-    code: ({ node, inline, className: codeClassName, children, ...props }) => {
-      const parent = node?.parent as { tagName?: string } | undefined;
+    code: ({ node, className: codeClassName, children, ...props }: any) => {
+      const parent = (node as any)?.parent as { tagName?: string } | undefined;
       const isBlock = parent?.tagName === 'pre';
+      const inline = !isBlock;
 
       if (inline || !isBlock) {
         return <code className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", codeClassName)} {...props}>{children}</code>;
@@ -266,15 +267,31 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       const finalPreClassName = cn('line-numbers', languageClass, preClassName, 'my-6');
       return <pre {...preProps} className={finalPreClassName}>{children}</pre>;
     },
-    code: ({ node, inline, className: codeClassName, children, ...props }) => {
-      const parent = node?.parent as { tagName?: string } | undefined;
+    code: (props) => {
+      const { node, className: codeClassName, children, ...rest } = props;
+      const parent = (node as any)?.parent as { tagName?: string } | undefined;
       const isBlock = parent?.tagName === 'pre';
+      const inline = !isBlock;
+
       if (inline || !isBlock) {
-        return <code className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", codeClassName)} {...props}>{children}</code>;
+        return (
+          <code
+            className={cn(
+              "bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono",
+              codeClassName
+            )}
+            {...rest}
+          >
+            {children}
+          </code>
+        );
       }
-      // For block code on SSR, rehype-prism-plus will add language-X. Ensure 'code-highlight' is not added if it's purely client-side.
-      // The key is that the CLASS STRUCTURE related to language (language-X) is the same server/client.
-      return <code className={cn(codeClassName)} {...props}>{children}</code>;
+
+      return (
+        <code className={cn(codeClassName)} {...rest}>
+          {children}
+        </code>
+      );
     },
   };
 

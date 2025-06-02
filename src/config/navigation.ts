@@ -620,7 +620,39 @@ export const navigationConfig: NavConfigItem[] = [
     isSection: true,
     children: [
       { title: "Getting Started with DevDocs++", path: "/docs/getting-started", order: 1 },
-      { title: "Advanced Topics in DevDocs++", path: "/docs/guides/advanced-topics", order: 2 }
+      { title: "Introduction", path: "/docs/introduction", order: 2 },
+      { title: "Blueprint", path: "/docs/blueprint", order: 3 },
+      { title: "Advanced Topics in DevDocs++", path: "/docs/guides/advanced-topics", order: 4 },
+      { title: "Knowledge Set", path: "/docs/knowledge_set", order: 5 },
+      { title: "Skill Set", path: "/docs/skill_set", order: 6 },
+      { title: "Backend Skills Set", path: "/docs/backend_skills_set", order: 7 },
+      { title: "AI Tools", path: "/docs/ai_tools", order: 8 }
+    ]
+  },
+  {
+    title: "Comprehensive Guides",
+    order: 5.5,
+    isSection: true,
+    children: [
+      { title: "Comprehensive FastAPI Guide", path: "/docs/Comprehensive FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 1 },
+      { title: "Advanced FastAPI Enhancements", path: "/docs/Advanced FastAPI, SQLAlchemy, Pydantic, and Async Programming Enhancements", order: 2 },
+      { title: "Supplementary FastAPI Guide", path: "/docs/Supplementary FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 3 },
+      { title: "Production-Level MkDocs", path: "/docs/Production-Level MkDocs for FastAPI and Related Topics", order: 4 },
+      { title: "FastAPI Guide Topics", path: "/docs/fastapi_guide_topics", order: 5 },
+      { title: "FastAPI Questions", path: "/docs/fastapi_questions", order: 6 }
+    ]
+  },
+  {
+    title: "Quest Series",
+    order: 5.7,
+    isSection: true,
+    children: [
+      { title: "Quest 1", path: "/docs/quest1", order: 1 },
+      { title: "Quest 2", path: "/docs/quest2", order: 2 },
+      { title: "Quest 3", path: "/docs/quest3", order: 3 },
+      { title: "Quest 4", path: "/docs/quest4", order: 4 },
+      { title: "Quest 5", path: "/docs/quest5", order: 5 },
+      { title: "Quest 6", path: "/docs/quest6", order: 6 }
     ]
   },
   {
@@ -640,13 +672,28 @@ export const navigationConfig: NavConfigItem[] = [
     order: 7,
     isSection: true,
     children: [
-      { title: "Introduction to FastAPI", path: "/docs/fastapi/introduction", order: 1, isSection: true },
-      { title: "Core FastAPI Concepts", path: "/docs/fastapi/core-concepts", order: 2, isSection: true },
-      { title: "Advanced FastAPI Features", path: "/docs/fastapi/advanced-features", order: 3, isSection: true },
-      { title: "FastAPI Pro-Level Features", path: "/docs/fastapi-pro", order: 4, isSection: true },
-      { title: "FastAPI Performance & Optimization", path: "/docs/fastapi/performance", order: 5, isSection: true },
-      { title: "FastAPI Security", path: "/docs/fastapi/security", order: 6, isSection: true },
-      { title: "FastAPI Hidden Gems", path: "/docs/fastapi/hidden-gems", order: 7 }
+      { title: "Basic FastAPI", path: "/docs/fastapi/basic", order: 1 },
+      { title: "Intermediate FastAPI", path: "/docs/fastapi/intermediate", order: 2 },
+      { title: "Advanced FastAPI", path: "/docs/fastapi/advanced", order: 3 },
+      { title: "Pro FastAPI", path: "/docs/fastapi/pro", order: 4 },
+      { title: "FastAPI Hidden Gems", path: "/docs/fastapi/hidden-gems", order: 5 },
+      { title: "Introduction to FastAPI", path: "/docs/fastapi/introduction", order: 6, isSection: true },
+      { title: "Core FastAPI Concepts", path: "/docs/fastapi/core-concepts", order: 7, isSection: true },
+      { title: "Advanced FastAPI Features", path: "/docs/fastapi/advanced-features", order: 8, isSection: true },
+      { title: "FastAPI Routing", path: "/docs/fastapi/routing", order: 9, isSection: true },
+      { title: "FastAPI Requests", path: "/docs/fastapi/requests", order: 10, isSection: true },
+      { title: "FastAPI Responses", path: "/docs/fastapi/responses", order: 11, isSection: true },
+      { title: "FastAPI Error Handling", path: "/docs/fastapi/error-handling", order: 12, isSection: true },
+      { title: "FastAPI Testing", path: "/docs/fastapi/testing", order: 13, isSection: true },
+      { title: "FastAPI Performance & Optimization", path: "/docs/fastapi/performance", order: 14, isSection: true },
+      { title: "FastAPI Security", path: "/docs/fastapi/security", order: 15, isSection: true },
+      { title: "FastAPI OpenAPI", path: "/docs/fastapi/openapi", order: 16, isSection: true },
+      { title: "FastAPI Real-time", path: "/docs/fastapi/real-time", order: 17, isSection: true },
+      { title: "FastAPI Privacy", path: "/docs/fastapi/privacy", order: 18, isSection: true },
+      { title: "FastAPI Ecosystem", path: "/docs/fastapi/ecosystem", order: 19, isSection: true },
+      { title: "FastAPI Pro-Level Features", path: "/docs/fastapi-pro", order: 20, isSection: true },
+      { title: "FastAPI with Rust", path: "/docs/fastapi-with-rust", order: 21, isSection: true },
+      { title: "FastAPI Edge Computing", path: "/docs/fastapi-edge-computing", order: 22, isSection: true }
     ]
   },
   {
@@ -654,17 +701,22 @@ export const navigationConfig: NavConfigItem[] = [
     order: 8,
     isSection: true,
     children: [
-      { title: "Introduction to SQLAlchemy", path: "/docs/sqlalchemy/introduction", order: 1, isSection: true },
-      { title: "FastAPI Integration with SQLAlchemy", path: "/docs/sqlalchemy/fastapi-integration", order: 2, isSection: true },
-      { title: "Pydantic Integration with SQLAlchemy", path: "/docs/sqlalchemy/pydantic-integration", order: 3, isSection: true },
-      { title: "SQLAlchemy Modeling", path: "/docs/sqlalchemy/modeling", order: 4, isSection: true },
-      { title: "Advanced SQLAlchemy Techniques", path: "/docs/sqlalchemy/advanced-techniques", order: 5, isSection: true },
-      { title: "SQLAlchemy Performance", path: "/docs/sqlalchemy/performance/sqlalchemy-performance", order: 6 },
-      { title: "Advanced SQLAlchemy Patterns", path: "/docs/sqlalchemy/advanced-patterns", order: 7, isSection: true },
-      { title: "Async SQLAlchemy", path: "/docs/sqlalchemy/async", order: 8, isSection: true },
-      { title: "SQLAlchemy Migrations", path: "/docs/sqlalchemy/migrations", order: 9, isSection: true },
-      { title: "SQLAlchemy Best Practices", path: "/docs/sqlalchemy/best-practices", order: 10, isSection: true },
-      { title: "SQLAlchemy Hidden Gems", path: "/docs/sqlalchemy/hidden-gems", order: 11 }
+      { title: "Basic SQLAlchemy", path: "/docs/sqlalchemy/basic", order: 1 },
+      { title: "Intermediate SQLAlchemy", path: "/docs/sqlalchemy/intermediate", order: 2 },
+      { title: "Advanced SQLAlchemy", path: "/docs/sqlalchemy/advanced", order: 3 },
+      { title: "Pro SQLAlchemy", path: "/docs/sqlalchemy/pro", order: 4 },
+      { title: "SQLAlchemy Hidden Gems", path: "/docs/sqlalchemy/hidden-gems", order: 5 },
+      { title: "Introduction to SQLAlchemy", path: "/docs/sqlalchemy/introduction", order: 6, isSection: true },
+      { title: "FastAPI Integration with SQLAlchemy", path: "/docs/sqlalchemy/fastapi-integration", order: 7, isSection: true },
+      { title: "Pydantic Integration with SQLAlchemy", path: "/docs/sqlalchemy/pydantic-integration", order: 8, isSection: true },
+      { title: "SQLAlchemy Modeling", path: "/docs/sqlalchemy/modeling", order: 9, isSection: true },
+      { title: "Advanced SQLAlchemy Techniques", path: "/docs/sqlalchemy/advanced-techniques", order: 10, isSection: true },
+      { title: "SQLAlchemy Performance", path: "/docs/sqlalchemy/performance/sqlalchemy-performance", order: 11 },
+      { title: "Advanced SQLAlchemy Patterns", path: "/docs/sqlalchemy/advanced-patterns", order: 12, isSection: true },
+      { title: "Async SQLAlchemy", path: "/docs/sqlalchemy/async", order: 13, isSection: true },
+      { title: "SQLAlchemy Migrations", path: "/docs/sqlalchemy/migrations", order: 14, isSection: true },
+      { title: "SQLAlchemy Best Practices", path: "/docs/sqlalchemy/best-practices", order: 15, isSection: true },
+      { title: "SQLAlchemy with Data Lakes", path: "/docs/sqlalchemy-with-datalakes", order: 16, isSection: true }
     ]
   },
   {
@@ -674,10 +726,12 @@ export const navigationConfig: NavConfigItem[] = [
     children: [
       { title: "Basic Pydantic", path: "/docs/pydantic/basic", order: 1 },
       { title: "Intermediate Pydantic", path: "/docs/pydantic/intermediate", order: 2 },
-      { title: "Pydantic Advanced Features", path: "/docs/pydantic/advanced-features", order: 3, isSection: true },
+      { title: "Advanced Pydantic", path: "/docs/pydantic/advanced", order: 3 },
       { title: "Pro Pydantic", path: "/docs/pydantic/pro", order: 4 },
-      { title: "Pydantic Type Checking", path: "/docs/pydantic/type-checking", order: 5, isSection: true },
-      { title: "Pydantic Hidden Gems", path: "/docs/pydantic/hidden-gems", order: 6 }
+      { title: "Pydantic Hidden Gems", path: "/docs/pydantic/hidden-gems", order: 5 },
+      { title: "Pydantic Advanced Features", path: "/docs/pydantic/advanced-features", order: 6, isSection: true },
+      { title: "Pydantic Type Checking", path: "/docs/pydantic/type-checking", order: 7, isSection: true },
+      { title: "Pydantic with Schema Registry", path: "/docs/pydantic-with-schema-registry", order: 8, isSection: true }
     ]
   },
   {
@@ -765,21 +819,82 @@ export const navigationConfig: NavConfigItem[] = [
     ]
   },
   {
-    title: "Software Product Documentation",
+    title: "API Documentation",
+    order: 16.5,
+    isSection: true,
+    children: [
+      { title: "API Fundamentals", path: "/docs/api-fundamentals", order: 1, isSection: true },
+      { title: "API Reference", path: "/docs/api/reference", order: 2 },
+      { title: "API Webhooks", path: "/docs/api/webhooks", order: 3 },
+      { title: "API Versioning", path: "/docs/api-versioning", order: 4, isSection: true }
+    ]
+  },
+  {
+    title: "Async Programming",
+    order: 16.7,
+    isSection: true,
+    children: [
+      { title: "Async Programming Overview", path: "/docs/async-programming", order: 1, isSection: true },
+      { title: "Async GraphQL Subscriptions", path: "/docs/async-graphql-subscriptions", order: 2, isSection: true }
+    ]
+  },
+  {
+    title: "Data & Streaming",
+    order: 16.8,
+    isSection: true,
+    children: [
+      { title: "Data Streaming", path: "/docs/data-streaming", order: 1, isSection: true }
+    ]
+  },
+  {
+    title: "Deployment & Testing",
+    order: 16.9,
+    isSection: true,
+    children: [
+      { title: "Deployment and Testing", path: "/docs/deployment-and-testing", order: 1, isSection: true }
+    ]
+  },
+  {
+    title: "Integrations & Architecture",
     order: 17,
+    isSection: true,
+    children: [
+      { title: "Integrations and Architectures", path: "/docs/integrations-and-architectures", order: 1, isSection: true },
+      { title: "Serverless Optimizations", path: "/docs/serverless-optimizations", order: 2, isSection: true }
+    ]
+  },
+  {
+    title: "AI/ML Integration",
+    order: 17.1,
+    isSection: true,
+    children: [
+      { title: "AI/ML Integration", path: "/docs/ai-ml-integration", order: 1, isSection: true }
+    ]
+  },
+  {
+    title: "Advanced Documentation",
+    order: 17.2,
+    isSection: true,
+    children: [
+      { title: "Advanced Documentation", path: "/docs/advanced-documentation", order: 1, isSection: true }
+    ]
+  },
+  {
+    title: "Software Product Documentation",
+    order: 18,
     isSection: true,
     children: [
       { title: "Backend Documentation", path: "/docs/spd/backend", order: 1 },
       { title: "Frontend Documentation", path: "/docs/spd/frontend", order: 2 },
       { title: "Database Documentation", path: "/docs/spd/database", order: 3 },
       { title: "Additional Documentation", path: "/docs/spd/additional", order: 4 },
-      { title: "Advanced Security Protocols", path: "/spd/docs/advanced_securtiy_protocols.md", order: 5 },
-      { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack.md", order: 6 }
+      { title: "Advanced Security Protocols", path: "/docs/spd/advanced_securtiy_protocols", order: 5 },
+      { title: "DevSecOps Full-Stack", path: "/docs/spd/devsecops-full-stack", order: 6 }
     ]
   },
   {
     title: "Software Product Architecture",
-    order: 18,
+    order: 19,
     isSection: true,
     children: [
       { title: "Stage 1", path: "/docs/spa/stage1", order: 1 },
@@ -792,7 +907,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Getting Started (New)",
-    order: 20,
+    order: 21,
     isSection: true,
     children: [
       { title: "Introduction", path: "/docs/old_docs/overview/getting-started", order: 1 },
@@ -813,7 +928,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Tutorials",
-    order: 21,
+    order: 22,
     isSection: true,
     children: [
       {
@@ -868,7 +983,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "FastAPI (User)",
-    order: 22,
+    order: 23,
     isSection: true,
     children: [
       {
@@ -1044,7 +1159,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Testing",
-    order: 23,
+    order: 24,
     isSection: true,
     children: [
       { title: "Functional Testing", path: "/docs/old_docs/pytests_tutorial/functional_pytests", order: 1 },
@@ -1067,7 +1182,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "DevOps",
-    order: 24,
+    order: 25,
     isSection: true,
     children: [
       { title: "Overview", path: "/docs/old_docs/learning_notes/devops/overview", order: 1 },
@@ -1168,7 +1283,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "DevSecOps",
-    order: 25,
+    order: 26,
     isSection: true,
     children: [
       { title: "Overview", path: "/docs/old_docs/learning_notes/devsecops/overview", order: 1 },
@@ -1219,7 +1334,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Application Architecture",
-    order: 26,
+    order: 27,
     isSection: true,
     children: [
       { title: "Requirements", path: "/docs/old_docs/architectures/requirements", order: 1 },
@@ -1280,7 +1395,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "AI Chat Notes",
-    order: 27,
+    order: 28,
     isSection: true,
     children: [
       {
@@ -1310,16 +1425,16 @@ export const navigationConfig: NavConfigItem[] = [
   {
     title: "Blog",
     path: "/docs/old_docs/blog/index",
-    order: 28
+    order: 29
   },
   {
     title: "Changelog",
     path: "/docs/old_docs/changelog",
-    order: 29
+    order: 30
   },
   {
     title: "About Project",
-    order: 30,
+    order: 31,
     isSection: true,
     children: [
       { title: "License", path: "/docs/old_docs/about/license", order: 1 },
@@ -1329,7 +1444,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Error Page Info",
-    order: 31,
+    order: 32,
     isSection: true,
     children: [
       { title: "Custom 404", path: "/docs/old_docs/custom_404", order: 1 }
@@ -1337,7 +1452,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "Alternative Paradigms",
-    order: 32,
+    order: 33,
     isSection: true,
     children: [
       { title: "GitOps", path: "/docs/old_docs/learning_notes/alternatives/gitops", order: 1 },

@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Additional error handling options
+  swcMinify: true,
+  experimental: {
+    // Ignore build warnings
+    optimizePackageImports: ['lucide-react'],
+  },
   images: {
     remotePatterns: [
       {
@@ -24,6 +30,36 @@ const nextConfig: NextConfig = {
       //   hostname: 'your-cdn.com',
       // },
     ],
+  },
+  webpack: (config, { isServer }) => {
+    // Handle OpenTelemetry and other problematic modules
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
+
+    // Ignore problematic modules during build
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push('@opentelemetry/exporter-jaeger');
+    }
+
+    // Handle handlebars require.extensions issue
+    config.module.rules.push({
+      test: /\.js$/,
+      include: /node_modules\/handlebars/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+        },
+      },
+    });
+
+    return config;
   },
 };
 

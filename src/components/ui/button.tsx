@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion } from "framer-motion"
+import { motion, HTMLMotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -45,10 +45,8 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : motion.button;
-
     // Framer Motion props
-    const motionProps = asChild ? {} : {
+    const motionProps = {
       whileHover: { scale: 1.03, transition: { type: "spring", stiffness: 400, damping: 10 } },
       whileTap: { scale: 0.97 },
       initial: { opacity: 0, y: 5 },
@@ -68,12 +66,24 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
+    // Separate motion-incompatible props from regular HTML props
+    const {
+      onDrag,
+      onDragEnd,
+      onDragStart,
+      onAnimationStart,
+      onAnimationEnd,
+      onAnimationIteration,
+      onTransitionEnd,
+      ...htmlProps
+    } = props;
+
     return (
       <motion.button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...motionProps}
-        {...props}
+        {...htmlProps}
       >
         {children}
       </motion.button>

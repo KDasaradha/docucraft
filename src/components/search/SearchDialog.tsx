@@ -168,15 +168,19 @@ export function SearchDialog() {
       <AnimatePresence>
       {isOpen && (
         <DialogPortal forceMount>
-            <DialogOverlay as={motion.div} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+            <DialogOverlay asChild>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+            </DialogOverlay>
             <DialogContent 
-              as={motion.div} 
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              asChild
               className="sm:max-w-2xl max-h-[calc(100vh-8rem)] flex flex-col p-0 gap-0 rounded-lg shadow-2xl"
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
               <DialogHeader className="p-4 border-b sticky top-0 bg-background z-10">
                 <DialogTitle className="text-lg font-semibold">Search Documentation</DialogTitle>
                  <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
@@ -208,6 +212,7 @@ export function SearchDialog() {
                   {getResultsContent()}
                 </div>
               </ScrollArea>
+              </motion.div>
             </DialogContent>
         </DialogPortal>
       )}

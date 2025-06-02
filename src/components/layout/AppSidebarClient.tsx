@@ -139,7 +139,7 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
   const normalizedItemHref = normalizePath(item.href);
   const normalizedCurrentPath = normalizePath(currentPath);
   const isDirectlyActive = normalizedItemHref === normalizedCurrentPath && normalizedItemHref !== "#";
-  const hasSubItems = item.items?.length > 0;
+  const hasSubItems = (item.items?.length ?? 0) > 0;
 
   useEffect(() => {
     if (hasSubItems && normalizedCurrentPath.startsWith(normalizedItemHref + "/")) {

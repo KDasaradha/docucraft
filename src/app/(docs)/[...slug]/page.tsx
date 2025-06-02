@@ -71,12 +71,12 @@ import { siteConfig } from '@/config/site.config';
 import DocClientView from './doc-client-view';
 
 type Props = {
-  params: Promise<{ slug: string[] }> | { slug: string[] }; // Updated type to allow Promise
+  params: Promise<{ slug: string[] }>;
 };
 
 // Metadata function
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params); // Ensure params is resolved
+  const resolvedParams = await params; // Await the params Promise
   const doc = await getDocumentContent(resolvedParams.slug.slice(1));
   if (!doc) {
     return {
@@ -111,7 +111,7 @@ export const dynamic = 'force-dynamic';
 
 // Page component
 export default async function Page({ params }: Props) {
-  const resolvedParams = await Promise.resolve(params); // Ensure params is resolved
+  const resolvedParams = await params; // Await the params Promise
   const doc = await getDocumentContent(resolvedParams.slug.slice(1));
 
   if (!doc) {
