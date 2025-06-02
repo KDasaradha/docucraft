@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { ExternalLink, ChevronDown, X } from 'lucide-react'; 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SearchDialog } from '@/components/search/SearchDialog';
+import { SidebarSearchDialog } from '@/components/search/SidebarSearchDialog';
 
 
 interface AppSidebarClientProps {
@@ -287,7 +287,7 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
   const sidebarStructure = (
     <>
       <SidebarHeader className={cn(isMobile && "justify-between", "p-3 border-b border-sidebar-border flex items-center gap-2")}>  
-        <SearchDialog /> {/* Removed max-width to allow search to take full width */}
+        <SidebarSearchDialog navigationItems={navigationItems} onNavigate={handleLinkClick} />
         {isMobile && (
           <SheetClose asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

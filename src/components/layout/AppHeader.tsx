@@ -7,7 +7,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Logo } from '@/components/shared/Logo';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
-import { SearchDialog } from '@/components/search/SearchDialog';
+import { HeaderSearchDialog } from '@/components/search/HeaderSearchDialog';
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"; 
 import { cn } from '@/lib/utils';
 
@@ -93,7 +93,7 @@ export default function AppHeader() {
         
         <div className="flex items-center gap-3">
           <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-            <SearchDialog />
+            <HeaderSearchDialog />
           </motion.div>
           <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
             <ThemeToggle />
