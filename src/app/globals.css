@@ -14,6 +14,43 @@ html {
   scroll-behavior: smooth; /* Smooth scrolling for anchor links */
 }
 
+/* Enhanced focus styles for better accessibility */
+*:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, textarea, select {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  @apply transition-transform duration-200 ease-out;
+}
+
+.hover-lift:hover {
+  @apply transform -translate-y-0.5 shadow-lg;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
 
 @layer base {
   :root {
@@ -62,8 +99,8 @@ html {
     --sidebar-foreground: hsl(220 15% 25%);
     --sidebar-primary: hsl(180 100% 25%); 
     --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(180 30% 88%); 
-    --sidebar-accent-foreground: hsl(180 100% 20%);
+    --sidebar-accent: hsl(180 40% 85%); 
+    --sidebar-accent-foreground: hsl(180 100% 15%);
     --sidebar-border: hsl(220 10% 88%); 
     --sidebar-ring: hsl(180 80% 40%);
 
@@ -113,8 +150,8 @@ html {
     --sidebar-foreground: hsl(220 10% 85%);
     --sidebar-primary: hsl(180 70% 50%);
     --sidebar-primary-foreground: hsl(220 15% 10%);
-    --sidebar-accent: hsl(220 15% 20%);
-    --sidebar-accent-foreground: hsl(180 70% 70%);
+    --sidebar-accent: hsl(220 15% 22%);
+    --sidebar-accent-foreground: hsl(180 70% 75%);
     --sidebar-border: hsl(220 10% 25%);
     --sidebar-ring: hsl(180 70% 60%);
   }

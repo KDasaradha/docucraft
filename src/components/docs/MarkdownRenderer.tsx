@@ -145,18 +145,29 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   useEffect(() => {
     setIsMounted(true);
     if (markdownRootRef.current) {
-       // GSAP animation for the entire markdown block if desired
-      gsap.fromTo(markdownRootRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
-      
-      // Potentially re-initialize Prism highlighting if needed,
-      // though rehype-prism-plus should handle it on initial render.
-      // If content changes dynamically and Prism needs to re-run:
-      // Prism.highlightAllUnder(markdownRootRef.current);
+      // Enhanced GSAP animation for the entire markdown block
+      gsap.fromTo(markdownRootRef.current, 
+        { opacity: 0, y: 30, scale: 0.98 }, 
+        { 
+          opacity: 1, 
+          y: 0, 
+          scale: 1,
+          duration: 0.6, 
+          ease: 'power2.out',
+          clearProps: "transform" // Clear transform after animation
+        }
+      );
     }
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill()); // Cleanup all ScrollTriggers
+      // More efficient cleanup - only kill ScrollTriggers for this component
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.trigger === markdownRootRef.current || 
+            (markdownRootRef.current && markdownRootRef.current.contains(trigger.trigger))) {
+          trigger.kill();
+        }
+      });
     };
-  }, [content]); // Re-run GSAP animations if content changes
+  }, [content]);
 
 
   const clientSideComponents: Components = {

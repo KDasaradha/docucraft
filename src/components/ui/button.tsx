@@ -45,15 +45,6 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
-    // Framer Motion props
-    const motionProps = {
-      whileHover: { scale: 1.03, transition: { type: "spring", stiffness: 400, damping: 10 } },
-      whileTap: { scale: 0.97 },
-      initial: { opacity: 0, y: 5 },
-      animate: { opacity: 1, y: 0 },
-      transition: { duration: 0.2, ease: "easeOut" }
-    };
-    
     if (asChild) {
       return (
         <Slot
@@ -82,7 +73,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        {...motionProps}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
         {...htmlProps}
       >
         {children}

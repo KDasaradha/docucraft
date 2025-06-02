@@ -26,28 +26,38 @@ export default function AppHeader() {
         scrollTrigger: {
           trigger: document.body,
           start: "top top",
-          end: "+=100", // Animate over the first 100px of scroll
-          scrub: 0.5, // Smooth scrubbing
+          end: "+=100",
+          scrub: 0.3,
         }
       });
 
-      // Animate background color and box-shadow
-      // Note: GSAP directly animates style.backgroundColor. For HSL variables, direct manipulation is complex.
-      // We'll use direct colors here or you can set up CSS classes and toggle them.
-      // For simplicity, direct color animation or opacity change might be easier.
-      // Let's try animating opacity of a background layer or box-shadow for a subtle effect.
-      
-      // Instead of direct background, let's animate a subtle shadow or border
+      // Animate header with backdrop blur and shadow
       tl.to(headerRef.current, {
-        boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Light shadow for light mode
-        // For dark mode, you'd need a different shadow color or conditional logic
-        // This will be applied universally for now.
-        borderBottomWidth: "1px",
-        // borderColor: "hsl(var(--border))", // This would also need theme awareness
+        backdropFilter: "blur(12px)",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        borderBottomColor: "rgba(0, 0, 0, 0.1)",
+        duration: 0.3,
       });
 
+      // Dark mode support
+      const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const updateForDarkMode = () => {
+        if (darkModeQuery.matches) {
+          tl.to(headerRef.current, {
+            backgroundColor: "rgba(15, 23, 42, 0.8)",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)",
+            borderBottomColor: "rgba(255, 255, 255, 0.1)",
+          });
+        }
+      };
+
+      darkModeQuery.addEventListener('change', updateForDarkMode);
+      updateForDarkMode();
+
       return () => {
-        tl.kill(); // Cleanup GSAP animation on component unmount
+        tl.kill();
+        darkModeQuery.removeEventListener('change', updateForDarkMode);
       };
     }
   }, []);

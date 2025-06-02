@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import type { NavItem } from '@/lib/docs'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { ExternalLink, ChevronDown, X } from 'lucide-react'; 
+import { ExternalLink, ChevronDown, X, ChevronRight, Home } from 'lucide-react'; 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarSearchDialog } from '@/components/search/SidebarSearchDialog';
@@ -37,24 +37,55 @@ interface RecursiveNavItemProps {
   initialOpen?: boolean;
 }
 
-// Optimize menu item animations
+// Enhanced menu item animations
 const menuItemVariants = {
-  initial: { opacity: 0, x: -5 }, // Reduced x offset from -10 to -5
-  animate: { opacity: 1, x: 0, transition: { duration: 0.2 } }, // Reduced duration from 0.3 to 0.2
-  exit: { opacity: 0, x: -5, transition: { duration: 0.15 } }, // Reduced duration and offset
+  initial: { opacity: 0, x: -12, scale: 0.95 },
+  animate: { 
+    opacity: 1, 
+    x: 0, 
+    scale: 1,
+    transition: { 
+      duration: 0.4, 
+      ease: "easeOut",
+      type: "spring",
+      stiffness: 260,
+      damping: 20
+    } 
+  },
+  exit: { 
+    opacity: 0, 
+    x: -12, 
+    scale: 0.95,
+    transition: { duration: 0.25, ease: "easeIn" } 
+  },
+  hover: {
+    x: 3,
+    scale: 1.02,
+    transition: { duration: 0.2, ease: "easeOut" }
+  }
 };
 
-// Optimize submenu animations
+// Enhanced submenu animations
 const subMenuVariants = {
   open: { 
     height: 'auto', 
-    opacity: 1, 
-    transition: { duration: 0.2, ease: "easeOut" } // Reduced duration and changed ease
+    opacity: 1,
+    transition: { 
+      duration: 0.4, 
+      ease: "easeOut",
+      staggerChildren: 0.08,
+      delayChildren: 0.15
+    }
   },
   closed: { 
     height: 0, 
     opacity: 0, 
-    transition: { duration: 0.2, ease: "easeIn" } // Reduced duration and changed ease
+    transition: { 
+      duration: 0.3, 
+      ease: "easeIn",
+      staggerChildren: 0.03,
+      staggerDirection: -1
+    }
   }
 };
 
@@ -83,22 +114,25 @@ interface ItemTitleContentProps {
 
 const ItemTitleContent: React.FC<ItemTitleContentProps> = ({ item, isCollapsed, isMobile, isOpen }) => (
   <>
-    {/* Remove the icon check since it's not in NavItem interface */}
+    {/* Add visual indicator for different item types */}
+    {!isCollapsed && !isMobile && item.isSection && (
+      <div className="w-2 h-2 rounded-full bg-sidebar-primary/60 shrink-0 mr-2" />
+    )}
     <span className={cn(
       "truncate flex-grow",
       item.isSection && "font-semibold text-sm",
       isCollapsed && !isMobile && "sr-only"
     )}>{item.title}</span>
     {item.isExternal && (!isCollapsed || isMobile) && (
-      <ExternalLink className="ml-1 h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <ExternalLink className="ml-1 h-3.5 w-3.5 text-sidebar-foreground/60 shrink-0" />
     )}
     {item.items && item.items.length > 0 && (!isCollapsed || isMobile) && (
       <motion.div 
         animate={{ rotate: isOpen ? 0 : -90 }} 
-        transition={{ duration: 0.2 }} 
+        transition={{ duration: 0.3, ease: "easeInOut" }} 
         className={cn("ml-auto", isCollapsed && !isMobile && "hidden")}
       >
-        <ChevronDown className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100" />
+        <ChevronDown className="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity duration-200" />
       </motion.div>
     )}
   </>
@@ -111,16 +145,84 @@ interface SectionHeaderProps {
   level: number;
 }
 
+interface BreadcrumbProps {
+  navigationItems: NavItem[];
+  currentPath: string;
+  isCollapsed: boolean;
+  isMobile: boolean;
+}
+
+const findPathToItem = (items: NavItem[], targetPath: string, currentPath: NavItem[] = []): NavItem[] | null => {
+  for (const item of items) {
+    const normalizedItemHref = normalizePath(item.href);
+    const normalizedTargetPath = normalizePath(targetPath);
+    
+    if (normalizedItemHref === normalizedTargetPath && normalizedItemHref !== "#") {
+      return [...currentPath, item];
+    }
+    
+    if (item.items && item.items.length > 0) {
+      const result = findPathToItem(item.items, targetPath, [...currentPath, item]);
+      if (result) return result;
+    }
+  }
+  return null;
+};
+
+const SidebarBreadcrumb: React.FC<BreadcrumbProps> = ({ navigationItems, currentPath, isCollapsed, isMobile }) => {
+  const pathItems = findPathToItem(navigationItems, currentPath);
+  
+  if (!pathItems || pathItems.length === 0 || isCollapsed) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="px-3 py-2 border-b border-sidebar-border/30 bg-sidebar-accent/20"
+    >
+      <div className="flex items-center gap-1 text-xs text-sidebar-foreground/70">
+        <Home className="h-3 w-3" />
+        {pathItems.map((item, index) => (
+          <React.Fragment key={item.href || item.title}>
+            <ChevronRight className="h-3 w-3 opacity-50" />
+            <span 
+              className={cn(
+                "truncate",
+                index === pathItems.length - 1 && "text-sidebar-accent-foreground font-medium"
+              )}
+              title={item.title}
+            >
+              {item.title}
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
 const SectionHeader: React.FC<SectionHeaderProps> = ({ item, isCollapsed, isMobile, level }) => (
   <motion.div 
     variants={menuItemVariants}
     className={cn(
-      "px-3 pt-5 pb-1 text-xs font-semibold text-sidebar-foreground/70 tracking-wider uppercase select-none truncate",
-      level > 0 && "pt-3 text-sidebar-foreground/60",
-      isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2"
+      "px-3 pt-5 pb-2 text-xs font-semibold text-sidebar-foreground/70 tracking-wider uppercase select-none truncate",
+      "border-b border-sidebar-border/20 mb-2",
+      level > 0 && "pt-3 text-sidebar-foreground/60 border-b-0 mb-1",
+      isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2 border-b-0"
     )}
   >
-    {isCollapsed && !isMobile ? item.title.substring(0,1).toUpperCase() : item.title}
+    {isCollapsed && !isMobile ? (
+      <div className="w-6 h-6 rounded-full bg-sidebar-accent/50 flex items-center justify-center text-[0.6rem] font-bold">
+        {item.title.substring(0,1).toUpperCase()}
+      </div>
+    ) : (
+      <div className="flex items-center gap-2">
+        <span>{item.title}</span>
+        {level === 0 && (
+          <div className="flex-1 h-px bg-gradient-to-r from-sidebar-border/30 to-transparent" />
+        )}
+      </div>
+    )}
   </motion.div>
 );
 
@@ -151,6 +253,11 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
     normalizedItemHref !== '#' &&
     normalizedCurrentPath.startsWith(normalizedItemHref + '/') && 
     hasSubItems;
+
+  // Check if this item is in the active path (breadcrumb-style highlighting)
+  const isInActivePath = 
+    normalizedItemHref !== '#' &&
+    (normalizedCurrentPath.startsWith(normalizedItemHref + '/') || isDirectlyActive);
   
   useEffect(() => {
     if (isActiveAncestor && !isOpen) setIsOpen(true);
@@ -180,9 +287,20 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
       onClick={handleToggleOrNavigate}
       tooltip={isCollapsed && !isMobile ? item.title : undefined}
       aria-expanded={isOpen}
-      isActive={isDirectlyActive || isActiveAncestor}
+      isActive={isDirectlyActive}
       level={level}
-      className={cn(isCollapsed && !isMobile && "justify-center")}
+      className={cn(
+        isCollapsed && !isMobile && "justify-center",
+        // Enhanced active state styling
+        isDirectlyActive && "ring-2 ring-sidebar-ring/20 shadow-sm",
+        // Breadcrumb-style highlighting for ancestor items
+        isInActivePath && !isDirectlyActive && "bg-sidebar-accent/30 text-sidebar-accent-foreground/80",
+        // Improved hover states
+        "transition-all duration-200 ease-in-out",
+        "hover:shadow-sm hover:scale-[1.02]",
+        // Better focus states
+        "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2"
+      )}
       hasSubItems={hasSubItems}
       isOpen={isOpen}
     >
@@ -196,7 +314,16 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
   );
 
   return (
-    <motion.li variants={menuItemVariants} className="list-none">
+    <motion.li 
+      variants={menuItemVariants} 
+      className={cn(
+        "list-none relative",
+        // Add visual indicator for active path
+        isDirectlyActive && "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-sidebar-primary before:rounded-r-full",
+        isInActivePath && !isDirectlyActive && "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-sidebar-accent-foreground/40 before:rounded-r-full"
+      )}
+      whileHover="hover"
+    >
       {item.href && item.href !== '#' ? (
         <Link 
           href={item.href} 
@@ -222,7 +349,13 @@ const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
               initial="closed"
               animate="open"
               exit="closed"
-              className="submenu-list"
+              className={cn(
+                "submenu-list relative",
+                // Enhanced submenu styling
+                "ml-2 border-l-2 border-sidebar-border/30 pl-3 space-y-1",
+                // Add subtle background for active submenu
+                isInActivePath && "border-l-sidebar-accent-foreground/20"
+              )}
             >
               {item.items?.map((subItem, index) => (
                 <RecursiveNavItem
@@ -253,6 +386,23 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
     setIsLoading(false);
   }, []);
 
+  // Add smooth scroll to active item when page loads
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        const activeElement = document.querySelector('[aria-current="page"]');
+        if (activeElement) {
+          activeElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, isLoading]);
+
   // Remove declaration for 'openMobile' if present
   const handleLinkClick = () => {
     if (isMobile) {
@@ -263,19 +413,25 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
   const isCollapsed = !isMobile && sidebarStateHook === "collapsed";
   
   const sidebarMenuContent = (
-    <SidebarMenu className={cn(isCollapsed && "px-1.5")}> 
-      {navigationItems.map((item, index) => (
-        <RecursiveNavItem
-          key={`${item.href || item.title}-${item.order}-${index}`}
-          item={item}
-          level={0}
-          isCollapsed={isCollapsed}
-          currentPath={pathname}
-          onLinkClick={handleLinkClick}
-          initialOpen={!!(item.href && pathname.startsWith(normalizePath(item.href)))}
-        />
-      ))}
-    </SidebarMenu>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
+    >
+      <SidebarMenu className={cn(isCollapsed && "px-1.5")}> 
+        {navigationItems.map((item, index) => (
+          <RecursiveNavItem
+            key={`${item.href || item.title}-${item.order}-${index}`}
+            item={item}
+            level={0}
+            isCollapsed={isCollapsed}
+            currentPath={pathname}
+            onLinkClick={handleLinkClick}
+            initialOpen={!!(item.href && pathname.startsWith(normalizePath(item.href)))}
+          />
+        ))}
+      </SidebarMenu>
+    </motion.div>
   );
   
   const sidebarSkeleton = (
@@ -297,6 +453,12 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
           </SheetClose>
         )}
       </SidebarHeader>
+      <SidebarBreadcrumb 
+        navigationItems={navigationItems}
+        currentPath={pathname}
+        isCollapsed={isCollapsed}
+        isMobile={isMobile}
+      />
       <SidebarContent className={cn("flex-1", isResizing && "!cursor-ew-resize")}>
         <ScrollArea className="h-full"> {/* Ensure ScrollArea takes full height of SidebarContent */}
           {isLoading ? sidebarSkeleton : sidebarMenuContent}

@@ -563,7 +563,11 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         variant={isActive ? "sidebarAccent" : "ghostSidebar"}
         className={cn(
           "h-auto min-h-[2.25rem] w-full justify-start items-center gap-2.5 text-sm px-2.5 py-1.5",
-          isCollapsed ? "justify-center px-0 h-9" : `pl-${2 + Math.min(level * 1, 4)}`, 
+          "transition-all duration-200 ease-in-out",
+          "hover:shadow-sm hover:scale-[1.01]",
+          "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1",
+          isCollapsed ? "justify-center px-0 h-9" : `pl-${2 + Math.min(level * 1, 4)}`,
+          isActive && "shadow-sm font-medium",
           className
         )}
         asChild={asChild}
