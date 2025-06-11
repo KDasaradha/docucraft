@@ -162,7 +162,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       // More efficient cleanup - only kill ScrollTriggers for this component
       ScrollTrigger.getAll().forEach(trigger => {
         if (trigger.trigger === markdownRootRef.current || 
-            (markdownRootRef.current && markdownRootRef.current.contains(trigger.trigger))) {
+            (markdownRootRef.current && trigger.trigger instanceof Element && markdownRootRef.current.contains(trigger.trigger))) {
           trigger.kill();
         }
       });
@@ -189,7 +189,9 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       }
       
       const preFinalClassName = cn('line-numbers', language ? `language-${language}` : '', preClassName, "my-6");
-
+      
+      // Add data-language attribute for the language badge
+      const dataLanguageAttr = language ? { 'data-language': language } : {};
 
       useEffect(() => {
         if (preRef.current) {
@@ -227,7 +229,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5 }}
         > 
-          <pre {...preProps} ref={preRef} className={preFinalClassName}>
+          <pre {...preProps} ref={preRef} className={preFinalClassName} {...dataLanguageAttr}>
             {children} 
           </pre>
           <motion.div
@@ -257,7 +259,19 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       const inline = !isBlock;
 
       if (inline || !isBlock) {
-        return <code className={cn("bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono", codeClassName)} {...props}>{children}</code>;
+        return (
+          <code 
+            className={cn(
+              "px-1.5 py-0.5 rounded-md text-sm font-mono font-medium", 
+              "bg-gradient-to-r from-[hsl(var(--inline-code-bg-gradient-from))] to-[hsl(var(--inline-code-bg-gradient-to))]",
+              "text-[hsl(var(--inline-code-text))] border border-[hsl(var(--inline-code-border))]",
+              codeClassName
+            )} 
+            {...props}
+          >
+            {children}
+          </code>
+        );
       }
       return <code className={cn(codeClassName, "code-highlight")} {...props}>{children}</code>;
     },
@@ -276,7 +290,12 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       // Ensure line-numbers class is present if rehype-prism-plus is configured to add it server-side
       // This logic tries to mimic what rehype-prism-plus might do on the server
       const finalPreClassName = cn('line-numbers', languageClass, preClassName, 'my-6');
-      return <pre {...preProps} className={finalPreClassName}>{children}</pre>;
+      
+      // Add data-language attribute for the language badge
+      const match = languageClass ? /language-(\S+)/.exec(languageClass) : null;
+      const dataLanguageAttr = match ? { 'data-language': match[1] } : {};
+      
+      return <pre {...preProps} className={finalPreClassName} {...dataLanguageAttr}>{children}</pre>;
     },
     code: (props) => {
       const { node, className: codeClassName, children, ...rest } = props;
@@ -288,7 +307,9 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         return (
           <code
             className={cn(
-              "bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono",
+              "px-1.5 py-0.5 rounded-md text-sm font-mono font-medium", 
+              "bg-gradient-to-r from-[hsl(var(--inline-code-bg-gradient-from))] to-[hsl(var(--inline-code-bg-gradient-to))]",
+              "text-[hsl(var(--inline-code-text))] border border-[hsl(var(--inline-code-border))]",
               codeClassName
             )}
             {...rest}

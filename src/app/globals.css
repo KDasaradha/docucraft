@@ -1,4 +1,4 @@
-@import 'prismjs/themes/prism-okaidia.css';
+/* Custom syntax highlighting theme that works well in both light and dark modes */
 @import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 
 @tailwind base;
@@ -104,12 +104,59 @@ button, a, input, textarea, select {
     --sidebar-border: hsl(220 10% 88%); 
     --sidebar-ring: hsl(180 80% 40%);
 
+    /* Code syntax highlighting - Light theme */
+    --code-bg-gradient-from: 210 50% 98%;
+    --code-bg-gradient-to: 210 50% 95%;
+    --code-border: 210 30% 90%;
+    --code-text: 210 20% 25%;
+    --code-line-number: 210 30% 70%;
+    --code-line-number-border: 210 30% 85%;
+    --code-language-badge-bg: 210 50% 90%;
+    --code-language-badge-text: 210 50% 30%;
+    --code-highlight-line: 180 70% 95%;
+    
+    /* Token colors - Light theme */
+    --code-comment: 210 25% 50%;
+    --code-punctuation: 210 20% 30%;
+    --code-property: 330 90% 45%;
+    --code-number: 270 70% 50%;
+    --code-string: 120 70% 35%;
+    --code-operator: 210 50% 40%;
+    --code-function: 40 90% 40%;
+    --code-keyword: 200 90% 45%;
+    --code-regex: 20 90% 50%;
+    
+    /* Inline code - Light theme */
+    --inline-code-bg-gradient-from: 210 50% 96%;
+    --inline-code-bg-gradient-to: 210 50% 94%;
+    --inline-code-text: 210 80% 35%;
+    --inline-code-border: 210 30% 90%;
+    --inline-code-text-shadow: 0 0% 100%;
+    
+    /* Table styling - Light theme */
+    --table-border: 210 30% 90%;
+    --table-header-bg-gradient-from: 210 50% 94%;
+    --table-header-bg-gradient-to: 210 50% 90%;
+    --table-header-text: 210 80% 25%;
+    --table-header-border: 210 30% 85%;
+    --table-cell-border: 210 30% 92%;
+    --table-cell-text: 210 20% 25%;
+    --table-row-hover-bg: 180 70% 97%;
+    --table-row-even-bg: 210 50% 98%;
+    
+    /* Blockquote styling - Light theme */
+    --blockquote-bg-gradient-from: 210 50% 98%;
+    --blockquote-bg-gradient-to: 210 50% 96%;
+    --blockquote-border-gradient-from: 180 80% 50%;
+    --blockquote-border-gradient-to: 200 80% 40%;
+    --blockquote-text: 210 20% 40%;
+    --blockquote-quote-color: 180 80% 40%;
+
     --header-height: 4rem; 
     --sidebar-width-default: 16rem; /* Default expanded sidebar width */
     --sidebar-width-min: 12rem;    /* Minimum resizable sidebar width */
     --sidebar-width-max: 24rem;    /* Maximum resizable sidebar width */
     --sidebar-width-icon: 3.5rem;  /* Collapsed sidebar width (icon only) */
-    
   }
 
   .dark {
@@ -154,6 +201,54 @@ button, a, input, textarea, select {
     --sidebar-accent-foreground: hsl(180 70% 75%);
     --sidebar-border: hsl(220 10% 25%);
     --sidebar-ring: hsl(180 70% 60%);
+    
+    /* Code syntax highlighting - Dark theme */
+    --code-bg-gradient-from: 220 20% 14%;
+    --code-bg-gradient-to: 220 20% 12%;
+    --code-border: 220 20% 20%;
+    --code-text: 220 15% 90%;
+    --code-line-number: 220 15% 50%;
+    --code-line-number-border: 220 15% 25%;
+    --code-language-badge-bg: 220 15% 25%;
+    --code-language-badge-text: 220 15% 90%;
+    --code-highlight-line: 220 70% 20%;
+    
+    /* Token colors - Dark theme */
+    --code-comment: 220 15% 55%;
+    --code-punctuation: 220 15% 75%;
+    --code-property: 330 80% 65%;
+    --code-number: 270 70% 75%;
+    --code-string: 120 60% 60%;
+    --code-operator: 220 15% 85%;
+    --code-function: 40 80% 65%;
+    --code-keyword: 200 80% 70%;
+    --code-regex: 20 80% 65%;
+    
+    /* Inline code - Dark theme */
+    --inline-code-bg-gradient-from: 220 20% 18%;
+    --inline-code-bg-gradient-to: 220 20% 16%;
+    --inline-code-text: 180 70% 70%;
+    --inline-code-border: 220 20% 25%;
+    --inline-code-text-shadow: 0 0% 0%;
+    
+    /* Table styling - Dark theme */
+    --table-border: 220 20% 25%;
+    --table-header-bg-gradient-from: 220 20% 20%;
+    --table-header-bg-gradient-to: 220 20% 18%;
+    --table-header-text: 180 70% 70%;
+    --table-header-border: 220 20% 30%;
+    --table-cell-border: 220 20% 20%;
+    --table-cell-text: 220 15% 85%;
+    --table-row-hover-bg: 220 20% 22%;
+    --table-row-even-bg: 220 20% 16%;
+    
+    /* Blockquote styling - Dark theme */
+    --blockquote-bg-gradient-from: 220 20% 16%;
+    --blockquote-bg-gradient-to: 220 20% 14%;
+    --blockquote-border-gradient-from: 180 70% 50%;
+    --blockquote-border-gradient-to: 200 70% 40%;
+    --blockquote-text: 220 15% 75%;
+    --blockquote-quote-color: 180 70% 50%;
   }
 }
 
@@ -180,8 +275,13 @@ button, a, input, textarea, select {
            ;
   }
 
+  /* Enhanced inline code styling with gradient background */
   .markdown-content :where(code):not(:where(pre > *)) {
-    @apply bg-muted text-foreground px-1.5 py-0.5 rounded-sm text-sm font-mono;
+    @apply px-1.5 py-0.5 rounded-md text-sm font-mono font-medium;
+    background: linear-gradient(to right, hsl(var(--inline-code-bg-gradient-from)), hsl(var(--inline-code-bg-gradient-to)));
+    color: hsl(var(--inline-code-text));
+    border: 1px solid hsl(var(--inline-code-border));
+    text-shadow: 0 1px 0 hsl(var(--inline-code-text-shadow));
     &::before, &::after {
         content: "" !important;
     }
@@ -211,73 +311,144 @@ button, a, input, textarea, select {
   .markdown-content li > p { 
     @apply mb-1;
   }
+  /* Enhanced blockquote with gradient border and subtle background */
   .markdown-content blockquote {
-    @apply border-l-4 border-primary pl-4 italic text-muted-foreground bg-muted/20 py-2 rounded-r-md; /* Added subtle background */
+    @apply relative pl-6 italic py-3 rounded-r-md my-6; 
+    background: linear-gradient(to right, hsl(var(--blockquote-bg-gradient-from)), hsl(var(--blockquote-bg-gradient-to)));
+    border-left: 4px solid;
+    border-image: linear-gradient(to bottom, hsl(var(--blockquote-border-gradient-from)), hsl(var(--blockquote-border-gradient-to))) 1;
+    color: hsl(var(--blockquote-text));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
+  
+  .markdown-content blockquote::before {
+    content: "\201C";
+    @apply absolute text-4xl opacity-20 font-serif;
+    top: -0.5rem;
+    left: 0.5rem;
+    color: hsl(var(--blockquote-quote-color));
+  }
+  
+  /* Attractive table styling with hover effects */
   .markdown-content table {
-    @apply w-full my-6 border-collapse border border-border text-base shadow-sm rounded-md overflow-hidden; /* Added shadow and rounded corners */
+    @apply w-full my-6 border-collapse text-base overflow-hidden; 
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid hsl(var(--table-border));
   }
-  .markdown-content th, .markdown-content td {
-    @apply border border-border px-4 py-2 text-left;
-  }
+  
   .markdown-content th {
-    @apply bg-muted font-semibold;
+    @apply px-4 py-3 text-left font-semibold;
+    background: linear-gradient(to bottom, hsl(var(--table-header-bg-gradient-from)), hsl(var(--table-header-bg-gradient-to)));
+    color: hsl(var(--table-header-text));
+    border-bottom: 2px solid hsl(var(--table-header-border));
+  }
+  
+  .markdown-content td {
+    @apply px-4 py-3 text-left border-b;
+    border-color: hsl(var(--table-cell-border));
+    color: hsl(var(--table-cell-text));
+  }
+  
+  .markdown-content tr:last-child td {
+    @apply border-b-0;
+  }
+  
+  .markdown-content tbody tr {
+    @apply transition-colors duration-150;
+  }
+  
+  .markdown-content tbody tr:hover {
+    background-color: hsl(var(--table-row-hover-bg));
+  }
+  
+  /* Zebra striping for better readability */
+  .markdown-content tbody tr:nth-child(even) {
+    background-color: hsl(var(--table-row-even-bg));
   }
 
+  /* Code block styling with enhanced visual appeal for both themes */
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg; /* Increased shadow */
-    background-color: #272822 !important; 
+    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg relative; 
+    background: linear-gradient(to bottom, hsl(var(--code-bg-gradient-from)), hsl(var(--code-bg-gradient-to))) !important;
+    border: 1px solid hsl(var(--code-border));
+  }
+  
+  .markdown-content pre[class*="language-"]::before {
+    content: attr(data-language);
+    @apply absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-full opacity-70;
+    background-color: hsl(var(--code-language-badge-bg));
+    color: hsl(var(--code-language-badge-text));
   }
   
   .markdown-content pre[class*="language-"] code[class*="language-"] {
     @apply font-mono text-sm bg-transparent p-0; 
-    color: #f8f8f2 !important; 
+    color: hsl(var(--code-text)) !important; 
     text-shadow: none !important;
   }
 
   .markdown-content .line-numbers .line-numbers-rows {
-    @apply border-r border-slate-700 pr-3 pt-4 pb-4 pl-3 text-xs; 
-    left: -3.8em; 
-  }
-  .markdown-content .line-numbers-rows > span::before {
-    color: #999 !important; 
-    @apply text-slate-600; 
+    @apply border-r pr-3 pt-4 pb-4 pl-3 text-xs; 
+    left: -3.8em;
+    border-right-color: hsl(var(--code-line-number-border)) !important;
   }
   
+  .markdown-content .line-numbers-rows > span::before {
+    color: hsl(var(--code-line-number)) !important; 
+  }
+  
+  /* Enhanced token colors for better readability in both themes */
   .token.comment, .token.prolog, .token.doctype, .token.cdata {
-    color: #8292a2 !important; 
+    color: hsl(var(--code-comment)) !important; 
+    font-style: italic;
   }
+  
   .token.punctuation {
-    color: #f8f8f2 !important; 
+    color: hsl(var(--code-punctuation)) !important; 
   }
+  
   .token.namespace {
-    opacity: .7 !important;
+    opacity: .8 !important;
   }
+  
   .token.property, .token.tag, .token.constant, .token.symbol, .token.deleted {
-    color: #f92672 !important; 
+    color: hsl(var(--code-property)) !important; 
   }
+  
   .token.boolean, .token.number {
-    color: #ae81ff !important; 
+    color: hsl(var(--code-number)) !important; 
   }
+  
   .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted {
-    color: #a6e22e !important; 
+    color: hsl(var(--code-string)) !important; 
   }
+  
   .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string, .token.variable {
-    color: #f8f8f2 !important; 
+    color: hsl(var(--code-operator)) !important; 
   }
+  
   .token.atrule, .token.attr-value, .token.function, .token.class-name {
-    color: #e6db74 !important; 
+    color: hsl(var(--code-function)) !important; 
   }
+  
   .token.keyword {
-    color: #66d9ef !important; 
+    color: hsl(var(--code-keyword)) !important; 
+    font-weight: 600;
   }
+  
   .token.regex, .token.important {
-    color: #fd971f !important; 
+    color: hsl(var(--code-regex)) !important; 
+  }
+  
+  /* Highlighted line effect */
+  .line-highlight {
+    background: hsl(var(--code-highlight-line)) !important;
+    margin-top: 0.5em !important;
   }
 
   .prose :where(code):not(:where([class~="not-prose"] *))::before,
   .prose :where(code):not(:where([class~="not-prose"] *))::after {
-    content: "" !important; 
+    content: "" !important;
   }
 }
 
