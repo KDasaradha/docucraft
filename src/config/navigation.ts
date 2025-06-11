@@ -15,7 +15,7 @@ export const navigationConfig: NavConfigItem[] = [
   },
   {
     title: "About DevDocs++",
-    path: "/docs/about",
+    path: "/docs/general/about",
     order: 2
   },
   {
@@ -619,14 +619,24 @@ export const navigationConfig: NavConfigItem[] = [
     order: 5,
     isSection: true,
     children: [
-      { title: "Getting Started with DevDocs++", path: "/docs/getting-started", order: 1 },
-      { title: "Introduction", path: "/docs/introduction", order: 2 },
-      { title: "Blueprint", path: "/docs/blueprint", order: 3 },
-      { title: "Advanced Topics in DevDocs++", path: "/docs/guides/advanced-topics", order: 4 },
-      { title: "Knowledge Set", path: "/docs/knowledge_set", order: 5 },
-      { title: "Skill Set", path: "/docs/skill_set", order: 6 },
-      { title: "Backend Skills Set", path: "/docs/backend_skills_set", order: 7 },
-      { title: "AI Tools", path: "/docs/ai_tools", order: 8 }
+      { title: "General Documentation Overview", path: "/docs/general/index", order: 1 },
+      { title: "Getting Started with DevDocs++", path: "/docs/general/getting-started", order: 2 },
+      { title: "Introduction", path: "/docs/general/introduction", order: 3 },
+      { title: "Blueprint", path: "/docs/general/blueprint", order: 4 },
+      { title: "Advanced Topics in DevDocs++", path: "/docs/guides/advanced-topics", order: 5 }
+    ]
+  },
+  {
+    title: "Skills & Knowledge",
+    order: 5.3,
+    isSection: true,
+    children: [
+      { title: "Skills Overview", path: "/docs/skills/index", order: 1 },
+      { title: "Knowledge Set", path: "/docs/skills/knowledge_set", order: 2 },
+      { title: "Skill Set", path: "/docs/skills/skill_set", order: 3 },
+      { title: "Backend Skills Set", path: "/docs/skills/backend_skills_set", order: 4 },
+      { title: "Full Skill Audit and Learning Plan", path: "/docs/skills/skill_audit_learning_plan", order: 5 },
+      { title: "AI Tools", path: "/docs/skills/ai_tools", order: 6 }
     ]
   },
   {
@@ -634,12 +644,13 @@ export const navigationConfig: NavConfigItem[] = [
     order: 5.5,
     isSection: true,
     children: [
-      { title: "Comprehensive FastAPI Guide", path: "/docs/Comprehensive FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 1 },
-      { title: "Advanced FastAPI Enhancements", path: "/docs/Advanced FastAPI, SQLAlchemy, Pydantic, and Async Programming Enhancements", order: 2 },
-      { title: "Supplementary FastAPI Guide", path: "/docs/Supplementary FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 3 },
-      { title: "Production-Level MkDocs", path: "/docs/Production-Level MkDocs for FastAPI and Related Topics", order: 4 },
-      { title: "FastAPI Guide Topics", path: "/docs/fastapi_guide_topics", order: 5 },
-      { title: "FastAPI Questions", path: "/docs/fastapi_questions", order: 6 }
+      { title: "Guides Overview", path: "/docs/comprehensive-guides/index", order: 1 },
+      { title: "Comprehensive FastAPI Guide", path: "/docs/comprehensive-guides/Comprehensive FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 2 },
+      { title: "Advanced FastAPI Enhancements", path: "/docs/comprehensive-guides/Advanced FastAPI, SQLAlchemy, Pydantic, and Async Programming Enhancements", order: 3 },
+      { title: "Supplementary FastAPI Guide", path: "/docs/comprehensive-guides/Supplementary FastAPI, SQLAlchemy, Pydantic, and Async Programming Guide", order: 4 },
+      { title: "Production-Level MkDocs", path: "/docs/comprehensive-guides/Production-Level MkDocs for FastAPI and Related Topics", order: 5 },
+      { title: "FastAPI Guide Topics", path: "/docs/fastapi/guides/fastapi_guide_topics", order: 6 },
+      { title: "FastAPI Questions", path: "/docs/fastapi/guides/fastapi_questions", order: 7 }
     ]
   },
   {
@@ -647,12 +658,13 @@ export const navigationConfig: NavConfigItem[] = [
     order: 5.7,
     isSection: true,
     children: [
-      { title: "Quest 1", path: "/docs/quest1", order: 1 },
-      { title: "Quest 2", path: "/docs/quest2", order: 2 },
-      { title: "Quest 3", path: "/docs/quest3", order: 3 },
-      { title: "Quest 4", path: "/docs/quest4", order: 4 },
-      { title: "Quest 5", path: "/docs/quest5", order: 5 },
-      { title: "Quest 6", path: "/docs/quest6", order: 6 }
+      { title: "Quest Series Overview", path: "/docs/quests/index", order: 1 },
+      { title: "Quest 1", path: "/docs/quests/quest1", order: 2 },
+      { title: "Quest 2", path: "/docs/quests/quest2", order: 3 },
+      { title: "Quest 3", path: "/docs/quests/quest3", order: 4 },
+      { title: "Quest 4", path: "/docs/quests/quest4", order: 5 },
+      { title: "Quest 5", path: "/docs/quests/quest5", order: 6 },
+      { title: "Quest 6", path: "/docs/quests/quest6", order: 7 }
     ]
   },
   {
@@ -877,6 +889,17 @@ export const navigationConfig: NavConfigItem[] = [
     isSection: true,
     children: [
       { title: "Advanced Documentation", path: "/docs/advanced-documentation", order: 1, isSection: true }
+    ]
+  },
+  {
+    title: "Project Documentation",
+    order: 17.3,
+    isSection: true,
+    children: [
+      { title: "Project Overview", path: "/docs/project-docs/index", order: 1 },
+      { title: "Documentation Enhancements", path: "/docs/project-docs/DOCUMENTATION_ENHANCEMENTS", order: 2 },
+      { title: "Features Guide", path: "/docs/project-docs/FEATURES_GUIDE", order: 3 },
+      { title: "Missing Files Analysis", path: "/docs/project-docs/missing_files_analysis", order: 4 }
     ]
   },
   {
