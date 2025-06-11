@@ -40,6 +40,7 @@ interface SidebarContextProps {
   sidebarWidthPx: number
   setSidebarWidthPx: (width: number) => void
   isResizing: boolean
+  isToggling: boolean
   handleMouseDownOnResizeHandle: (e: React.MouseEvent<HTMLDivElement>) => void;
   defaultOpen?: boolean;
   initialCollapsible?: CollapsibleType;
@@ -136,7 +137,13 @@ export function SidebarProvider({
   }, [isMobileView, isCollapsedInternal, effectiveCollapsible, sidebarWidthPxState, iconWidthPx])
 
 
+  const [isToggling, setIsToggling] = useState(false);
+
   const toggleSidebar = useCallback(() => {
+    // Add visual feedback during toggle
+    setIsToggling(true);
+    setTimeout(() => setIsToggling(false), 300);
+
     if (isMobileView) {
       setOpenMobile((prev) => !prev)
     } else if (effectiveCollapsible === 'resizable') {
@@ -236,6 +243,7 @@ export function SidebarProvider({
     sidebarWidthPx: currentSidebarWidthForStyle, 
     setSidebarWidthPx,
     isResizing,
+    isToggling,
     handleMouseDownOnResizeHandle,
     defaultOpen,
     initialCollapsible,
@@ -332,12 +340,17 @@ const sidebarVariants = cva(
       isResizing: {
         true: "transition-none cursor-ew-resize",
         false: "", // Default transition is handled by the base class
+      },
+      isToggling: {
+        true: "animate-pulse shadow-lg border-primary/20",
+        false: "",
       }
     },
     defaultVariants: {
       variant: "default",
       collapsibleType: "resizable",
       isResizing: false,
+      isToggling: false,
     },
   }
 )
@@ -408,7 +421,7 @@ Sidebar.displayName = "Sidebar"
 
 export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const { toggleSidebar, isMobile } = useSidebar()
+    const { toggleSidebar, isMobile, state, isToggling } = useSidebar()
     if (typeof isMobile !== 'boolean' || !isMobile ) {
          return <div className={cn("md:hidden", props.className)} style={{width: '2.5rem', height: '2.5rem'}}/>;
     }
@@ -416,14 +429,22 @@ export const SidebarTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <RadixSheetTrigger asChild>
         <Button
           ref={ref}
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={toggleSidebar} 
           aria-label="Toggle sidebar"
-          className={cn(props.className)}
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200",
+            isToggling && "ring-2 ring-primary/50 scale-105",
+            props.className
+          )}
+          disabled={isToggling}
           {...props}
         >
-          <Menu />
+          <Menu className={cn(
+            "h-4 w-4",
+            isToggling && "text-primary"
+          )} />
         </Button>
       </RadixSheetTrigger>
     );
@@ -433,7 +454,7 @@ SidebarTrigger.displayName = "SidebarTrigger"
 
 const SidebarHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
  ({ className, children, ...props }, ref) => {
-    const { isResizing, state, isMobile, setOpenMobile } = useSidebar();
+    const { isResizing, state, isMobile } = useSidebar();
 
     return (
         <div

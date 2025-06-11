@@ -892,6 +892,16 @@ export const navigationConfig: NavConfigItem[] = [
     ]
   },
   {
+    title: "Development Documents",
+    order: 17.25,
+    isSection: true,
+    children: [
+      { title: "Overview", path: "/docs/development-documents/index", order: 1 },
+      { title: "Backend Development", path: "/docs/development-documents/backend-development", order: 2 },
+      { title: "Frontend Development", path: "/docs/development-documents/frontend-development", order: 3 }
+    ]
+  },
+  {
     title: "Project Documentation",
     order: 17.3,
     isSection: true,
