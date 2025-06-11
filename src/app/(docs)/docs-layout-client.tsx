@@ -11,7 +11,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import KeyboardShortcuts from '@/components/shared/KeyboardShortcuts';
-import ReadingProgress from '@/components/shared/ReadingProgress';
+import { ReadingProgress } from '@/components/enhanced/ReadingProgress';
+import { FloatingTOC } from '@/components/enhanced/FloatingTOC';
 import type { NavItem } from '@/lib/docs';
 import React from 'react'; // Ensure React is imported for React.isValidElement etc.
 
@@ -57,6 +58,7 @@ export default function DocsLayoutClient({ children, navigationItems }: { childr
               <AppFooter />
             </ScrollArea>
           </div>
+          <FloatingTOC />
           <KeyboardShortcuts />
         </div>
       </SidebarProvider>
