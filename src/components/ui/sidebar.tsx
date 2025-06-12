@@ -140,9 +140,9 @@ export function SidebarProvider({
   const [isToggling, setIsToggling] = useState(false);
 
   const toggleSidebar = useCallback(() => {
-    // Add visual feedback during toggle
+    // Add visual feedback during toggle with reduced duration
     setIsToggling(true);
-    setTimeout(() => setIsToggling(false), 300);
+    setTimeout(() => setIsToggling(false), 200);
 
     if (isMobileView) {
       setOpenMobile((prev) => !prev)
@@ -324,7 +324,7 @@ MobileSheetContent.displayName = "MobileSheetContent";
 
 
 const sidebarVariants = cva(
-  "flex flex-col transition-all duration-200 ease-in-out group",
+  "flex flex-col transition-all duration-150 ease-in-out group",
   {
     variants: {
       variant: {
@@ -342,7 +342,7 @@ const sidebarVariants = cva(
         false: "", // Default transition is handled by the base class
       },
       isToggling: {
-        true: "animate-pulse shadow-lg border-primary/20",
+        true: "animate-pulse shadow-md border-primary/20",
         false: "",
       }
     },
@@ -584,8 +584,8 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         variant={isActive ? "sidebarAccent" : "ghostSidebar"}
         className={cn(
           "h-auto min-h-[2.25rem] w-full justify-start items-center gap-2.5 text-sm px-2.5 py-1.5",
-          "transition-all duration-200 ease-in-out",
-          "hover:shadow-sm hover:scale-[1.01]",
+          "transition-all duration-150 ease-in-out",
+          "hover:shadow-sm hover:scale-[1.005]",
           "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1",
           isCollapsed ? "justify-center px-0 h-9" : `pl-${2 + Math.min(level * 1, 4)}`,
           isActive && "shadow-sm font-medium",
