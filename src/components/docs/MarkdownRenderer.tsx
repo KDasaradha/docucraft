@@ -24,7 +24,6 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff'; 
 
-
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, Copy } from 'lucide-react';
@@ -38,140 +37,145 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-const commonComponentsBase: Components = {
-  // Apply GSAP animations to heading elements
-  h1: ({node, ...props}: any) => {
-    const ref = useRef<HTMLHeadingElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current, 
-          { opacity: 0, y: 20 }, 
-          { opacity: 1, y: 0, duration: 0.5, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
-      }
-    }, []);
-    return <h1 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
-  },
-  h2: ({node, ...props}: any) => {
-    const ref = useRef<HTMLHeadingElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current, 
-          { opacity: 0, y: 20 }, 
-          { opacity: 1, y: 0, duration: 0.5, delay: 0.1, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
-      }
-    }, []);
-    return <h2 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
-  },
-  h3: ({node, ...props}: any) => {
-    const ref = useRef<HTMLHeadingElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current, 
-          { opacity: 0, y: 20 }, 
-          { opacity: 1, y: 0, duration: 0.5, delay: 0.2, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
-      }
-    }, []);
-    return <h3 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
-  },
-   p: ({node, ...props}: any) => { // Animate paragraphs
-    const ref = useRef<HTMLParagraphElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current,
-          { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
-        );
-      }
-    }, []);
-    return <p ref={ref} {...props} />;
-  },
-  ul: ({node, ...props}: any) => { // Animate unordered lists
-    const ref = useRef<HTMLUListElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current.children,
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
-        );
-      }
-    }, []);
-    return <ul ref={ref} {...props} />;
-  },
-  ol: ({node, ...props}: any) => { // Animate ordered lists
-    const ref = useRef<HTMLOListElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current.children,
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
-        );
-      }
-    }, []);
-    return <ol ref={ref} {...props} />;
-  },
-  img: ({node, src, alt, ...props}: any) => {
-    const ref = useRef<HTMLImageElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current, 
-          { opacity: 0, scale: 0.95 }, 
-          { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
-      }
-    }, []);
-    return <img ref={ref} src={src || ""} alt={alt || ""} {...props} className="rounded-md shadow-lg my-6 max-w-full h-auto transition-transform duration-300 hover:scale-105" />;
-  },
-  blockquote: ({node, ...props}: any) => {
-    const ref = useRef<HTMLQuoteElement>(null);
-    useEffect(() => {
-      if (ref.current) {
-        gsap.fromTo(ref.current, 
-          { opacity: 0, x: -20 }, 
-          { opacity: 1, x: 0, duration: 0.5, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
-      }
-    }, []);
-    return <blockquote ref={ref} {...props} />;
-  }
-};
-
 export default function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
   const [isMounted, setIsMounted] = useState(false);
   const markdownRootRef = useRef<HTMLDivElement>(null); 
 
   useEffect(() => {
     setIsMounted(true);
-    if (markdownRootRef.current) {
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && markdownRootRef.current) {
       // Enhanced GSAP animation for the entire markdown block
-      gsap.fromTo(markdownRootRef.current, 
-        { opacity: 0, y: 30, scale: 0.98 }, 
-        { 
-          opacity: 1, 
-          y: 0, 
-          scale: 1,
-          duration: 0.6, 
-          ease: 'power2.out',
-          clearProps: "transform" // Clear transform after animation
+      const timer = setTimeout(() => {
+        if (markdownRootRef.current) {
+          gsap.fromTo(markdownRootRef.current, 
+            { opacity: 0, y: 30, scale: 0.98 }, 
+            { 
+              opacity: 1, 
+              y: 0, 
+              scale: 1,
+              duration: 0.6, 
+              ease: 'power2.out',
+              clearProps: "transform" // Clear transform after animation
+            }
+          );
         }
-      );
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        // More efficient cleanup - only kill ScrollTriggers for this component
+        ScrollTrigger.getAll().forEach(trigger => {
+          if (trigger.trigger === markdownRootRef.current || 
+              (markdownRootRef.current && trigger.trigger instanceof Element && markdownRootRef.current.contains(trigger.trigger))) {
+            trigger.kill();
+          }
+        });
+      };
     }
-    return () => {
-      // More efficient cleanup - only kill ScrollTriggers for this component
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.trigger === markdownRootRef.current || 
-            (markdownRootRef.current && trigger.trigger instanceof Element && markdownRootRef.current.contains(trigger.trigger))) {
-          trigger.kill();
+  }, [isMounted, content]);
+
+
+  const components: Components = {
+    // Apply GSAP animations to heading elements only when mounted
+    h1: ({node, ...props}: any) => {
+      const ref = useRef<HTMLHeadingElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current, 
+            { opacity: 0, y: 20 }, 
+            { opacity: 1, y: 0, duration: 0.5, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
         }
-      });
-    };
-  }, [content]);
-
-
-  const clientSideComponents: Components = {
-    ...commonComponentsBase, 
+      }, [isMounted]);
+      return <h1 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
+    },
+    h2: ({node, ...props}: any) => {
+      const ref = useRef<HTMLHeadingElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current, 
+            { opacity: 0, y: 20 }, 
+            { opacity: 1, y: 0, duration: 0.5, delay: 0.1, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
+        }
+      }, [isMounted]);
+      return <h2 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
+    },
+    h3: ({node, ...props}: any) => {
+      const ref = useRef<HTMLHeadingElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current, 
+            { opacity: 0, y: 20 }, 
+            { opacity: 1, y: 0, duration: 0.5, delay: 0.2, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
+        }
+      }, [isMounted]);
+      return <h3 ref={ref} id={String(props.children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '')} {...props} />;
+    },
+    p: ({node, ...props}: any) => {
+      const ref = useRef<HTMLParagraphElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current,
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
+          );
+        }
+      }, [isMounted]);
+      return <p ref={ref} {...props} />;
+    },
+    ul: ({node, ...props}: any) => {
+      const ref = useRef<HTMLUListElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current.children,
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
+          );
+        }
+      }, [isMounted]);
+      return <ul ref={ref} {...props} />;
+    },
+    ol: ({node, ...props}: any) => {
+      const ref = useRef<HTMLOListElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current.children,
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 95%", toggleActions: "play none none none" }}
+          );
+        }
+      }, [isMounted]);
+      return <ol ref={ref} {...props} />;
+    },
+    img: ({node, src, alt, ...props}: any) => {
+      const ref = useRef<HTMLImageElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current, 
+            { opacity: 0, scale: 0.95 }, 
+            { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
+        }
+      }, [isMounted]);
+      return <img ref={ref} src={src || ""} alt={alt || ""} {...props} className="rounded-md shadow-lg my-6 max-w-full h-auto transition-transform duration-300 hover:scale-105" />;
+    },
+    blockquote: ({node, ...props}: any) => {
+      const ref = useRef<HTMLQuoteElement>(null);
+      useEffect(() => {
+        if (isMounted && ref.current) {
+          gsap.fromTo(ref.current, 
+            { opacity: 0, x: -20 }, 
+            { opacity: 1, x: 0, duration: 0.5, scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
+        }
+      }, [isMounted]);
+      return <blockquote ref={ref} {...props} />;
+    },
     pre: ({ node, children, className: preClassName, ...preProps }) => { 
       const [copied, setCopied] = useState(false);
       const preRef = useRef<HTMLPreElement>(null);
@@ -194,13 +198,13 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       const dataLanguageAttr = language ? { 'data-language': language } : {};
 
       useEffect(() => {
-        if (preRef.current) {
+        if (isMounted && preRef.current) {
           gsap.fromTo(preRef.current, 
             { opacity: 0, y: 20, scale: 0.98 }, 
             { opacity: 1, y: 0, scale: 1, duration: 0.5, scrollTrigger: { trigger: preRef.current, start: "top 90%", toggleActions: "play none none none" } }
           );
         }
-      }, []);
+      }, [isMounted]);
       
       const getCodeString = () => {
         if (preRef.current?.querySelector('code')) {
@@ -229,27 +233,29 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5 }}
         > 
-          <pre {...preProps} ref={preRef} className={preFinalClassName} {...dataLanguageAttr}>
+          <pre {...preProps} ref={preRef} className={preFinalClassName} tabIndex={0} {...dataLanguageAttr}>
             {children} 
           </pre>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleCopy}
-              className="absolute top-2 right-2 h-8 w-8 bg-muted/50 hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 ease-in-out hover:scale-110 active:scale-95"
-              aria-label="Copy code"
-              asChild
+          {isMounted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}>
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </motion.button>
-            </Button>
-          </motion.div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleCopy}
+                className="absolute top-2 right-2 h-8 w-8 bg-muted/50 hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 ease-in-out hover:scale-110 active:scale-95"
+                aria-label="Copy code"
+                asChild
+              >
+                <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}>
+                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                </motion.button>
+              </Button>
+            </motion.div>
+          )}
         </motion.div>
       );
     },
@@ -276,68 +282,27 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       return <code className={cn(codeClassName, "code-highlight")} {...props}>{children}</code>;
     },
   };
-  
-  // SSR and initial client render (no client-side hooks, minimal JS)
-  const serverComponents: Components = {
-    ...commonComponentsBase,
-    pre: ({ children, className: preClassName, node, ...preProps }) => {
-      let languageClass = '';
-      const codeChild = React.Children.toArray(children).find(child => React.isValidElement(child) && child.type === 'code') as React.ReactElement | undefined;
-      if (codeChild && codeChild.props.className) {
-        const match = /language-(\S+)/.exec(codeChild.props.className);
-        if (match) languageClass = `language-${match[1]}`;
-      }
-      // Ensure line-numbers class is present if rehype-prism-plus is configured to add it server-side
-      // This logic tries to mimic what rehype-prism-plus might do on the server
-      const finalPreClassName = cn('line-numbers', languageClass, preClassName, 'my-6');
-      
-      // Add data-language attribute for the language badge
-      const match = languageClass ? /language-(\S+)/.exec(languageClass) : null;
-      const dataLanguageAttr = match ? { 'data-language': match[1] } : {};
-      
-      return <pre {...preProps} className={finalPreClassName} {...dataLanguageAttr}>{children}</pre>;
-    },
-    code: (props) => {
-      const { node, className: codeClassName, children, ...rest } = props;
-      const parent = (node as any)?.parent as { tagName?: string } | undefined;
-      const isBlock = parent?.tagName === 'pre';
-      const inline = !isBlock;
 
-      if (inline || !isBlock) {
-        return (
-          <code
-            className={cn(
-              "px-1.5 py-0.5 rounded-md text-sm font-mono font-medium", 
-              "bg-gradient-to-r from-[hsl(var(--inline-code-bg-gradient-from))] to-[hsl(var(--inline-code-bg-gradient-to))]",
-              "text-[hsl(var(--inline-code-text))] border border-[hsl(var(--inline-code-border))]",
-              codeClassName
-            )}
-            {...rest}
-          >
-            {children}
-          </code>
-        );
-      }
-
-      return (
-        <code className={cn(codeClassName)} {...rest}>
-          {children}
-        </code>
-      );
-    },
-  };
-
-  const currentComponents = isMounted ? clientSideComponents : serverComponents;
+  // Show a loading placeholder until mounted to avoid hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className={className}>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={markdownRootRef} className={className}> 
       <ReactMarkdown
         className={cn('markdown-content', className)}
         remarkPlugins={[remarkGfm]}
-        // rehypePrismPlus handles Prism.js integration, including adding language classes.
-        // The showLineNumbers option will add the 'line-numbers' class to <pre> tags.
         rehypePlugins={[[rehypePrismPlus, { ignoreMissing: true, showLineNumbers: true }]]}
-        components={currentComponents}
+        components={components}
       >
         {content}
       </ReactMarkdown>
