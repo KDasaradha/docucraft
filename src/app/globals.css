@@ -26,11 +26,110 @@ button, a, input, textarea, select {
 
 /* Enhanced hover effects */
 .hover-lift {
-  @apply transition-transform duration-200 ease-out;
+  @apply transition-all duration-200 ease-out;
 }
 
 .hover-lift:hover {
   @apply transform -translate-y-0.5 shadow-lg;
+}
+
+/* Professional loading animations */
+.loading-dots {
+  @apply inline-flex items-center;
+}
+
+.loading-dots::after {
+  content: '';
+  @apply inline-block w-4 h-4 rounded-full bg-current animate-pulse;
+  animation-delay: 0ms;
+}
+
+.loading-dots::before {
+  content: '';
+  @apply inline-block w-1 h-1 rounded-full bg-current mr-1 animate-bounce-subtle;
+  animation-delay: -0.3s;
+}
+
+/* Skeleton loading animations */
+.skeleton {
+  @apply bg-gradient-to-r from-muted via-muted/50 to-muted animate-shimmer;
+  background-size: 200% 100%;
+}
+
+/* Enhanced focus management */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+}
+
+/* Improved button hover states */
+.button-hover {
+  @apply transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
+}
+
+/* Layout spacing utilities */
+.content-spacing {
+  @apply pt-[calc(var(--header-height)+0.25rem)];
+}
+
+.sidebar-spacing {
+  @apply top-[var(--header-height)];
+}
+
+/* Professional layout patterns */
+.main-content-container {
+  @apply container mx-auto px-4 py-8 lg:px-8 lg:py-12;
+}
+
+.prose-enhanced {
+  @apply prose prose-slate dark:prose-invert prose-headings:scroll-mt-20 max-w-none;
+}
+
+/* Responsive breakpoints for content */
+.content-responsive {
+  @apply sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl;
+}
+
+/* Enhanced animations */
+.fade-in-up {
+  @apply animate-fade-in;
+}
+
+.slide-in-right {
+  @apply animate-slide-in-right;
+}
+
+/* Dialog positioning utilities */
+.dialog-top-left {
+  position: fixed !important;
+  top: calc(var(--header-height) + 1rem) !important;
+  left: 1rem !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.dialog-top-right {
+  position: fixed !important;
+  top: calc(var(--header-height) + 1rem) !important;
+  right: 1rem !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* Responsive adjustments for dialog positioning */
+@media (max-width: 640px) {
+  .dialog-top-left,
+  .dialog-top-right {
+    top: calc(var(--header-height) + 0.5rem) !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
 }
 
 /* Custom scrollbar styles */
@@ -152,11 +251,37 @@ button, a, input, textarea, select {
     --blockquote-text: 210 20% 40%;
     --blockquote-quote-color: 180 80% 40%;
 
-    --header-height: 4rem; 
-    --sidebar-width-default: 16rem; /* Default expanded sidebar width */
+    --header-height: 2.6rem; /* Optimized height for top bar + main nav */ 
+    --sidebar-width-default: 18rem; /* Default expanded sidebar width */
     --sidebar-width-min: 12rem;    /* Minimum resizable sidebar width */
     --sidebar-width-max: 24rem;    /* Maximum resizable sidebar width */
     --sidebar-width-icon: 3.5rem;  /* Collapsed sidebar width (icon only) */
+    
+    /* Professional spacing system */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    /* Enhanced shadows for depth */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    /* Animation timing */
+    --transition-fast: 150ms;
+    --transition-normal: 200ms;
+    --transition-slow: 300ms;
+    --transition-slower: 500ms;
+    
+    /* Content width constraints */
+    --content-width-narrow: 65ch;
+    --content-width-normal: 75ch;
+    --content-width-wide: 85ch;
   }
 
   .dark {

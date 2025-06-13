@@ -12,9 +12,10 @@ import {
   useSidebar,
   SidebarMenuSkeleton,
   SheetClose,
+  SheetTitle,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { SheetContent as MobileSheetContent, SheetTitle } from "@/components/ui/sheet";
+import { SheetContent as MobileSheetContent } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import type { NavItem } from '@/lib/docs'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -57,7 +58,7 @@ import {
 } from 'lucide-react'; 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { SidebarSearchDialog } from '@/components/search/SidebarSearchDialog';
+import { CompactSearchDialog } from '@/components/search/CompactSearchDialog';
 import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { siteConfig } from '@/config/site.config';
@@ -1300,7 +1301,12 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
         {/* <SidebarHeaderWithLogo isCollapsed={isCollapsed} /> */}
         
         {!isCollapsed && !isMobile && (
-          <SidebarSearchDialog navigationItems={navigationItems} onNavigate={handleLinkClick} />
+          <CompactSearchDialog 
+            navigationItems={navigationItems} 
+            onNavigate={handleLinkClick}
+            className="w-full"
+            placeholder="Quick search..."
+          />
         )}
         
         {isMobile && (

@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { SheetTitle as RadixSheetTitle } from "@/components/ui/sheet"; 
+import { SheetTitle as RadixSheetTitle, SheetClose as RadixSheetClose } from "@/components/ui/sheet"; 
 
 
 // --- Sidebar Context ---
@@ -267,7 +267,6 @@ export function SidebarProvider({
 }
 
 const RadixSheetTrigger = DialogPrimitive.Trigger;
-const RadixSheetClose = DialogPrimitive.Close; 
 const RadixSheetPortal = DialogPrimitive.Portal;
 
 const RadixSheetOverlay = React.forwardRef<

@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/shared/Logo';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
-import { HeaderSearchDialog } from '@/components/search/HeaderSearchDialog';
+import { ProfessionalSearchDialog } from '@/components/search/ProfessionalSearchDialog';
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"; 
 import { 
   Tooltip, 
@@ -86,7 +86,13 @@ type NavigationItem = {
 
 type SystemStatus = 'online' | 'degraded' | 'offline';
 
-export default function AppHeader() {
+import type { NavItem } from '@/lib/docs';
+
+interface AppHeaderProps {
+  navigationItems?: NavItem[];
+}
+
+export default function AppHeader({ navigationItems = [] }: AppHeaderProps) {
   const { isMobile, toggleSidebar, state, isToggling } = useSidebar(); 
   const headerRef = useRef<HTMLElement>(null);
   const topBarRef = useRef<HTMLDivElement>(null);
@@ -677,24 +683,13 @@ export default function AppHeader() {
                 </Tooltip>
               </motion.div> */}
               
-              {/* Enhanced Search Dialog with Keyboard Shortcut */}
+              {/* Enhanced Professional Search Dialog */}
               <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div data-search-trigger>
-                      <Button variant="outline" size="sm" className="gap-1.5">
-                        <Search className="h-4 w-4" />
-                        <span className="hidden sm:inline">Search</span>
-                        <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
-                          <span className="text-xs">⌘</span>K
-                        </kbd>
-                      </Button>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    Search <kbd className="ml-1 px-1 py-0.5 text-xs border rounded">Ctrl+K</kbd>
-                  </TooltipContent>
-                </Tooltip>
+                <ProfessionalSearchDialog 
+                  navigationItems={navigationItems}
+                  placeholder="Search documentation..."
+                  className="min-w-[200px] sm:min-w-[280px]"
+                />
               </motion.div>
               
               {/* Notification Bell with Animation */}
