@@ -61,39 +61,106 @@ const pageTransition = {
   }
 };
 
-// Breadcrumb component for better navigation context
-const BreadcrumbNavigation = ({ pathname }: { pathname: string }) => {
-  const pathSegments = pathname.split('/').filter(segment => segment && segment !== 'docs');
+// Helper function to find navigation item by path
+const findNavItemByPath = (items: NavItem[], targetPath: string): NavItem | null => {
+  const normalizedTarget = targetPath.replace(/\/$/, '') || '/docs';
   
-  if (pathSegments.length === 0) return null;
+  for (const item of items) {
+    const normalizedItemHref = (item.href || '').replace(/\/$/, '');
+    if (normalizedItemHref === normalizedTarget) {
+      return item;
+    }
+    if (item.items) {
+      const found = findNavItemByPath(item.items, targetPath);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+// Helper function to build breadcrumb path
+const buildBreadcrumbPath = (items: NavItem[], targetPath: string, currentPath: NavItem[] = []): NavItem[] => {
+  const normalizedTarget = targetPath.replace(/\/$/, '') || '/docs';
+  
+  for (const item of items) {
+    const normalizedItemHref = (item.href || '').replace(/\/$/, '');
+    const newPath = [...currentPath, item];
+    
+    if (normalizedItemHref === normalizedTarget) {
+      return newPath;
+    }
+    
+    if (item.items && normalizedTarget.startsWith(normalizedItemHref + '/')) {
+      const result = buildBreadcrumbPath(item.items, targetPath, newPath);
+      if (result.length > 0) return result;
+    }
+  }
+  return [];
+};
+
+// Improved Breadcrumb component using navigation data
+const BreadcrumbNavigation = ({ pathname, navigationItems }: { pathname: string; navigationItems: NavItem[] }) => {
+  const breadcrumbPath = buildBreadcrumbPath(navigationItems, pathname);
+  
+  // Don't show breadcrumb for root docs page
+  if (pathname === '/docs' || pathname === '/docs/' || breadcrumbPath.length === 0) {
+    return null;
+  }
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6">
-      <ol className="flex items-center space-x-2 text-sm text-muted-foreground">
+    <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem' }}>
+      <ol style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '0.5rem', 
+        fontSize: '0.875rem',
+        color: 'hsl(var(--muted-foreground))',
+        listStyle: 'none',
+        padding: 0,
+        margin: 0
+      }}>
         <li>
-          <a href="/docs" className="hover:text-foreground transition-colors">
+          <a 
+            href="/docs" 
+            style={{ 
+              color: 'hsl(var(--muted-foreground))',
+              textDecoration: 'none',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.color = 'hsl(var(--foreground))'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.color = 'hsl(var(--muted-foreground))'}
+          >
             Documentation
           </a>
         </li>
-        {pathSegments.map((segment, index) => {
-          const isLast = index === pathSegments.length - 1;
-          const href = `/docs/${pathSegments.slice(0, index + 1).join('/')}`;
-          const title = segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        {breadcrumbPath.map((item, index) => {
+          const isLast = index === breadcrumbPath.length - 1;
           
           return (
-            <React.Fragment key={segment}>
-              <li className="text-muted-foreground/50">/</li>
+            <React.Fragment key={item.href || item.title}>
+              <li style={{ color: 'hsl(var(--muted-foreground))', opacity: 0.5 }}>
+                /
+              </li>
               <li>
                 {isLast ? (
-                  <span className="text-foreground font-medium" aria-current="page">
-                    {title}
+                  <span style={{ 
+                    color: 'hsl(var(--foreground))', 
+                    fontWeight: '500' 
+                  }}>
+                    {item.title}
                   </span>
                 ) : (
                   <a 
-                    href={href} 
-                    className="hover:text-foreground transition-colors"
+                    href={item.href || '#'} 
+                    style={{ 
+                      color: 'hsl(var(--muted-foreground))',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.color = 'hsl(var(--foreground))'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.color = 'hsl(var(--muted-foreground))'}
                   >
-                    {title}
+                    {item.title}
                   </a>
                 )}
               </li>
@@ -209,7 +276,7 @@ export default function DocsLayoutClient({
                   >
                     <ErrorBoundary>
                       {/* Breadcrumb navigation for context */}
-                      <BreadcrumbNavigation pathname={currentPath} />
+                      <BreadcrumbNavigation pathname={currentPath} navigationItems={navigationItems} />
                       
                       {/* Content with loading states */}
                       <AnimatePresence mode="wait">

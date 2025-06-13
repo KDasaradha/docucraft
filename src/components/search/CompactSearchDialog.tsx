@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -202,6 +203,7 @@ export function CompactSearchDialog({
         className="sm:max-w-md max-h-[70vh] p-0 gap-0 dialog-top-left"
         aria-label="Quick search dialog"
       >
+        <DialogTitle className="sr-only">Quick Search</DialogTitle>
         {/* Compact Header */}
         <div className="p-4 border-b">
           <div className="relative">

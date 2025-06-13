@@ -19,6 +19,11 @@ export const navigationConfig: NavConfigItem[] = [
     order: 2
   },
   {
+    title: "🤖 AI Features Demo",
+    path: "/ai-demo",
+    order: 2.5
+  },
+  {
     title: "Main Comprehensive Guide",
     path: "/docs/guides/comprehensive-fastapi-guide",
     order: 3

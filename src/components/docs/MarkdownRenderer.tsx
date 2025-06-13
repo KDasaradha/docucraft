@@ -23,6 +23,15 @@ import 'prismjs/components/prism-bash'; // For shell scripts
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-diff'; 
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-shell-session'; 
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -61,6 +70,24 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
               clearProps: "transform" // Clear transform after animation
             }
           );
+          
+          // Force syntax highlighting on all code blocks
+          const codeBlocks = markdownRootRef.current.querySelectorAll('pre:not([class*="language-"])');
+          codeBlocks.forEach((block) => {
+            // Add default language class if none exists
+            if (!block.className.includes('language-')) {
+              block.classList.add('language-text');
+            }
+            // Ensure proper data attribute for language badge
+            if (!block.getAttribute('data-language')) {
+              block.setAttribute('data-language', 'text');
+            }
+          });
+          
+          // Force re-highlight with Prism if available
+          if (typeof window !== 'undefined' && (window as any).Prism) {
+            (window as any).Prism.highlightAllUnder(markdownRootRef.current);
+          }
         }
       }, 100);
       
@@ -192,10 +219,16 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
         }
       }
       
-      const preFinalClassName = cn('line-numbers', language ? `language-${language}` : '', preClassName, "my-6");
+      const preFinalClassName = cn(
+        'line-numbers', 
+        language ? `language-${language}` : 'language-text', 
+        preClassName, 
+        "my-6",
+        "code-highlight" // Always add this class for consistent styling
+      );
       
       // Add data-language attribute for the language badge
-      const dataLanguageAttr = language ? { 'data-language': language } : {};
+      const dataLanguageAttr = { 'data-language': language || 'text' };
 
       useEffect(() => {
         if (isMounted && preRef.current) {
@@ -297,7 +330,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
   }
 
   return (
-    <div ref={markdownRootRef} className={className}> 
+    <div ref={markdownRootRef} className={cn(className, 'force-code-style')}> 
       <ReactMarkdown
         className={cn('markdown-content', className)}
         remarkPlugins={[remarkGfm]}

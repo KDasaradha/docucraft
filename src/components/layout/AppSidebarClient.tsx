@@ -54,7 +54,72 @@ import {
   Palette,
   Gauge,
   BarChart,
-  Workflow
+  Workflow,
+  Globe,
+  Info,
+  Map,
+  Play,
+  Package,
+  Route,
+  Send,
+  ArrowLeftRight,
+  Timer,
+  Server,
+  Link as LinkIcon,
+  Shield,
+  Key,
+  Lock,
+  Fingerprint,
+  ShieldCheck,
+  UserCheck,
+  AlertTriangle,
+  Gauge as GaugeIcon,
+  Activity,
+  TrendingUp,
+  Bug,
+  Terminal,
+  Wrench,
+  Sliders,
+  Eye,
+  Filter,
+  Merge,
+  Network,
+  Cloud,
+  Container,
+  MonitorSpeaker,
+  TestTube,
+  Upload,
+  Download,
+  Webhook,
+  Blocks,
+  Binary,
+  Braces,
+  Code2,
+  FileCode,
+  FunctionSquare,
+  Hash,
+  Puzzle,
+  Brackets,
+  Variable,
+  Cog,
+  CogIcon,
+  Folder,
+  FolderOpen,
+  BookMarked,
+  GraduationCap,
+  LightbulbIcon,
+  Target,
+  Trophy,
+  CheckCircle,
+  ArrowRight,
+  Plus,
+  Minus,
+  Equal,
+  MoreHorizontal,
+  List,
+  Grid3x3,
+  Building,
+  Building2
 } from 'lucide-react'; 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
@@ -186,26 +251,148 @@ interface ItemTitleContentProps {
 }
 
 const ItemTitleContent: React.FC<ItemTitleContentProps> = ({ item, isCollapsed, isMobile, isOpen }) => {
-  // Determine icon based on item title or path
+  // Comprehensive icon mapping for FastAPI documentation
   const getItemIcon = () => {
     const title = item.title.toLowerCase();
     const href = item.href?.toLowerCase() || '';
     
-    if (href.includes('/api')) return <Code className="h-4 w-4 text-blue-500" />;
-    if (href.includes('/guide')) return <BookOpen className="h-4 w-4 text-green-500" />;
-    if (href.includes('/tutorial')) return <Lightbulb className="h-4 w-4 text-amber-500" />;
-    if (href.includes('/reference')) return <FileText className="h-4 w-4 text-purple-500" />;
-    if (title.includes('getting started')) return <Rocket className="h-4 w-4 text-red-500" />;
-    if (title.includes('config')) return <Settings className="h-4 w-4 text-gray-500" />;
-    if (title.includes('database')) return <Database className="h-4 w-4 text-blue-600" />;
-    if (title.includes('deploy')) return <Cpu className="h-4 w-4 text-indigo-500" />;
-    if (title.includes('theme')) return <Palette className="h-4 w-4 text-pink-500" />;
-    if (title.includes('performance')) return <Gauge className="h-4 w-4 text-orange-500" />;
-    if (title.includes('analytics')) return <BarChart className="h-4 w-4 text-blue-400" />;
-    if (title.includes('workflow')) return <Workflow className="h-4 w-4 text-teal-500" />;
+    // Home and About
+    if (title.includes('home') || href.includes('/index')) return <Home className="h-4 w-4 text-blue-500" />;
+    if (title.includes('about') || title.includes('devdocs++')) return <Info className="h-4 w-4 text-purple-500" />;
     
-    // Default icon for sections
-    if (item.isSection) return <Layers className="h-4 w-4 text-sidebar-foreground/70" />;
+    // Main sections and comprehensive guides
+    if (title.includes('comprehensive guide') && !title.includes('main')) return <Map className="h-4 w-4 text-emerald-500" />;
+    if (title.includes('main comprehensive guide')) return <BookMarked className="h-4 w-4 text-blue-600" />;
+    
+    // API Fundamentals (Section 1)
+    if (title.includes('intro to apis') || title.includes('introduction to apis')) return <Play className="h-4 w-4 text-green-500" />;
+    if (title.includes('what is an api')) return <HelpCircle className="h-4 w-4 text-blue-400" />;
+    if (title.includes('types of apis')) return <Grid3x3 className="h-4 w-4 text-purple-400" />;
+    if (title.includes('rest api principles')) return <Blocks className="h-4 w-4 text-indigo-500" />;
+    if (title.includes('introduction to fastapi')) return <Zap className="h-4 w-4 text-red-500" />;
+    
+    // Core FastAPI Concepts (Section 2)
+    if (title.includes('core fastapi concepts')) return <Target className="h-4 w-4 text-orange-500" />;
+    if (title.includes('basic fastapi application') || title.includes('basic application')) return <Code2 className="h-4 w-4 text-green-600" />;
+    if (title.includes('path and query parameters') || title.includes('parameters')) return <Route className="h-4 w-4 text-blue-500" />;
+    if (title.includes('request body') || title.includes('pydantic models')) return <Package className="h-4 w-4 text-purple-600" />;
+    if (title.includes('response models') || title.includes('status codes')) return <Send className="h-4 w-4 text-teal-600" />;
+    if (title.includes('async endpoints') || title.includes('async')) return <Timer className="h-4 w-4 text-orange-600" />;
+    
+    // Database/SQLAlchemy (Section 3)
+    if (title.includes('database handling') || title.includes('sqlalchemy') && title.includes('main')) return <Database className="h-4 w-4 text-blue-700" />;
+    if (title.includes('introduction to sqlalchemy')) return <Database className="h-4 w-4 text-indigo-600" />;
+    if (title.includes('fastapi with sqlalchemy') || title.includes('session management')) return <LinkIcon className="h-4 w-4 text-green-700" />;
+    if (title.includes('pydantic and sqlalchemy integration')) return <Merge className="h-4 w-4 text-purple-700" />;
+    if (title.includes('sqlalchemy best practices')) return <CheckCircle className="h-4 w-4 text-emerald-600" />;
+    if (title.includes('table creation methods')) return <Building className="h-4 w-4 text-gray-600" />;
+    if (title.includes('declarative base')) return <Building2 className="h-4 w-4 text-gray-700" />;
+    if (title.includes('multi-tenant')) return <Network className="h-4 w-4 text-cyan-600" />;
+    
+    // Advanced FastAPI Features (Section 4)
+    if (title.includes('advanced fastapi features')) return <Sparkles className="h-4 w-4 text-violet-500" />;
+    if (title.includes('dependency injection')) return <ArrowLeftRight className="h-4 w-4 text-blue-600" />;
+    if (title.includes('background tasks')) return <Activity className="h-4 w-4 text-orange-600" />;
+    if (title.includes('websockets')) return <Webhook className="h-4 w-4 text-green-600" />;
+    if (title.includes('fastapi admin')) return <Settings className="h-4 w-4 text-purple-600" />;
+    if (title.includes('custom middleware')) return <Filter className="h-4 w-4 text-indigo-600" />;
+    if (title.includes('event handlers') || title.includes('startup') || title.includes('shutdown')) return <Clock className="h-4 w-4 text-red-600" />;
+    if (title.includes('custom apirouter') || title.includes('routing')) return <GitBranch className="h-4 w-4 text-teal-600" />;
+    if (title.includes('dependency overrides')) return <Wrench className="h-4 w-4 text-amber-600" />;
+    if (title.includes('custom exception handlers') || title.includes('exception')) return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    if (title.includes('streaming responses')) return <Download className="h-4 w-4 text-blue-500" />;
+    if (title.includes('file uploads')) return <Upload className="h-4 w-4 text-green-500" />;
+    if (title.includes('openapi customization')) return <Settings className="h-4 w-4 text-orange-500" />;
+    if (title.includes('server-sent events') || title.includes('sse')) return <MonitorSpeaker className="h-4 w-4 text-purple-500" />;
+    if (title.includes('custom response classes')) return <Braces className="h-4 w-4 text-indigo-500" />;
+    if (title.includes('request context')) return <Eye className="h-4 w-4 text-cyan-500" />;
+    
+    // Security (Section 5)
+    if (title.includes('fastapi security') || title.includes('security') && title.includes('main')) return <Shield className="h-4 w-4 text-red-600" />;
+    if (title.includes('security mechanisms') || title.includes('security overview')) return <ShieldCheck className="h-4 w-4 text-green-600" />;
+    if (title.includes('basic authentication')) return <UserCheck className="h-4 w-4 text-blue-600" />;
+    if (title.includes('jwt authentication')) return <Key className="h-4 w-4 text-purple-600" />;
+    if (title.includes('oauth2 authentication')) return <Lock className="h-4 w-4 text-indigo-600" />;
+    if (title.includes('api key authentication')) return <Hash className="h-4 w-4 text-orange-600" />;
+    if (title.includes('rate limiting')) return <Gauge className="h-4 w-4 text-red-500" />;
+    if (title.includes('csrf protection')) return <Shield className="h-4 w-4 text-amber-600" />;
+    if (title.includes('advanced security techniques')) return <Fingerprint className="h-4 w-4 text-violet-600" />;
+    if (title.includes('token refresh')) return <Timer className="h-4 w-4 text-cyan-600" />;
+    if (title.includes('cookie-based authentication') || title.includes('cookie')) return <Binary className="h-4 w-4 text-brown-600" />;
+    if (title.includes('zero trust')) return <ShieldCheck className="h-4 w-4 text-red-700" />;
+    
+    // Performance & Optimization (Section 6)
+    if (title.includes('performance') && title.includes('optimization') && title.includes('main')) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (title.includes('optimizing fastapi performance')) return <Rocket className="h-4 w-4 text-orange-600" />;
+    if (title.includes('error handling and logging')) return <Bug className="h-4 w-4 text-red-500" />;
+    if (title.includes('sqlalchemy performance')) return <BarChart className="h-4 w-4 text-blue-600" />;
+    
+    // Advanced SQLAlchemy (Section 7)
+    if (title.includes('advanced sqlalchemy')) return <Database className="h-4 w-4 text-indigo-700" />;
+    if (title.includes('advanced querying')) return <Search className="h-4 w-4 text-blue-500" />;
+    if (title.includes('triggers and views')) return <Eye className="h-4 w-4 text-purple-500" />;
+    if (title.includes('hybrid properties')) return <Variable className="h-4 w-4 text-green-500" />;
+    if (title.includes('inheritance mapping')) return <GitBranch className="h-4 w-4 text-orange-500" />;
+    if (title.includes('orm events')) return <Bell className="h-4 w-4 text-yellow-500" />;
+    if (title.includes('async sqlalchemy')) return <Timer className="h-4 w-4 text-purple-700" />;
+    
+    // Pydantic Advanced Features (Section 8)
+    if (title.includes('pydantic advanced features')) return <Puzzle className="h-4 w-4 text-green-600" />;
+    if (title.includes('custom validators')) return <CheckCircle className="h-4 w-4 text-green-500" />;
+    if (title.includes('settings management')) return <Cog className="h-4 w-4 text-gray-600" />;
+    if (title.includes('complex nested models')) return <Layers className="h-4 w-4 text-purple-500" />;
+    if (title.includes('serialization')) return <Binary className="h-4 w-4 text-blue-500" />;
+    if (title.includes('generic models')) return <Brackets className="h-4 w-4 text-indigo-500" />;
+    if (title.includes('dataclasses')) return <Package className="h-4 w-4 text-orange-500" />;
+    
+    // Async Programming (Section 9)
+    if (title.includes('async programming') && title.includes('main')) return <Timer className="h-4 w-4 text-cyan-600" />;
+    if (title.includes('sync vs. async')) return <ArrowLeftRight className="h-4 w-4 text-blue-500" />;
+    if (title.includes('async db connections')) return <Database className="h-4 w-4 text-purple-600" />;
+    if (title.includes('async middleware')) return <Filter className="h-4 w-4 text-green-600" />;
+    if (title.includes('running tasks concurrently')) return <Activity className="h-4 w-4 text-orange-500" />;
+    if (title.includes('async generators')) return <FunctionSquare className="h-4 w-4 text-teal-500" />;
+    
+    // Integrations & Architectures (Section 10)
+    if (title.includes('integrations') && title.includes('architectures')) return <Network className="h-4 w-4 text-purple-600" />;
+    if (title.includes('third-party integrations')) return <Puzzle className="h-4 w-4 text-blue-600" />;
+    if (title.includes('graphql integration')) return <GitBranch className="h-4 w-4 text-pink-600" />;
+    if (title.includes('microservices architecture')) return <Building2 className="h-4 w-4 text-indigo-600" />;
+    if (title.includes('celery integration')) return <Workflow className="h-4 w-4 text-green-600" />;
+    if (title.includes('kafka integration')) return <MonitorSpeaker className="h-4 w-4 text-orange-600" />;
+    
+    // Deployment & Testing (Section 11)
+    if (title.includes('deployment') && title.includes('testing') && title.includes('main')) return <Cloud className="h-4 w-4 text-blue-600" />;
+    if (title.includes('deploying fastapi')) return <Server className="h-4 w-4 text-green-600" />;
+    if (title.includes('testing fastapi')) return <TestTube className="h-4 w-4 text-purple-600" />;
+    if (title.includes('monitoring and logging')) return <Activity className="h-4 w-4 text-orange-600" />;
+    if (title.includes('docker')) return <Container className="h-4 w-4 text-blue-500" />;
+    if (title.includes('production deployment')) return <Cpu className="h-4 w-4 text-red-600" />;
+    
+    // URL-based patterns (fallback)
+    if (href.includes('/api-fundamentals')) return <Globe className="h-4 w-4 text-blue-500" />;
+    if (href.includes('/fastapi')) return <Zap className="h-4 w-4 text-red-500" />;
+    if (href.includes('/sqlalchemy')) return <Database className="h-4 w-4 text-blue-600" />;
+    if (href.includes('/pydantic')) return <Package className="h-4 w-4 text-green-600" />;
+    if (href.includes('/async-programming')) return <Timer className="h-4 w-4 text-purple-600" />;
+    if (href.includes('/integrations')) return <Network className="h-4 w-4 text-teal-600" />;
+    if (href.includes('/deployment')) return <Cloud className="h-4 w-4 text-indigo-600" />;
+    if (href.includes('/testing')) return <TestTube className="h-4 w-4 text-purple-500" />;
+    if (href.includes('/security')) return <Shield className="h-4 w-4 text-red-600" />;
+    if (href.includes('/performance')) return <TrendingUp className="h-4 w-4 text-orange-600" />;
+    
+    // General patterns
+    if (href.includes('/guide')) return <Map className="h-4 w-4 text-green-500" />;
+    if (href.includes('/tutorial')) return <GraduationCap className="h-4 w-4 text-amber-500" />;
+    if (href.includes('/reference')) return <BookOpen className="h-4 w-4 text-purple-500" />;
+    if (href.includes('/examples')) return <Code className="h-4 w-4 text-blue-500" />;
+    
+    // Default icons for sections and regular items
+    if (item.isSection) {
+      // Use different icons for main sections vs subsections
+      if (title.includes('(main)')) return <Star className="h-4 w-4 text-yellow-500" />;
+      return <Folder className="h-4 w-4 text-sidebar-foreground/70" />;
+    }
     
     // Default icon for regular items
     return <FileText className="h-4 w-4 text-sidebar-foreground/70" />;
@@ -298,7 +485,7 @@ const SidebarBreadcrumb: React.FC<BreadcrumbProps> = ({ navigationItems, current
       <div className="flex items-center gap-1 text-xs text-sidebar-foreground/70 overflow-x-auto sidebar-scroll pb-1">
         <Home className="h-3 w-3 shrink-0" />
         {pathItems.map((item, index) => (
-          <React.Fragment key={item.href || item.title}>
+          <React.Fragment key={`${item.title}-${index}`}>
             <ChevronRight className="h-3 w-3 opacity-50 shrink-0" />
             <Link 
               href={item.href || '#'} 
@@ -319,31 +506,54 @@ const SidebarBreadcrumb: React.FC<BreadcrumbProps> = ({ navigationItems, current
   );
 };
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ item, isCollapsed, isMobile, level }) => (
-  <motion.div 
-    variants={menuItemVariants}
-    className={cn(
-      "px-4 pt-6 pb-2.5 text-xs font-semibold text-sidebar-foreground/80 tracking-wider uppercase select-none truncate",
-      "border-b border-sidebar-border/30 mb-3",
-      level > 0 && "pt-4 pb-2 text-sidebar-foreground/70 border-b-0 mb-2",
-      isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2 border-b-0 flex justify-center"
-    )}
-  >
-    {isCollapsed && !isMobile ? (
-      <div className="w-6 h-6 rounded-full bg-sidebar-accent/50 flex items-center justify-center text-[0.6rem] font-bold">
-        {item.title.substring(0,1).toUpperCase()}
-      </div>
-    ) : (
-      <div className="flex items-center gap-2.5 w-full">
-        <Layers className="h-4 w-4 text-sidebar-foreground/70 shrink-0" />
-        <span className="truncate font-medium">{item.title}</span>
-        {level === 0 && (
-          <div className="flex-1 h-px bg-gradient-to-r from-sidebar-border/40 to-transparent ml-1.5" />
-        )}
-      </div>
-    )}
-  </motion.div>
-);
+const SectionHeader: React.FC<SectionHeaderProps> = ({ item, isCollapsed, isMobile, level }) => {
+  // Get appropriate icon for section headers
+  const getSectionIcon = () => {
+    const title = item.title.toLowerCase();
+    
+    if (title.includes('comprehensive guide')) return <Map className="h-4 w-4 text-emerald-500 shrink-0" />;
+    if (title.includes('api') && title.includes('fastapi')) return <Play className="h-4 w-4 text-green-500 shrink-0" />;
+    if (title.includes('core fastapi')) return <Target className="h-4 w-4 text-orange-500 shrink-0" />;
+    if (title.includes('database') || title.includes('sqlalchemy')) return <Database className="h-4 w-4 text-blue-700 shrink-0" />;
+    if (title.includes('advanced fastapi')) return <Sparkles className="h-4 w-4 text-violet-500 shrink-0" />;
+    if (title.includes('security')) return <Shield className="h-4 w-4 text-red-600 shrink-0" />;
+    if (title.includes('performance')) return <TrendingUp className="h-4 w-4 text-green-600 shrink-0" />;
+    if (title.includes('advanced sqlalchemy')) return <Database className="h-4 w-4 text-indigo-700 shrink-0" />;
+    if (title.includes('pydantic')) return <Puzzle className="h-4 w-4 text-green-600 shrink-0" />;
+    if (title.includes('async programming')) return <Timer className="h-4 w-4 text-cyan-600 shrink-0" />;
+    if (title.includes('integrations') || title.includes('architectures')) return <Network className="h-4 w-4 text-purple-600 shrink-0" />;
+    if (title.includes('deployment') || title.includes('testing')) return <Cloud className="h-4 w-4 text-blue-600 shrink-0" />;
+    
+    // Default section icon
+    return <Layers className="h-4 w-4 text-sidebar-foreground/70 shrink-0" />;
+  };
+
+  return (
+    <motion.div 
+      variants={menuItemVariants}
+      className={cn(
+        "px-4 pt-6 pb-2.5 text-xs font-semibold text-sidebar-foreground/80 tracking-wider uppercase select-none truncate",
+        "border-b border-sidebar-border/30 mb-3",
+        level > 0 && "pt-4 pb-2 text-sidebar-foreground/70 border-b-0 mb-2",
+        isCollapsed && !isMobile && "text-center px-1 text-[0.6rem] py-2 border-b-0 flex justify-center"
+      )}
+    >
+      {isCollapsed && !isMobile ? (
+        <div className="w-6 h-6 rounded-full bg-sidebar-accent/50 flex items-center justify-center text-[0.6rem] font-bold">
+          {item.title.substring(0,1).toUpperCase()}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2.5 w-full">
+          {getSectionIcon()}
+          <span className="truncate font-medium">{item.title}</span>
+          {level === 0 && (
+            <div className="flex-1 h-px bg-gradient-to-r from-sidebar-border/40 to-transparent ml-1.5" />
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
 
 // Refactor RecursiveNavItem for lower cognitive complexity and robust type usage
 const RecursiveNavItem: React.FC<RecursiveNavItemProps> = ({
@@ -1147,38 +1357,9 @@ const Languages = ({ className, ...props }: React.ComponentProps<typeof Bookmark
   </svg>
 );
 
-const Plus = ({ className, ...props }: React.ComponentProps<typeof Bookmark>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={cn("lucide lucide-plus", className)}
-    {...props}
-  >
-    <path d="M5 12h14" />
-    <path d="M12 5v14" />
-  </svg>
-);
 
-const Minus = ({ className, ...props }: React.ComponentProps<typeof Bookmark>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={cn("lucide lucide-minus", className)}
-    {...props}
-  >
-    <path d="M5 12h14" />
-  </svg>
-);
+
+
 
 export default function AppSidebarClient({ navigationItems }: Readonly<AppSidebarClientProps>) {
   const { isMobile, setOpenMobile, isResizing, state: sidebarStateHook, collapsible: collapsibleTypeHook, defaultOpen: contextDefaultOpen, initialCollapsible: contextInitialCollapsible } = useSidebar();
@@ -1310,12 +1491,20 @@ export default function AppSidebarClient({ navigationItems }: Readonly<AppSideba
         )}
         
         {isMobile && (
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close menu</span>
-            </Button>
-          </SheetClose>
+          <div className="flex items-center gap-2 w-full">
+            <CompactSearchDialog 
+              navigationItems={navigationItems} 
+              onNavigate={handleLinkClick}
+              className="flex-1"
+              placeholder="Search docs..."
+            />
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close menu</span>
+              </Button>
+            </SheetClose>
+          </div>
         )}
       </SidebarHeader>
       

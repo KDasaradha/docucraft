@@ -1,4 +1,5 @@
 /* Custom syntax highlighting theme that works well in both light and dark modes */
+@import 'prismjs/themes/prism.css';
 @import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 
 @tailwind base;
@@ -204,32 +205,36 @@ button, a, input, textarea, select {
     --sidebar-ring: hsl(180 80% 40%);
 
     /* Code syntax highlighting - Light theme */
-    --code-bg-gradient-from: 210 50% 98%;
-    --code-bg-gradient-to: 210 50% 95%;
-    --code-border: 210 30% 90%;
-    --code-text: 210 20% 25%;
-    --code-line-number: 210 30% 70%;
-    --code-line-number-border: 210 30% 85%;
-    --code-language-badge-bg: 210 50% 90%;
-    --code-language-badge-text: 210 50% 30%;
-    --code-highlight-line: 180 70% 95%;
+    --code-bg-gradient-from: 210 40% 97%;
+    --code-bg-gradient-to: 210 40% 94%;
+    --code-border: 210 30% 85%;
+    --code-text: 210 25% 15%;
+    --code-line-number: 210 30% 60%;
+    --code-line-number-border: 210 30% 80%;
+    --code-language-badge-bg: 210 40% 88%;
+    --code-language-badge-text: 210 60% 25%;
+    --code-highlight-line: 180 60% 93%;
     
-    /* Token colors - Light theme */
-    --code-comment: 210 25% 50%;
-    --code-punctuation: 210 20% 30%;
-    --code-property: 330 90% 45%;
-    --code-number: 270 70% 50%;
-    --code-string: 120 70% 35%;
-    --code-operator: 210 50% 40%;
-    --code-function: 40 90% 40%;
-    --code-keyword: 200 90% 45%;
-    --code-regex: 20 90% 50%;
+    /* Token colors - Light theme (Vibrant VS Code inspired) */
+    --code-comment: 120 50% 40%;        /* Green comments */
+    --code-punctuation: 220 20% 20%;    /* Dark gray punctuation */
+    --code-property: 200 100% 40%;      /* Blue properties */
+    --code-number: 25 100% 45%;         /* Orange numbers */
+    --code-string: 35 100% 35%;         /* Orange-red strings */
+    --code-operator: 300 100% 45%;      /* Magenta operators */
+    --code-function: 45 100% 40%;       /* Yellow functions */
+    --code-keyword: 240 100% 50%;       /* Blue keywords */
+    --code-regex: 10 100% 50%;          /* Red regex */
+    --code-class-name: 180 100% 35%;    /* Cyan class names */
+    --code-attr-name: 200 100% 40%;     /* Blue attributes */
+    --code-builtin: 270 100% 50%;       /* Purple builtins */
+    --code-variable: 315 100% 45%;      /* Pink variables */
     
     /* Inline code - Light theme */
-    --inline-code-bg-gradient-from: 210 50% 96%;
-    --inline-code-bg-gradient-to: 210 50% 94%;
-    --inline-code-text: 210 80% 35%;
-    --inline-code-border: 210 30% 90%;
+    --inline-code-bg-gradient-from: 210 40% 95%;
+    --inline-code-bg-gradient-to: 210 40% 92%;
+    --inline-code-text: 340 100% 40%;
+    --inline-code-border: 210 30% 85%;
     --inline-code-text-shadow: 0 0% 100%;
     
     /* Table styling - Light theme */
@@ -338,16 +343,20 @@ button, a, input, textarea, select {
     --code-language-badge-text: 220 15% 90%;
     --code-highlight-line: 220 70% 20%;
     
-    /* Token colors - Dark theme */
-    --code-comment: 220 15% 55%;
-    --code-punctuation: 220 15% 75%;
-    --code-property: 330 80% 65%;
-    --code-number: 270 70% 75%;
-    --code-string: 120 60% 60%;
-    --code-operator: 220 15% 85%;
-    --code-function: 40 80% 65%;
-    --code-keyword: 200 80% 70%;
-    --code-regex: 20 80% 65%;
+    /* Token colors - Dark theme (Vibrant VS Code Dark inspired) */
+    --code-comment: 120 50% 60%;        /* Bright green comments */
+    --code-punctuation: 220 15% 80%;    /* Light gray punctuation */
+    --code-property: 200 100% 70%;      /* Bright blue properties */
+    --code-number: 25 100% 70%;         /* Bright orange numbers */
+    --code-string: 35 100% 65%;         /* Bright orange-red strings */
+    --code-operator: 300 100% 70%;      /* Bright magenta operators */
+    --code-function: 45 100% 75%;       /* Bright yellow functions */
+    --code-keyword: 240 100% 75%;       /* Bright blue keywords */
+    --code-regex: 10 100% 70%;          /* Bright red regex */
+    --code-class-name: 180 100% 65%;    /* Bright cyan class names */
+    --code-attr-name: 200 100% 70%;     /* Bright blue attributes */
+    --code-builtin: 270 100% 75%;       /* Bright purple builtins */
+    --code-variable: 315 100% 70%;      /* Bright pink variables */
     
     /* Inline code - Dark theme */
     --inline-code-bg-gradient-from: 220 20% 18%;
@@ -374,6 +383,422 @@ button, a, input, textarea, select {
     --blockquote-border-gradient-to: 200 70% 40%;
     --blockquote-text: 220 15% 75%;
     --blockquote-quote-color: 180 70% 50%;
+  }
+}
+
+/* Prism.js Syntax Highlighting Styles */
+/* Enhanced VS Code-like theme that works in both light and dark modes */
+@layer components {
+  /* Code block container styling - Apply to ALL code blocks */
+  .markdown-content pre,
+  .markdown-content pre[class*="language-"],
+  pre[class*="language-"],
+  pre.code-highlight,
+  .force-code-style pre {
+    position: relative;
+    background: linear-gradient(135deg, 
+      hsl(var(--code-bg-gradient-from)) 0%, 
+      hsl(var(--code-bg-gradient-to)) 100%);
+    border: 1px solid hsl(var(--code-border));
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    color: hsl(var(--code-text));
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    tab-size: 2;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Language badge styling - Apply to ALL code blocks */
+  .markdown-content pre:before,
+  .markdown-content pre[class*="language-"]:before,
+  pre[class*="language-"]:before,
+  pre.code-highlight:before,
+  .force-code-style pre:before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    background: hsl(var(--code-language-badge-bg));
+    color: hsl(var(--code-language-badge-text));
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    z-index: 10;
+    border: 1px solid hsl(var(--code-border));
+  }
+
+  /* Line numbers styling - Apply to ALL code blocks */
+  .markdown-content pre.line-numbers,
+  .markdown-content pre[class*="language-"].line-numbers,
+  pre[class*="language-"].line-numbers,
+  pre.code-highlight.line-numbers,
+  .force-code-style pre.line-numbers {
+    padding-left: 3.5rem;
+  }
+
+  .markdown-content .line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 1.5rem;
+    left: 0;
+    width: 3rem;
+    letter-spacing: -1px;
+    border-right: 1px solid hsl(var(--code-line-number-border));
+    user-select: none;
+    counter-reset: linenumber;
+  }
+
+  .markdown-content .line-numbers .line-numbers-rows > span {
+    pointer-events: none;
+    display: block;
+    counter-increment: linenumber;
+    color: hsl(var(--code-line-number));
+    text-align: right;
+    padding-right: 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .markdown-content .line-numbers .line-numbers-rows > span:before {
+    content: counter(linenumber);
+  }
+
+  /* Highlighted line styling */
+  .markdown-content pre[class*="language-"] .highlight-line {
+    background-color: hsl(var(--code-highlight-line));
+    display: block;
+    margin: 0 -1.5rem;
+    padding: 0 1.5rem;
+    border-left: 4px solid hsl(var(--primary));
+  }
+
+  /* Universal Token Styling - Apply to ALL code contexts */
+  
+  /* Comments - Green */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: hsl(var(--code-comment)) !important;
+    font-style: italic;
+  }
+
+  /* Punctuation - Gray */
+  .token.punctuation {
+    color: hsl(var(--code-punctuation)) !important;
+  }
+
+  /* Properties and attributes - Blue */
+  .token.property,
+  .token.tag,
+  .token.attr-name {
+    color: hsl(var(--code-property)) !important;
+    font-weight: 500;
+  }
+
+  /* Numbers - Orange */
+  .token.number,
+  .token.constant {
+    color: hsl(var(--code-number)) !important;
+    font-weight: 600;
+  }
+
+  /* Strings - Orange-red */
+  .token.string,
+  .token.char {
+    color: hsl(var(--code-string)) !important;
+  }
+
+  /* Operators - Magenta */
+  .token.operator {
+    color: hsl(var(--code-operator)) !important;
+    font-weight: 600;
+  }
+
+  /* Functions - Yellow */
+  .token.function {
+    color: hsl(var(--code-function)) !important;
+    font-weight: 600;
+  }
+
+  /* Keywords - Blue */
+  .token.keyword,
+  .token.control,
+  .token.directive,
+  .token.important {
+    color: hsl(var(--code-keyword)) !important;
+    font-weight: 600;
+  }
+
+  /* Regex - Red */
+  .token.regex {
+    color: hsl(var(--code-regex)) !important;
+    font-weight: 500;
+  }
+
+  /* Class names - Cyan */
+  .token.class-name {
+    color: hsl(var(--code-class-name)) !important;
+    font-weight: 600;
+  }
+
+  /* Attribute values - Blue */
+  .token.attr-value {
+    color: hsl(var(--code-attr-name)) !important;
+  }
+
+  /* Built-in functions - Purple */
+  .token.builtin {
+    color: hsl(var(--code-builtin)) !important;
+    font-weight: 600;
+  }
+
+  /* Variables - Pink */
+  .token.variable {
+    color: hsl(var(--code-variable)) !important;
+    font-weight: 500;
+  }
+
+  /* Additional token types for comprehensive coverage */
+  .token.boolean {
+    color: hsl(var(--code-keyword)) !important;
+    font-weight: 600;
+  }
+
+  .token.symbol {
+    color: hsl(var(--code-function)) !important;
+  }
+
+  .token.inserted {
+    color: hsl(var(--code-string)) !important;
+    background-color: hsl(120 100% 25% / 0.1);
+  }
+
+  .token.deleted {
+    color: hsl(var(--code-regex)) !important;
+    background-color: hsl(0 100% 50% / 0.1);
+  }
+
+  .token.namespace {
+    color: hsl(var(--code-class-name)) !important;
+  }
+
+  /* Generic fallback for any unspecified tokens */
+  .token {
+    color: hsl(var(--code-text)) !important;
+  }
+
+  /* Language-specific token styling */
+  /* JavaScript/TypeScript specific */
+  .markdown-content .token.template-string .token.string {
+    color: hsl(var(--code-string));
+  }
+
+  .markdown-content .token.template-string .token.punctuation {
+    color: hsl(var(--code-operator));
+  }
+
+  /* Python specific */
+  .markdown-content .language-python .token.decorator {
+    color: hsl(var(--code-function));
+    font-weight: 600;
+  }
+
+  .markdown-content .language-python .token.triple-quoted-string {
+    color: hsl(var(--code-comment));
+    font-style: italic;
+  }
+
+  /* CSS specific */
+  .markdown-content .language-css .token.selector {
+    color: hsl(var(--code-class-name));
+    font-weight: 600;
+  }
+
+  .markdown-content .language-css .token.property {
+    color: hsl(var(--code-property));
+  }
+
+  .markdown-content .language-css .token.function {
+    color: hsl(var(--code-function));
+  }
+
+  /* HTML specific */
+  .markdown-content .language-html .token.tag .token.tag {
+    color: hsl(var(--code-keyword));
+  }
+
+  .markdown-content .language-html .token.tag .token.punctuation {
+    color: hsl(var(--code-punctuation));
+  }
+
+  /* JSON specific */
+  .markdown-content .language-json .token.property {
+    color: hsl(var(--code-property));
+  }
+
+  .markdown-content .language-json .token.string {
+    color: hsl(var(--code-string));
+  }
+
+  /* SQL specific */
+  .markdown-content .language-sql .token.keyword {
+    color: hsl(var(--code-keyword));
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .markdown-content .language-sql .token.function {
+    color: hsl(var(--code-function));
+    text-transform: uppercase;
+  }
+
+  /* Bash/Shell specific */
+  .markdown-content .language-bash .token.function,
+  .markdown-content .language-shell .token.function {
+    color: hsl(var(--code-function));
+    font-weight: 600;
+  }
+
+  .markdown-content .language-bash .token.variable,
+  .markdown-content .language-shell .token.variable {
+    color: hsl(var(--code-variable));
+  }
+
+  /* Enhanced hover effects for tokens */
+  .markdown-content .token:hover {
+    background-color: hsl(var(--code-highlight-line));
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.25rem;
+    margin: -0.125rem -0.25rem;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Ensure code blocks without specific language get basic highlighting */
+  pre:not([class*="language-"]),
+  .markdown-content pre:not([class*="language-"]),
+  pre.language-text,
+  pre.language-none {
+    background: linear-gradient(135deg, 
+      hsl(var(--code-bg-gradient-from)) 0%, 
+      hsl(var(--code-bg-gradient-to)) 100%) !important;
+    border: 1px solid hsl(var(--code-border)) !important;
+    color: hsl(var(--code-text)) !important;
+  }
+
+  /* Apply token colors even to plain text blocks */
+  pre:not([class*="language-"]) code,
+  .markdown-content pre:not([class*="language-"]) code,
+  pre.language-text code,
+  pre.language-none code {
+    color: hsl(var(--code-text)) !important;
+  }
+
+  /* Copy button enhancements - Apply to ALL pre elements */
+  pre .copy-button,
+  .markdown-content pre .copy-button,
+  .markdown-content pre[class*="language-"] .copy-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  pre:hover .copy-button,
+  .markdown-content pre:hover .copy-button,
+  .markdown-content pre[class*="language-"]:hover .copy-button {
+    opacity: 1;
+  }
+
+  /* Responsive design for code blocks */
+  @media (max-width: 768px) {
+    .markdown-content pre[class*="language-"] {
+      margin: 1rem -1rem;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      font-size: 0.8rem;
+    }
+
+    .markdown-content pre[class*="language-"]:before {
+      display: none;
+    }
+
+    .markdown-content .line-numbers .line-numbers-rows {
+      display: none;
+    }
+
+    .markdown-content pre[class*="language-"].line-numbers {
+      padding-left: 1.5rem;
+    }
+  }
+
+  /* Focus styling for accessibility */
+  .markdown-content pre[class*="language-"]:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Selection styling within code blocks - Apply to ALL */
+  pre ::selection,
+  .markdown-content pre ::selection,
+  .markdown-content pre[class*="language-"] ::selection {
+    background-color: hsl(var(--primary) / 0.3);
+  }
+
+  pre ::-moz-selection,
+  .markdown-content pre ::-moz-selection,
+  .markdown-content pre[class*="language-"] ::-moz-selection {
+    background-color: hsl(var(--primary) / 0.3);
+  }
+
+  /* Global fallback - Ensure ANY pre element gets basic code styling */
+  pre {
+    position: relative;
+    background: linear-gradient(135deg, 
+      hsl(var(--code-bg-gradient-from)) 0%, 
+      hsl(var(--code-bg-gradient-to)) 100%);
+    border: 1px solid hsl(var(--code-border));
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    color: hsl(var(--code-text));
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    tab-size: 2;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Ensure code elements within pre always get proper styling */
+  pre code {
+    color: hsl(var(--code-text));
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  /* Force Prism.js to process all code blocks */
+  .force-code-style pre,
+  .force-code-style pre code {
+    color: hsl(var(--code-text)) !important;
   }
 }
 
@@ -494,9 +919,11 @@ button, a, input, textarea, select {
 
   /* Code block styling with enhanced visual appeal for both themes */
   .markdown-content pre[class*="language-"] {
-    @apply p-4 rounded-md overflow-x-auto my-6 text-sm shadow-lg relative; 
+    @apply p-4 rounded-lg overflow-x-auto my-6 text-sm shadow-lg relative; 
     background: linear-gradient(to bottom, hsl(var(--code-bg-gradient-from)), hsl(var(--code-bg-gradient-to))) !important;
     border: 1px solid hsl(var(--code-border));
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    line-height: 1.5;
   }
   
   .markdown-content pre[class*="language-"]::before {
@@ -504,12 +931,32 @@ button, a, input, textarea, select {
     @apply absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-full opacity-70;
     background-color: hsl(var(--code-language-badge-bg));
     color: hsl(var(--code-language-badge-text));
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
   }
   
   .markdown-content pre[class*="language-"] code[class*="language-"] {
     @apply font-mono text-sm bg-transparent p-0; 
     color: hsl(var(--code-text)) !important; 
     text-shadow: none !important;
+    font-family: inherit;
+  }
+  
+  /* Fallback for code blocks without language class */
+  .markdown-content pre:not([class*="language-"]) {
+    @apply p-4 rounded-lg overflow-x-auto my-6 text-sm shadow-lg relative; 
+    background: linear-gradient(to bottom, hsl(var(--code-bg-gradient-from)), hsl(var(--code-bg-gradient-to))) !important;
+    border: 1px solid hsl(var(--code-border));
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    line-height: 1.5;
+  }
+  
+  .markdown-content pre:not([class*="language-"]) code {
+    @apply font-mono text-sm bg-transparent p-0; 
+    color: hsl(var(--code-text)) !important; 
+    text-shadow: none !important;
+    font-family: inherit;
   }
 
   .markdown-content .line-numbers .line-numbers-rows {
@@ -522,14 +969,14 @@ button, a, input, textarea, select {
     color: hsl(var(--code-line-number)) !important; 
   }
   
-  /* Enhanced token colors for better readability in both themes */
+  /* Enhanced token colors with vibrant colors (VS Code inspired) */
   .token.comment, .token.prolog, .token.doctype, .token.cdata {
-    color: hsl(var(--code-comment)) !important; 
+    color: hsl(120 50% 45%) !important;      /* Green comments */
     font-style: italic;
   }
   
   .token.punctuation {
-    color: hsl(var(--code-punctuation)) !important; 
+    color: hsl(220 20% 30%) !important;      /* Dark gray punctuation */
   }
   
   .token.namespace {
@@ -537,32 +984,259 @@ button, a, input, textarea, select {
   }
   
   .token.property, .token.tag, .token.constant, .token.symbol, .token.deleted {
-    color: hsl(var(--code-property)) !important; 
+    color: hsl(200 100% 45%) !important;     /* Blue properties */
+    font-weight: 500;
   }
   
   .token.boolean, .token.number {
-    color: hsl(var(--code-number)) !important; 
+    color: hsl(25 100% 50%) !important;      /* Orange numbers */
+    font-weight: 500;
   }
   
   .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted {
-    color: hsl(var(--code-string)) !important; 
+    color: hsl(35 100% 45%) !important;      /* Orange-red strings */
   }
   
-  .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string, .token.variable {
-    color: hsl(var(--code-operator)) !important; 
+  .token.operator, .token.entity, .token.url, .token.variable {
+    color: hsl(300 100% 50%) !important;     /* Magenta operators */
+    font-weight: 500;
   }
   
   .token.atrule, .token.attr-value, .token.function, .token.class-name {
-    color: hsl(var(--code-function)) !important; 
-  }
-  
-  .token.keyword {
-    color: hsl(var(--code-keyword)) !important; 
+    color: hsl(45 100% 45%) !important;      /* Yellow functions */
     font-weight: 600;
   }
   
+  .token.keyword {
+    color: hsl(240 100% 55%) !important;     /* Blue keywords */
+    font-weight: 700;
+  }
+  
   .token.regex, .token.important {
-    color: hsl(var(--code-regex)) !important; 
+    color: hsl(10 100% 55%) !important;      /* Red regex */
+    font-weight: 500;
+  }
+  
+  /* Additional VS Code inspired highlighting */
+  .token.parameter {
+    color: hsl(var(--code-variable)) !important;
+    font-style: italic;
+  }
+  
+  .token.annotation, .token.decorator {
+    color: hsl(var(--code-function)) !important;
+    font-weight: 600;
+  }
+  
+  .token.attr-value .token.punctuation:not(.attr-equals) {
+    color: hsl(var(--code-string)) !important;
+  }
+  
+  .token.interpolation {
+    color: hsl(var(--code-operator)) !important;
+  }
+  
+  /* Python-specific tokens with vibrant colors */
+  .language-python .token.keyword {
+    color: hsl(240 100% 60%) !important;     /* Bright blue for keywords */
+    font-weight: 700;
+  }
+  
+  .language-python .token.function {
+    color: hsl(45 100% 50%) !important;      /* Bright yellow for functions */
+    font-weight: 600;
+  }
+  
+  .language-python .token.string {
+    color: hsl(35 100% 50%) !important;      /* Orange for strings */
+  }
+  
+  .language-python .token.builtin {
+    color: hsl(270 100% 65%) !important;     /* Purple for builtins like print, len */
+    font-weight: 600;
+  }
+  
+  .language-python .token.decorator {
+    color: hsl(315 100% 60%) !important;     /* Pink for decorators like @app.get */
+    font-weight: 600;
+  }
+  
+  .language-python .token.class-name {
+    color: hsl(180 100% 45%) !important;     /* Cyan for class names */
+    font-weight: 600;
+  }
+  
+  /* JavaScript/TypeScript specific tokens with vibrant colors */
+  .language-javascript .token.template-string,
+  .language-typescript .token.template-string {
+    color: hsl(35 100% 55%) !important;      /* Orange for template strings */
+  }
+  
+  .language-javascript .token.template-punctuation,
+  .language-typescript .token.template-punctuation {
+    color: hsl(300 100% 60%) !important;     /* Magenta for template punctuation */
+  }
+  
+  .language-javascript .token.keyword,
+  .language-typescript .token.keyword {
+    color: hsl(240 100% 65%) !important;     /* Blue for keywords */
+    font-weight: 700;
+  }
+  
+  .language-javascript .token.function,
+  .language-typescript .token.function {
+    color: hsl(45 100% 55%) !important;      /* Yellow for functions */
+    font-weight: 600;
+  }
+  
+  .language-javascript .token.class-name,
+  .language-typescript .token.class-name {
+    color: hsl(180 100% 50%) !important;     /* Cyan for class names */
+    font-weight: 600;
+  }
+  
+  .language-javascript .token.constant,
+  .language-typescript .token.constant {
+    color: hsl(315 100% 65%) !important;     /* Pink for constants */
+    font-weight: 600;
+  }
+  
+  /* CSS specific tokens with vibrant colors */
+  .language-css .token.property {
+    color: hsl(200 100% 50%) !important;     /* Blue for CSS properties */
+    font-weight: 500;
+  }
+  
+  .language-css .token.selector {
+    color: hsl(45 100% 50%) !important;      /* Yellow for CSS selectors */
+    font-weight: 600;
+  }
+  
+  .language-css .token.string {
+    color: hsl(35 100% 55%) !important;      /* Orange for CSS values */
+  }
+  
+  .language-css .token.function {
+    color: hsl(270 100% 60%) !important;     /* Purple for CSS functions */
+    font-weight: 600;
+  }
+  
+  /* JSON specific tokens with vibrant colors */
+  .language-json .token.property {
+    color: hsl(200 100% 55%) !important;     /* Blue for JSON properties */
+    font-weight: 500;
+  }
+  
+  .language-json .token.string {
+    color: hsl(35 100% 55%) !important;      /* Orange for JSON strings */
+  }
+  
+  .language-json .token.number {
+    color: hsl(25 100% 60%) !important;      /* Orange-red for JSON numbers */
+    font-weight: 500;
+  }
+  
+  .language-json .token.boolean {
+    color: hsl(240 100% 65%) !important;     /* Blue for JSON booleans */
+    font-weight: 600;
+  }
+  
+  /* HTML specific tokens with vibrant colors */
+  .language-markup .token.attr-name,
+  .language-html .token.attr-name {
+    color: hsl(200 100% 55%) !important;     /* Blue for HTML attributes */
+    font-weight: 500;
+  }
+  
+  .language-markup .token.attr-value,
+  .language-html .token.attr-value {
+    color: hsl(35 100% 55%) !important;      /* Orange for HTML attribute values */
+  }
+  
+  .language-markup .token.tag .token.tag,
+  .language-html .token.tag .token.tag {
+    color: hsl(240 100% 60%) !important;     /* Blue for HTML tags */
+    font-weight: 600;
+  }
+  
+  .language-markup .token.tag .token.punctuation,
+  .language-html .token.tag .token.punctuation {
+    color: hsl(300 100% 60%) !important;     /* Magenta for HTML tag brackets */
+  }
+  
+  /* SQL specific tokens with vibrant colors */
+  .language-sql .token.keyword {
+    color: hsl(240 100% 65%) !important;     /* Blue for SQL keywords */
+    font-weight: 700;
+  }
+  
+  .language-sql .token.string {
+    color: hsl(35 100% 55%) !important;      /* Orange for SQL strings */
+  }
+  
+  .language-sql .token.function {
+    color: hsl(270 100% 65%) !important;     /* Purple for SQL functions */
+    font-weight: 600;
+  }
+  
+  .language-sql .token.operator {
+    color: hsl(300 100% 60%) !important;     /* Magenta for SQL operators */
+    font-weight: 500;
+  }
+  
+  /* Bash/Shell specific tokens with vibrant colors */
+  .language-bash .token.function,
+  .language-shell .token.function {
+    color: hsl(45 100% 55%) !important;      /* Yellow for shell commands */
+    font-weight: 600;
+  }
+  
+  .language-bash .token.string,
+  .language-shell .token.string {
+    color: hsl(35 100% 55%) !important;      /* Orange for shell strings */
+  }
+  
+  .language-bash .token.variable,
+  .language-shell .token.variable {
+    color: hsl(315 100% 65%) !important;     /* Pink for shell variables */
+    font-weight: 500;
+  }
+
+  /* Dark mode adjustments for vibrant colors */
+  .dark .token.comment, .dark .token.prolog, .dark .token.doctype, .dark .token.cdata {
+    color: hsl(120 50% 65%) !important;      /* Brighter green comments in dark mode */
+  }
+  
+  .dark .token.punctuation {
+    color: hsl(220 15% 80%) !important;      /* Light gray punctuation in dark mode */
+  }
+  
+  .dark .token.property, .dark .token.tag, .dark .token.constant, .dark .token.symbol, .dark .token.deleted {
+    color: hsl(200 100% 70%) !important;     /* Brighter blue properties in dark mode */
+  }
+  
+  .dark .token.boolean, .dark .token.number {
+    color: hsl(25 100% 70%) !important;      /* Brighter orange numbers in dark mode */
+  }
+  
+  .dark .token.selector, .dark .token.attr-name, .dark .token.string, .dark .token.char, .dark .token.builtin, .dark .token.inserted {
+    color: hsl(35 100% 65%) !important;      /* Brighter orange-red strings in dark mode */
+  }
+  
+  .dark .token.operator, .dark .token.entity, .dark .token.url, .dark .token.variable {
+    color: hsl(300 100% 70%) !important;     /* Brighter magenta operators in dark mode */
+  }
+  
+  .dark .token.atrule, .dark .token.attr-value, .dark .token.function, .dark .token.class-name {
+    color: hsl(45 100% 70%) !important;      /* Brighter yellow functions in dark mode */
+  }
+  
+  .dark .token.keyword {
+    color: hsl(240 100% 75%) !important;     /* Brighter blue keywords in dark mode */
+  }
+  
+  .dark .token.regex, .dark .token.important {
+    color: hsl(10 100% 70%) !important;      /* Brighter red regex in dark mode */
   }
   
   /* Highlighted line effect */
@@ -574,6 +1248,59 @@ button, a, input, textarea, select {
   .prose :where(code):not(:where([class~="not-prose"] *))::before,
   .prose :where(code):not(:where([class~="not-prose"] *))::after {
     content: "" !important;
+  }
+
+  /* Ensure all code elements have proper styling */
+  .markdown-content code,
+  .prose code {
+    color: hsl(var(--code-text)) !important;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
+  }
+
+  /* Force text color in code blocks to ensure visibility */
+  .markdown-content pre code,
+  .markdown-content pre[class*="language-"] code,
+  .prose pre code,
+  .prose pre[class*="language-"] code {
+    color: hsl(var(--code-text)) !important;
+    background: transparent !important;
+  }
+
+  /* Override any conflicting styles from prism themes */
+  .token * {
+    color: inherit !important;
+  }
+
+  /* Specific overrides for light mode visibility */
+  .markdown-content pre,
+  .prose pre {
+    background: linear-gradient(to bottom, hsl(var(--code-bg-gradient-from)), hsl(var(--code-bg-gradient-to))) !important;
+    color: hsl(var(--code-text)) !important;
+    border: 1px solid hsl(var(--code-border)) !important;
+  }
+
+  /* Force proper code styling when needed */
+  .force-code-style pre,
+  .force-code-style code {
+    background: linear-gradient(to bottom, hsl(var(--code-bg-gradient-from)), hsl(var(--code-bg-gradient-to))) !important;
+    color: hsl(var(--code-text)) !important;
+    border: 1px solid hsl(var(--code-border)) !important;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
+  }
+
+  /* Ensure proper contrast ratios for accessibility */
+  @media (prefers-contrast: high) {
+    :root {
+      --code-text: 220 25% 5% !important;
+      --code-bg-gradient-from: 0 0% 98% !important;
+      --code-bg-gradient-to: 0 0% 95% !important;
+    }
+    
+    .dark {
+      --code-text: 220 15% 95% !important;
+      --code-bg-gradient-from: 220 20% 5% !important;
+      --code-bg-gradient-to: 220 20% 8% !important;
+    }
   }
 }
 
@@ -1120,4 +1847,38 @@ html, body {
   color: hsl(var(--sidebar-foreground));
   z-index: 50;
   max-width: 200px;
+}
+
+/* AI Dialog Positioning */
+@layer components {
+  /* Override default dialog positioning */
+  [data-radix-dialog-content] {
+    position: fixed !important;
+    top: 5vh !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-height: 85vh !important;
+    overflow: hidden !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Ensure overlay is properly positioned */
+  [data-radix-dialog-overlay] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9998 !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+  
+  /* AI Dialog specific overrides */
+  .ai-dialog-content {
+    position: fixed !important;
+    top: 5vh !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(0) !important;
+    margin: 0 !important;
+    max-height: 85vh !important;
+    z-index: 9999 !important;
+  }
 }
